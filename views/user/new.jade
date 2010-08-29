@@ -1,0 +1,12 @@
+ul
+  - each msg, field in errors
+    - if(msg.length > 0)
+      li #{field}: #{msg}
+form(method: 'post', action: '/user/new')
+  label(for="new_name") Name:
+  input(id: 'new_name', type: 'text', name: 'name', value: values.name || '')
+  br
+  label(for="new_password") Password: 
+  input(id: 'new_password', type: 'password', name: 'password')
+  br
+  input(type: 'submit', name: 'create', value: 'Create')
