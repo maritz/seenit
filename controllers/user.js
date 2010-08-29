@@ -9,6 +9,7 @@ app.set('view engine', 'jade');
 
 var redis = nohm.redis.createClient();
 var hashing = require('hashlib');
+var seed = 'pAUFBPIBAPSONkplanfpoinf0938fp93noNNFW)§(NWP)NPognOISNMPG=)WNGPOASNGMPA)§NMNp98n3wnnPN9nf89wP()fnWP)NFWfn9';
 var User = nohm.Model.extend({
   constructor: function () {
     this.modelName = 'User';
@@ -31,29 +32,36 @@ var User = nohm.Model.extend({
     nohm.Model.call(this);
   },
   passwordHash: function (pw) {
+    pw = pw.substr(pw.length / 2 + 1, pw.length) + seed + pw.substr(0, pw.length / 2);
     return hashing.sha512(pw);
   }
 });
 
 app.post('/login', function (req, res, next) {
-  console.log('login process started');
-  console.dir(req.body);
   if (req.body.login_name) {
-    console.log('login process has everything');
     var user = new User(),
     password = user.passwordHash(req.body.login_password),
-    userid = user.find({name: req.body.login_name}, function (err, values) {
-      if (!err) {
-        console.log('values found:');
-        console.dir(values);
-        //req.session.user = user;
-        //req.session.logged_in = true;
-      } else {
-        console.log('wrong login attempt from: ' + req.socket.remoteAddress +
+    wrongAttempt = function () {
+      console.log('wrong login attempt from: ' + req.socket.remoteAddress +
                     ' with name: "' + req.body.login_name + '"');
-        req.flash('login', JSON.stringify({name: req.body.login_name, error: true}));
-      }
+      req.flash('login', JSON.stringify({name: req.body.login_name, error: true}));
       res.redirect(req.body.pre_login_url || '/');
+    };
+    req.body.login_password = ''; // better safe than sorry.
+    user.find({name: req.body.login_name}, function (err, values) {
+      if (!err && values.length === 1) {
+        user.load(values[0], function (err) {
+          if (user.p('password') === password) {
+            req.session.user = user;
+            req.session.logged_in = true;
+            res.redirect(req.body.pre_login_url || '/');
+          } else {
+            wrongAttempt();
+          }
+        });
+      } else {
+        wrongAttempt();
+      }
     });
   }
 });
