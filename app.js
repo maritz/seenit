@@ -4,6 +4,7 @@ var express = require('express'),
 conductor = require('conductor'),
 jade = require('jade'),
 nohm = require('nohm'),
+fs = require('fs'),
 MemoryStore = require('connect/middleware/session/memory');
 
 // initialize the main app
@@ -31,12 +32,30 @@ app.use('', function (req, res, next) {
   res.render_locals = {
     session: req.session,
     currentURL: req.url,
-    login: tmp_login
+    login: tmp_login,
+    values: {},
+    errors: {}
   };
   next();
 });
 
-app.use('/user', require('./controllers/user'));
+var controllers = fs.readdirSync('controllers'),
+controllerGlobals = {
+  Models: {}
+},
+models = fs.readdirSync('models');
+for (var i = 0, len = models.length; i < len; i = i + 1) {
+  if (models[i].match(/Model\.js$/i)) {
+    var name = models[i].replace(/Model\.js$/i, '');
+    controllerGlobals.Models[name] = require('./models/' + name + 'Model');
+  }
+}
+for (var i = 0, len = controllers.length; i < len; i = i + 1) {
+  if (controllers[i].match(/\.js$/i)) {
+    var name = controllers[i].replace(/\.js$/i, '');
+    app.use('/' + name, require('./controllers/' + name).init(controllerGlobals));
+  }
+}
 
 var index = function (req, res, next) {
   console.dir(req.session);
@@ -46,14 +65,12 @@ var index = function (req, res, next) {
 };
 
 app.get('/', index);
-app.post('/', index);
 
 app.get('*', function (req, res, next) {
   res.send('<html><head><title>404 - Not found.</title></head><body>Not found.</body></html>');
 });
 
 app.post('*', function (req, res, next) {
-  console.dir(req.url);
   res.send('<html><head><title>404 - Not found.</title></head><body>Not found.</body></html>');
 });
 

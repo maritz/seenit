@@ -1,0 +1,9 @@
+ul
+  - each msg, field in errors
+    - if(msg.length > 0)
+      li #{field}: #{msg}
+form(method: 'post', action: '/show/new')
+  label(for="new_name") Name:
+  input#new_name(type: 'text', name: 'name', value: values.name || '')
+  br
+  input(type: 'submit', name: 'create', value: 'Create')

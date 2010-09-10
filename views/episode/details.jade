@@ -1,0 +1,21 @@
+- if (errors === 'not found')
+  span.error.notfound The episode was not found
+- else
+  b Season:
+  a(href: '/season/details/' + parent_id)=parent_id
+  br
+  b N°:
+  = values.number
+  br
+  b Name:
+  = values.name
+  br
+  b Air date:
+  = new Date(values.date*1000).toISOString()
+  br
+  b Seen:
+  input(type: 'checkbox', readonly: true, checked: values.seen)
+  br
+  a(href: '/episode/edit/' + values.id) Edit this Episode
+  a(href: '/episode/delete/' + values.id) Delete this Episode
+    

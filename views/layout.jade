@@ -1,16 +1,21 @@
 !!! 5
-meta( charset: 'utf-8' )
-title have you seenit?
-h1 seenit
-- if (!session.logged_in && typeof(nologin) === 'undefined')
-  - if (login && login.error)
-    span.error Name or password wrong
-  form(method: 'post', action: '/user/login')
-    input( type: 'hidden', name: 'pre_login_url', value: currentURL)
-    label(for: 'login_name') name
-    input#login_name( type: 'text', name: 'login_name', value: login ? login.name || '' : '' )
-    label(for: 'login.pwd') pwd
-    input#login_pwd( type: 'password', name: 'login_password' )
-    input( type: 'submit', name: 'login_submit', value: 'login' )
-- else
-  != body
+html
+  head
+    meta( charset: 'utf-8' )
+    title have you seenit?
+  body
+    h1 seenit
+    - if (!session.logged_in && typeof(nologin) === 'undefined')
+      - if (login && login.error)
+        span.error Name or password wrong
+      form(method: 'post', action: '/user/login')
+        input( type: 'hidden', name: 'pre_login_url', value: currentURL)
+        label(for: 'login_name') name
+        input#login_name( type: 'text', name: 'login_name', value: login ? login.name || '' : '' , autofocus: !login || login.name === '')
+        label(for: 'login.pwd') pwd
+        input#login_pwd( type: 'password', name: 'login_password' )
+        input( type: 'submit', name: 'login_submit', value: 'login' )
+    h2
+      - if (typeof(page_name) !== 'undefined')
+        =page_name
+    != body

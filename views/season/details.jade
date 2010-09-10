@@ -1,0 +1,29 @@
+- if (errors === 'not found')
+  span.error.notfound The season was not found
+- else
+  b Show:
+  a(href: '/show/details/' + parent_id)=parent_id
+  br
+  b N°:
+  = values.number
+  br
+  b Name:
+  = values.name
+  br
+  b Start date:
+  = new Date(values.start*1000).toISOString()
+  br
+  b End date:
+  = new Date(values.end*1000).toISOString()
+  br
+  b Interval:
+  = values.interval
+  br
+  b Episodes:
+    ul
+      - each id in episodes
+        li 
+          a(href: '/episode/details/' + id)=id
+      li
+        a(href: '/episode/new/' + values.id) Add new Episode
+    
