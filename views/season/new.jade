@@ -20,7 +20,7 @@ form(method: 'post', action: '/season/new')
   input#new_end(type: 'date', name: 'end', value: values.end || (new Date().toISOString()))
   br
   label(for="new_interval") Days between episodes:
-  input#new_interval(type: 'dial', name: 'num_interval', value: values.interval || 7)
+  input#new_interval(type: 'dial', name: 'interval', value: values.interval || 7)
   br
   label(for="new_interval") Have you seen all episodes?
   input#new_interval(type: 'checkbox', name: 'seen', checked: values.seen)

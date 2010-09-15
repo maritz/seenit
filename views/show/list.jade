@@ -1,0 +1,10 @@
+Shows:
+  ul
+    - each show in shows
+      li
+        a(href: '/show/details/' + show.id)
+          = show.p('name')
+        a(href: '/show/edit/' + show.id) edit
+        a(href: '/show/delete/' + show.id) delete
+    li
+      a(href: '/show/new/') Add new show

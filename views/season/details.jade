@@ -21,9 +21,12 @@
   br
   b Episodes:
     ul
-      - each id in episodes
+      - each episode in episodes
         li 
-          a(href: '/episode/details/' + id)=id
+          a(href: '/episode/details/' + episode.id)
+            = episode.number + ': ' + episode.name
+          - if (episode.seen)
+            input(type: 'checkbox', readonly: true, checked: true)
       li
         a(href: '/episode/new/' + values.id) Add new Episode
     

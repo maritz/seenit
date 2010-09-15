@@ -31,8 +31,9 @@ module.exports = nohm.Model.extend({
       end: {
         type: 'timestamp',
         index: true,
+        value: (+ new Date()),
         validations: [
-          'date'
+          ['date', 'optional']
         ]
       },
       interval: {

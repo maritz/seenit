@@ -41,7 +41,8 @@ app.use('', function (req, res, next) {
 
 var controllers = fs.readdirSync('controllers'),
 controllerGlobals = {
-  Models: {}
+  Models: {},
+  redis: nohm.redis.createClient()
 },
 models = fs.readdirSync('models');
 for (var i = 0, len = models.length; i < len; i = i + 1) {

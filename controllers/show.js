@@ -57,5 +57,37 @@ module.exports.init = function (global) {
     });
   });
   
+  app.get('/list', function (req, res, next) {
+    var show = new Models.Show();
+    res.render_locals.shows = [];
+    show.find(function (err, ids) {
+      if (ids.length === 0) {
+        res.redirect('/show/new');
+      }
+      var len = ids.length,
+      lenFor = len, i = 0,
+      setShow = function (err) {
+        if (err) {
+          console.log(err);
+        }
+        len = len - 1;
+        if (len === 0) {
+          res.render('show/list', {
+            locals: res.render_locals
+          });
+        }
+      };
+      res.render_locals.shows = [];
+      for (; i < lenFor; i = i + 1) {
+        res.render_locals.shows[i] = new Models.Show();
+        res.render_locals.shows[i].load(ids[i], setShow);
+      }
+    });
+  });
+  
+  app.get('', function (req, res, next) {
+    res.redirect('/show/list');
+  });
+  
   return app;
 };

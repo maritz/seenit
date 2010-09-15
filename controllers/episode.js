@@ -2,7 +2,6 @@
 
 var express = require('express');
 
-
 module.exports.init = function (global) {
   var Models = global.Models,
   app = express.createServer(),

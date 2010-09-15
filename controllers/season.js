@@ -6,6 +6,7 @@ var express = require('express');
 module.exports.init = function (global) {
   var Models = global.Models,
   app = express.createServer(),
+  redis = global.redis,
   idGetter = function idGetter(req, res, callback) {
     var season = new Models.Season();
     season.load(req.param('id'), function (err) {
@@ -32,16 +33,16 @@ module.exports.init = function (global) {
   
   app.get('/new/:show_id', function (req, res, next) {
     var id = parseInt(req.param('show_id'), 10),
-    show = new Models.Show();
+    show = new Models.Show(),
+    season = new Models.Season();
     show.load(id, function (err) {
       if (err) {
         res.render_locals.errors.Show = err;
       }
       res.render_locals.show_id = id;
+      res.render_locals.values = season.allProperties();
       show.numLinks('Season', function (err, num_seasons) {
-        res.render_locals.values = {
-          number: num_seasons + 1
-        };
+        res.render_locals.values.number = num_seasons + 1;
         res.render('season/new', {
           locals: res.render_locals
         });
@@ -58,15 +59,35 @@ module.exports.init = function (global) {
         errors = err;
       } else {
         season.p(req.body);
-        console.dir(season.allProperties());
         var renderForm = function () {
           res.render_locals.errors = errors;
-          res.render_locals.values = req.body;
+          res.render_locals.values = season.allProperties();
           res.render_locals.show_id = req.param('show_id');
           res.render('season/new', {
             locals: res.render_locals
           });
-        };
+        },
+        episodes = season.p('num_episodes'),
+        i = 0,
+        time = season.p('start'),
+        interval = season.p('interval') * 86400, // interval is saved/enterd as days
+        episode,
+        seen = season.p('seen'),
+        season_num = season.p('number');
+        if (season_num < 10) {
+          season_num = '0' + season_num;
+        }
+        
+        for (; i < episodes; i = i + 1, time = time + interval) {
+          episode = new Models.Episode();
+          episode.p({
+            number: i + 1,
+            name: 'S' + season_num + 'E' + (i < 9 ? '0' : '') + (i + 1),
+            date: time,
+            seen: seen
+          });
+          season.link(episode);
+        }
         
         season.save(function (err) {
           if (!err) {
@@ -129,13 +150,47 @@ module.exports.init = function (global) {
   
   app.get('/details/:id', function (req, res, next) {
     idGetter(req, res, function (season) {
-      season.getAll('Episode', function (err, episodes) {
-        res.render_locals.episodes = episodes;
-        res.render('season/details', {
-          locals: res.render_locals
-        });  
+      var key = season.relationKey('Episode', 'child'),
+      episode = new Models.Episode(),
+      hashWeightKey = episode.getHashKey('') + '*->number',
+      episodes = [],
+      episodeProps = [];
+      redis.sort(key, 'BY', hashWeightKey, function (err, ids) {
+        if (err) {
+          console.dir(err);
+        }
+        var i = 0,
+        len = ids.length,
+        countdown = len,
+        loadCallback = function (err) {
+          if (err) {
+            console.dir(err);
+          }
+          countdown = countdown - 1;
+          if (countdown === 0) {
+            for (i = 0; i < len; i = i + 1) {
+              episodeProps[i] = episodes[i].allProperties();
+            }
+            res.render_locals.episodes = episodeProps;
+            res.render('season/details', {
+              locals: res.render_locals
+            });
+          }
+        };
+        for (; i < len; i = i + 1) {
+          episodes[i] = new Models.Episode();
+          episodes[i].load(ids[i], loadCallback);
+        }  
       });
     });
+  });
+  
+  app.get(/\/([\d])/, function (req, res, next) {
+    res.redirect('/season/details/' + req.params[0]);
+  });
+  
+  app.get('', function (req, res, next) {
+    res.redirect('/show/list');
   });
   
   return app;
