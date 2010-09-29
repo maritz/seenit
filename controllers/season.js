@@ -31,6 +31,12 @@ module.exports.init = function (global) {
   };  
   app.set('view engine', 'jade');
   
+  app.use('', function (req, res, next) {
+    req.checkLogin();
+    res.render_locals.page_name = 'Season';
+    next();
+  });
+  
   app.get('/new/:show_id', function (req, res, next) {
     var id = parseInt(req.param('show_id'), 10),
     show = new Models.Show(),
@@ -113,6 +119,15 @@ module.exports.init = function (global) {
     });
   });
   
+  app.get('/edit/:id', function (req, res, next) {
+    idGetter(req, res, function (season) {
+      res.render_locals.values = season.allProperties();
+      res.render('season/edit', {
+        locals: res.render_locals
+      });
+    });
+  });
+  
   app.get('/delete/:id', function (req, res, next) {
     idGetter(req, res, function (season) {
       res.render('season/delete', {
@@ -185,8 +200,8 @@ module.exports.init = function (global) {
     });
   });
   
-  app.get(/\/([\d])/, function (req, res, next) {
-    res.redirect('/season/details/' + req.params[0]);
+  app.get('/:id', function (req, res, next) {
+    res.redirect('/season/details/' + req.param('id'));
   });
   
   app.get('', function (req, res, next) {

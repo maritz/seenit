@@ -49,5 +49,21 @@ module.exports = nohm.Model.extend({
       }
     };
     nohm.Model.call(this);
+  },
+  getShow: function (show, callback) {
+    var self = this;
+    if (!this.id) {
+      console.log('Trying to use the getShow() method of the Season model even though the season has no id set yet.');
+      return false;
+    }
+    this.getAll('Show', 'parent', function (err, ids) {
+          if (!err) {
+            show.load(ids[0], function (err) {
+              callback();
+            });
+          } else {
+            callback(err);
+          }
+        });
   }
 });

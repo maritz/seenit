@@ -11,7 +11,7 @@ form(method: 'post', action: '/episode/new')
   input#new_name(type: 'text', name: 'name', value: values.name || '')
   br
   label(for="new_date") Air date:
-  input#new_start(type: 'date', name: 'date', value: values.date || (new Date().toISOString()))
+  input#new_start(type: 'date', name: 'date', value: input.date_parser(values.date || (+new Date())))
   br
   label(for="new_interval") Have you seen it?
   input#new_interval(type: 'checkbox', name: 'seen', checked: values.seen)

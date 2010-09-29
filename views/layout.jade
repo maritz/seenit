@@ -4,7 +4,8 @@ html
     meta( charset: 'utf-8' )
     title have you seenit?
   body
-    h1 seenit
+    h1 
+      a( href: '/' ) seenit
     - if (!session.logged_in && typeof(nologin) === 'undefined')
       - if (login && login.error)
         span.error Name or password wrong
@@ -13,9 +14,9 @@ html
         label(for: 'login_name') name
         input#login_name( type: 'text', name: 'login_name', value: login ? login.name || '' : '' , autofocus: !login || login.name === '')
         label(for: 'login.pwd') pwd
-        input#login_pwd( type: 'password', name: 'login_password' )
+        input#login_pwd( type: 'password', name: 'login_password', autofocus: !login || login.name !== '' )
         input( type: 'submit', name: 'login_submit', value: 'login' )
-    h2
-      - if (typeof(page_name) !== 'undefined')
+    - if (typeof(page_name) !== 'undefined')
+      h2
         =page_name
     != body

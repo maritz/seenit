@@ -4,8 +4,24 @@ var express = require('express');
 
 module.exports.init = function (global) {
   var Models = global.Models,
-  app = express.createServer();  
+  app = express.createServer(),
+  redis = global.redis;  
   app.set('view engine', 'jade');
+  
+  app.use('', function (req, res, next) {
+    if (req.url === '/login' || req.checkLogin(false)) {
+      next();
+    } else {
+      // if there is no user yet, creating a new user does not require a login
+      redis.scard('nohm:idsets:User', function (err, value) {
+        if (err !== null || value > 0) {
+          req.checkLogin();
+        }
+        res.render_locals.page_name = 'User';
+        next();
+      });
+    }
+  });
   
   app.post('/login', function (req, res, next) {
     if (req.body.login_name) {
@@ -22,9 +38,18 @@ module.exports.init = function (global) {
         if (!err && values.length === 1) {
           user.load(values[0], function (err) {
             if (user.p('password') === password) {
-              req.session.user = user.allProperties();
-              req.session.logged_in = true;
-              res.redirect(req.body.pre_login_url || '/');
+              var oldUrl = req.flash('page_accessed');
+              req.session.regenerate(function () {
+                req.session.user = user.allProperties();
+                req.session.logged_in = true;
+                var redirectUrl = req.body.pre_login_url || '/';
+                console.dir(oldUrl);
+                if (oldUrl.length > 0 && oldUrl[0] !== '') {
+                  redirectUrl = oldUrl;
+                }
+                console.dir(redirectUrl);
+                res.redirect(redirectUrl);
+              });
             } else {
               wrongAttempt();
             }
@@ -34,6 +59,12 @@ module.exports.init = function (global) {
         }
       });
     }
+  });
+  
+  app.get('/logout', function (req, res, next) {
+    req.session.regenerate(function () {
+      res.redirect('/');
+    });
   });
   
   app.get('/new', function (req, res, next) {
@@ -84,6 +115,10 @@ module.exports.init = function (global) {
         res.send('username: ' + user.p('name'));
       }
     });
+  });
+  
+  app.get('', function (req, res) {
+    res.redirect('/user/new');
   });
   
   return app;

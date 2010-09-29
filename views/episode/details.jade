@@ -1,6 +1,9 @@
 - if (errors === 'not found')
   span.error.notfound The episode was not found
 - else
+  b Show:
+  a(href: '/show/details/' + show.id)=show.name
+  br
   b Season:
   a(href: '/season/details/' + parent_id)=parent_id
   br
@@ -11,10 +14,17 @@
   = values.name
   br
   b Air date:
-  = new Date(values.date*1000).toISOString()
+  = new Date(values.date).toISOString()
   br
   b Seen:
   input(type: 'checkbox', readonly: true, checked: values.seen)
+  br
+  b Download:
+    ul
+      li
+        a( href: 'http://www.filestube.com/search.html?q=' + show.name.replace(/[\s]/g, '+') + '+' + values.name + '+720p&select=All&hosting=1') Filestube 720p
+      li
+        a( href: 'http://www.filestube.com/search.html?q=' + show.name.replace(/[\s]/g, '+') + '+' + values.name + '&select=All&hosting=1') Filestube
   br
   a(href: '/episode/edit/' + values.id) Edit this Episode
   a(href: '/episode/delete/' + values.id) Delete this Episode

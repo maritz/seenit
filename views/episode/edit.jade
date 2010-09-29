@@ -1,0 +1,19 @@
+ul
+  - each msg, field in errors
+    - if(msg.length > 0)
+      li #{field}: #{msg}
+form(method: 'post', action: '/episode/edit/' + values.id)
+  input( type: 'hidden', name: 'id', value: values.id )
+  label( for: 'edit_number' ) Number:
+  = values.number
+  br
+  label( for: 'edit_name' ) Name:
+  input#edit_name(type: 'text', name: 'name', value: values.name || '')
+  br
+  label( for: 'edit_date' ) Air date:
+  input#edit_start(type: 'date', name: 'date', value: input.date_parser(values.date || (+ new Date())))
+  br
+  label( for: 'edit_interval' ) Have you seen it?
+  input#edit_interval(type: 'checkbox', name: 'seen', checked: values.seen)
+  br
+  input(type: 'submit', name: 'edit', value: 'Edit')
