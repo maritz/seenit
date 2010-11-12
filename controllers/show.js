@@ -88,10 +88,34 @@ module.exports.init = function (global) {
         res.render_locals.values = show.allProperties();
       }
       show.getAll('Season', function (err, seasons) {
-        res.render_locals.seasons = seasons;
-        res.render('show/details', {
-          locals: res.render_locals
-        });  
+        if (!err & Array.isArray(seasons) && seasons.length > 0) {
+          seasonArray = [];
+          var len = seasons.length;
+          seasons.forEach(function (id) {
+            var season = new Models.Season();
+            season.load(id, function (err) {
+              if (!err) {
+                seasonArray.push(season.allProperties());
+              }
+              len--;
+              if (!len) {
+                seasonArray.sort(function (a, b) {
+                  console.dir(arguments);
+                });
+                res.render_locals.seasons = seasonArray;
+                res.render('show/details', {
+                  locals: res.render_locals
+                });
+              }
+            })
+          });
+        } else {
+          res.render_locals.seasons = [];
+          res.render('show/details', {
+            locals: res.render_locals
+          }); 
+        }
+         
       });
     });
   });

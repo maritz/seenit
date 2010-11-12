@@ -8,11 +8,11 @@
   br
   b Seasons:
     ul
-      - each id in seasons
+      - each season in seasons
         li
-          a(href: '/season/details/' + id)=id
-          a(href: '/season/edit/' + id) edit
-          a(href: '/season/delete/' + id) delete
+          a(href: '/season/details/' + season.id)= season.number 
+          a(href: '/season/edit/' + season.id) &nbsp;edit 
+          a(href: '/season/delete/' + season.id) delete 
       li
         a(href: '/season/new/' + values.id) Add new Season
     
