@@ -111,6 +111,16 @@ module.exports.init = function (global) {
         }
         len = len - 1;
         if (len === 0) {
+          res.render_locals.shows.sort(function (a, b) {
+            var a = a.p('name')
+            , b = b.p('name');
+            if (a > b) {
+              return 1;
+            } else if (a < b) {
+              return -1;
+            }
+            return 0;
+          });
           res.render('show/list', {
             locals: res.render_locals
           });

@@ -43,11 +43,9 @@ module.exports.init = function (global) {
                 req.session.user = user.allProperties();
                 req.session.logged_in = true;
                 var redirectUrl = req.body.pre_login_url || '/';
-                console.dir(oldUrl);
                 if (oldUrl.length > 0 && oldUrl[0] !== '') {
                   redirectUrl = oldUrl;
                 }
-                console.dir(redirectUrl);
                 res.redirect(redirectUrl);
               });
             } else {
