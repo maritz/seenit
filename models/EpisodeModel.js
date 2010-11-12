@@ -24,7 +24,8 @@ module.exports = nohm.Model.extend({
       },
       seen: {
         type: 'bool',
-        value: false
+        value: false,
+        index: true
       }
     };
     nohm.Model.call(this);

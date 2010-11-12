@@ -116,11 +116,11 @@ module.exports.init = function (global) {
     values = {
       name: req.body.name,
       date: req.body.date,
-      seen: req.body.seen
+      seen: req.body.seen || false
     },
     errors = {};
     idGetter(req, res, false, function (episode) {
-      episode.p(values, true);
+      episode.p(values);
       episode.save(function (err) {
         if (!err) {
           res.redirect('/episode/details/' + episode.id);

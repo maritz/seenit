@@ -100,7 +100,7 @@ module.exports.init = function (global) {
               len--;
               if (!len) {
                 seasonArray.sort(function (a, b) {
-                  console.dir(arguments);
+                  return a.number-b.number;
                 });
                 res.render_locals.seasons = seasonArray;
                 res.render('show/details', {
