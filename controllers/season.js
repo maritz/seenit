@@ -76,7 +76,7 @@ module.exports.init = function (global) {
         episodes = season.p('num_episodes'),
         i = 0,
         time = season.p('start'),
-        interval = season.p('interval') * 86400, // interval is saved/enterd as days
+        interval = season.p('interval') * 86400000, // interval is saved/enterd as days
         episode,
         seen = season.p('seen'),
         season_num = season.p('number');

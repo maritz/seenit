@@ -14,7 +14,7 @@
   = values.name
   br
   b Air date:
-  = new Date(values.date).toISOString()
+  = input.date_parser(values.date)
   br
   b Seen:
   input(type: 'checkbox', readonly: true, checked: values.seen)

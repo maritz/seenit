@@ -25,7 +25,6 @@ app.use(express.cookieDecoder());
 app.use(express.session({ store: new RedisStore({ magAge: 60000 * 60 * 24 }) })); // one day
 
 app.use('', function (req, res, next) {
-  console.dir(req.session);
   var tmp_login = null;
   if (req.session.hasOwnProperty('flash') &&
       req.session.flash.hasOwnProperty('login')) {
@@ -68,7 +67,7 @@ app.use('', function (req, res, next) {
 var controllers = fs.readdirSync('controllers'),
 controllerGlobals = {
   Models: {},
-  redis: nohm.redis.createClient()
+  redis: nohm.client
 },
 models = fs.readdirSync('models'),
 node_daemon_reload_hack = function () {
