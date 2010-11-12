@@ -108,7 +108,7 @@ var index = function (req, res, next) {
     if (err) {
       console.dir(err);
       render();
-    } else if (Array.isArray(ids)) {
+    } else if (Array.isArray(ids) && ids.length > 0) {
       var countdown = ids.length,
       counter = function () {
         countdown--;
