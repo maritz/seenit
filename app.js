@@ -91,8 +91,53 @@ for (var i = 0, len = controllers.length; i < len; i = i + 1) {
 }
 
 var index = function (req, res, next) {
-  res.render('index', {
-    locals: res.render_locals
+  var episodes = new controllerGlobals.Models.Episode(),
+  render = function () {
+    res.render('index', {
+      locals: res.render_locals
+    });
+  };
+  res.render_locals.new_episodes = [];
+  
+  episodes.find({
+    date: {
+      max: (+ new Date())
+    },
+    seen: false
+  }, function (err, ids) {
+    if (err) {
+      console.dir(err);
+      render();
+    } else if (Array.isArray(ids)) {
+      var countdown = ids.length,
+      counter = function () {
+        countdown--;
+        if (!countdown) {
+          render();
+        }
+      };
+      ids.forEach(function (id) {
+        var episode = new controllerGlobals.Models.Episode(),
+        season = new controllerGlobals.Models.Season(), // sadly we need the season to get to the show :(
+        show = new controllerGlobals.Models.Show();
+        episode.load(id, function  (err) {
+          res.render_locals.new_episodes.push(episode.allProperties());
+          var pos = res.render_locals.new_episodes.length - 1;
+          episode.loadSeason(season, function (result) {
+            if (result) {
+              season.getShow(show, function (err) {
+                res.render_locals.new_episodes[pos].showname = show.p('name');
+                counter();
+              });
+            } else {
+              counter();
+            }
+          });
+        });
+      });
+    } else {
+      render();
+    }
   });
 };
 

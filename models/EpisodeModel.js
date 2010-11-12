@@ -17,6 +17,7 @@ module.exports = nohm.Model.extend({
       },
       date: {
         type: 'timestamp',
+        index: true,
         validations: [
           'date'
         ]
@@ -27,5 +28,21 @@ module.exports = nohm.Model.extend({
       }
     };
     nohm.Model.call(this);
+  },
+  
+  loadSeason: function (season, callback) {
+    if (!this.id) {
+      console.log('Warning: trying Episode.loadSeason when the episode doesnt have an idea');
+      callback(false);
+    }
+    this.getAll('Season', 'parent', function (err, ids) {
+      if (!err) {
+        season.load(ids[0], function (err) {
+          callback(true);
+        });
+      } else {
+        callback(false);
+      }
+    });
   }
 });
