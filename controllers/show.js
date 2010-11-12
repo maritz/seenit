@@ -136,8 +136,8 @@ module.exports.init = function (global) {
         len = len - 1;
         if (len === 0) {
           res.render_locals.shows.sort(function (a, b) {
-            var a = a.p('name')
-            , b = b.p('name');
+            var a = a.p('name').toLowerCase()
+            , b = b.p('name').toLowerCase();
             if (a > b) {
               return 1;
             } else if (a < b) {
