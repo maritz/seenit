@@ -115,7 +115,7 @@ module.exports.init = function (global) {
     });
   });
   
-  app.get('', function (req, res) {
+  app.get('/', function (req, res) {
     res.redirect('/user/new');
   });
   

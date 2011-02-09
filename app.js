@@ -7,6 +7,8 @@ nohm = require('nohm'),
 fs = require('fs'),
 RedisStore = require('connect-redis');
 
+nohm.connect(6379, 'localhost');
+
 // initialize the main app
 var app = express.createServer();
 app.set('view engine', 'jade');
@@ -22,7 +24,7 @@ app.use(express.staticProvider('./public'));
 // start main app pre-routing stuff
 app.use(express.bodyDecoder());
 app.use(express.cookieDecoder());
-app.use(express.session({ store: new RedisStore({ magAge: 60000 * 60 * 24 }) })); // one day
+app.use(express.session({ secret: 'ausbfg', key: 'seenit', store: new RedisStore({ magAge: 60000 * 60 * 24 }) })); // one day
 
 app.use('', function (req, res, next) {
   var tmp_login = null;
@@ -67,13 +69,14 @@ app.use('', function (req, res, next) {
 var controllers = fs.readdirSync('controllers'),
 controllerGlobals = {
   Models: {},
-  redis: nohm.client
+  redis: nohm.getClient()
 },
 models = fs.readdirSync('models'),
 node_daemon_reload_hack = function () {
   require('child_process').spawn('touch', ['app.js']);
 };
-for (var i = 0, len = models.length; i < len; i = i + 1) {
+var i, len;
+for (i = 0, len = models.length; i < len; i = i + 1) {
   if (models[i].match(/Model\.js$/i)) {
     var name = models[i].replace(/Model\.js$/i, '');
     controllerGlobals.Models[name] = require('./models/' + name + 'Model');
@@ -81,7 +84,7 @@ for (var i = 0, len = models.length; i < len; i = i + 1) {
     fs.watchFile('./models/' + name + 'Model.js', node_daemon_reload_hack);
   }
 }
-for (var i = 0, len = controllers.length; i < len; i = i + 1) {
+for (i = 0, len = controllers.length; i < len; i = i + 1) {
   if (controllers[i].match(/\.js$/i)) {
     var name = controllers[i].replace(/\.js$/i, '');
     app.use('/' + name, require('./controllers/' + name).init(controllerGlobals));
@@ -163,5 +166,5 @@ app.post('*', function (req, res, next) {
 app.use(express.errorHandler({ showStack: true }));
 
 
-app.listen(3000);
+app.listen(3002);
 console.log('listening on 3000');

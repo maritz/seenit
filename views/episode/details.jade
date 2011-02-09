@@ -17,7 +17,7 @@
   = input.date_parser(values.date)
   br
   b Seen:
-  input(type: 'checkbox', readonly: true, checked: values.seen)
+  input(type: 'checkbox', class: 'episode_seen', checked: values.seen, data-id: values.id)
   br
   b Download:
     ul

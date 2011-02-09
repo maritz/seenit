@@ -158,7 +158,7 @@ module.exports.init = function (global) {
     });
   });
   
-  app.get('', function (req, res, next) {
+  app.get('/', function (req, res, next) {
     res.redirect('/show/list');
   });
   

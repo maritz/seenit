@@ -25,8 +25,7 @@
         li 
           a(href: '/episode/details/' + episode.id)
             = episode.number + ': ' + episode.name
-          - if (episode.seen)
-            input(type: 'checkbox', readonly: true, checked: true)
+          input(type: 'checkbox', class: 'episode_seen', checked: episode.seen, data-id: episode.id)
       li
         a(href: '/episode/new/' + values.id) Add new Episode
     

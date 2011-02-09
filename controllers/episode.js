@@ -103,6 +103,22 @@ module.exports.init = function (global) {
     });
   });
   
+  app.get('/seen_switch/:id/:seen?', function (req, res, next) {
+    var seen = req.params.seen || null;
+    idGetter(req, res, false, function (episode) {
+      if (seen === null) {
+        seen = ! episode.p('seen');
+      } else if (seen === 'false') {
+        console.log('yep, converting "false" string');
+        seen = false;
+      }
+      episode.p('seen', !!seen);
+      episode.save(function (err) {
+        res.send({error: err || null,});
+      });
+    });
+  });
+  
   app.get('/edit/:id', function (req, res, next) {
     idGetter(req, res, false, function (episode) {
       res.render_locals.values = episode.allProperties();

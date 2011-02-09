@@ -3,6 +3,7 @@ html
   head
     meta( charset: 'utf-8' )
     title have you seenit?
+    link( rel: 'stylesheet', href: '/css/style.css' )
   body
     h1 
       a( href: '/' ) seenit
@@ -20,3 +21,9 @@ html
       h2
         =page_name
     != body
+
+  script( src: '//ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.js' )
+  :javascript
+    !window.jQuery && document.write(unescape('%3Cscript src="/js/jquery-1.5.js"%3E%3C/script%3E'))
+  script( src: '/js/jquery.xcolor.js' )
+  script( src: '/js/main.js' )

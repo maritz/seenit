@@ -204,7 +204,7 @@ module.exports.init = function (global) {
     res.redirect('/season/details/' + req.param('id'));
   });
   
-  app.get('', function (req, res, next) {
+  app.get('/', function (req, res, next) {
     res.redirect('/show/list');
   });
   
