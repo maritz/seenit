@@ -231,6 +231,8 @@
   else if (window.console)
     console.log("Live.js doesn't support the file protocol. It needs http.");    
   
-  Live.loadresources();
+  $(function () {
+    Live.loadresources();
+  });
   window.Live = Live;
 })();

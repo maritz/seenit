@@ -18,7 +18,7 @@ var PageController = Backbone.Router.extend({
   },
   
   router: function(route){
-    var controller = 'news',
+    var controller = 'main',
         action = 'index',
         parameters = [],
         refresh = false,

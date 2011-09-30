@@ -6,7 +6,7 @@ module.exports = {
     options: {
       origins: '*:*',
       log: true,
-      heartbeats: true,
+      heartbeats: false,
       authorization: false,
       transports: [
         'websocket',
@@ -16,9 +16,9 @@ module.exports = {
         'jsonp-polling'
       ],
       'log level': 3,
-      'close timeout': 25,
-      'heartbeat timeout': 15,
-      'heartbeat interval': 20,
+      'close timeout': 1000,
+      'heartbeat timeout': 2,
+      'heartbeat interval': 5,
       'polling duration': 20,
       'flash policy server': true,
       'flash policy port': 3013,
