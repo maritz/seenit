@@ -1,0 +1,41 @@
+!!! 5
+!= '<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->'
+!= '<!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->'
+!= '<!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->'
+!= '<!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->'
+!= '<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->'
+  head
+    meta( charset: 'utf-8' )
+    meta( name: 'author', content: 'Moritz Peters')
+    title Game
+    link( rel: 'stylesheet', href: '/css/style.css' )
+    script( src: '/js/modernizr-2.0.6.custom.min.js' )
+  body
+    | Game
+    br
+    a(href: 'http://www.hagebaumarkt.de') Build shit
+    br
+    a(href: 'http://www.google.com') Research shit
+    br
+    a(href: 'http://www.starcraft2.com') Attack shit
+    br
+    a(href: 'http://www.ebay.com') Trade shit
+    br
+    a(href: 'http://www.allianz.de') Shitty alliance
+    br
+    a(href: 'http://www.disney.com') shit shit shit, i'm losing
+
+    script( src: '//ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.js' )
+    script
+      !window.jQuery && document.write(unescape('%3Cscript src="/js/jquery-1.6.2.min.js"%3E%3C/script%3E'));
+
+    - if (typeof(form_fieldcheck_timeout) !== 'undefined')
+      script
+        var form_fieldcheck_timeout = #{form_fieldcheck_timeout}
+    script( src: socket_url+'/socket.io/socket.io.js' )
+
+    - if (Array.isArray(js_files))
+      - each file in js_files
+        script( src: '/js/'+file )
+    - else
+      script( src: '/js/' + cacheTimestamp.js + '/merged.js' )

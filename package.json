@@ -1,0 +1,19 @@
+{
+    "name": "game",
+    "version": "0.0.1",
+    "engines": {
+        "node" : ">=0.4.10" 
+    },
+    "author": "Moritz Peters",
+    "description": "NOPE NOPE NOPE",
+    "dependencies": {
+      "cluster": "0.6.9",
+      "socket.io": "0.8.2",
+      "nohm": "0.5.0",
+      "express": "2.4.4",
+      "stylus": "0.15.1",
+      "jade": "0.15.2",
+      "connect-assetmanager": "0.0.21",
+      "connect-assetmanager-handlers": "0.0.17"
+    }
+}
