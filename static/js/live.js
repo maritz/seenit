@@ -224,10 +224,13 @@
   // start listening
   if (document.location.protocol != "file:") {
     if (!window.liveJsLoaded)
-      Live.heartbeat();
+      //Live.heartbeat();
 
     window.liveJsLoaded = true;
   }
   else if (window.console)
     console.log("Live.js doesn't support the file protocol. It needs http.");    
+  
+  Live.loadresources();
+  window.Live = Live;
 })();

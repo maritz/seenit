@@ -16,6 +16,7 @@ var uid = function uid () {
 var password_minlength = 6;
 
 var userModel = module.exports = nohm.model('User', {
+  idGenerator: 'increment',
   properties: {
     name: {
       type: 'string',

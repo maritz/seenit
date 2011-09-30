@@ -32,7 +32,7 @@
     - if (typeof(form_fieldcheck_timeout) !== 'undefined')
       script
         var form_fieldcheck_timeout = #{form_fieldcheck_timeout}
-    script( src: socket_url+'/socket.io/socket.io.js' )
+    script( src: '/socket.io/socket.io.js' )
 
     - if (Array.isArray(js_files))
       - each file in js_files

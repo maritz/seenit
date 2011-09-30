@@ -24,7 +24,7 @@ var files = Array.prototype.concat(
   file_helper.getFiles(basedir, 'controllers/'),
   file_helper.getFiles(basedir, 'models/'),
   file_helper.getFiles(basedir, 'views/'),
-  file_helper.getFiles(basedir, '', ['live.js', 'modernizr-2.0.6.custom.min.js']));
+  file_helper.getFiles(basedir, '', ['modernizr-2.0.6.custom.min.js']));
 
 assetManagerMiddleware = assetManager({
   'js': {

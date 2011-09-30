@@ -19,7 +19,7 @@ redisClient.select(config.nohm.db || 0, function (err) {
   console.log('static server listening on '+config['static'].port || 3000);
     
   
-  var socket_server = require('./socket_server.js').init(config['socket'].port || 3001);
+  var socket_server = require('./socket_server.js').init(static_server);
   
-  console.log('socket server listening on '+config['static'].port || 3003);
+  console.log('socket server listening on '+(config['static'].port || 3001));
 });

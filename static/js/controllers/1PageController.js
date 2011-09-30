@@ -1,4 +1,4 @@
-var PageController = Backbone.Controller.extend({
+var PageController = Backbone.Router.extend({
   
   initialize: function (spec) {
     var self = this;
