@@ -3,3 +3,44 @@ span {
   display: block;
   cursor: pointer;
 }
+.jGrowl-notification,
+.jGrowl-closer {
+  background-color: #333;
+  background-color: #ccf;
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ccf), to(#fff));
+  background: -moz-linear-gradient(#ccf, #fff);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ccf, endColorstr=#fff);
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  -moz-box-shadow: 3px 3px 4px 0px #333;
+  -webkit-box-shadow: 3px 3px 4px 0px #333;
+  box-shadow: 3px 3px 4px 0px #333;
+  color: #000;
+  display: none;
+  opacity: 0.9;
+  filter: alpha(opacity=90);
+  padding: 4px 8px;
+}
+.jGrowl-notification border,
+.jGrowl-closer border {
+  color: 1px;
+  width: 1px;
+  style: solid;
+}
+.success .jGrowl-message,
+.success .jGrowl-header {
+  color: #3f3;
+}
+.jGrowl-header {
+  font-weight: 700;
+}
+.jGrowl-notification.warning {
+  color: #e8ac14;
+}
+.jGrowl-close,
+.jGrowl-closer {
+  float: right;
+  font-weight: bold;
+  cursor: pointer;
+}
