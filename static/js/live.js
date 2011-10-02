@@ -232,7 +232,9 @@
     console.log("Live.js doesn't support the file protocol. It needs http.");    
   
   $(function () {
-    Live.loadresources();
+    setTimeout(function () {
+      Live.loadresources();
+    }, 2000);
   });
   window.Live = Live;
 })();

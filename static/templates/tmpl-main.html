@@ -1,0 +1,12 @@
+<script type="text/x-jade-tmpl" name="breadcrumb">
+%a{href:"##{controller}"}= controller
+
+:if (action && action !== 'index')
+  &nbsp;&gt;&nbsp;
+  %a{href:"##{controller}/#{action}"}= action
+  :if parameters
+    &nbsp;&gt;&nbsp;
+    %a{href:"##{controller}/#{action}/#{parameters}"}= parameters
+
+%a#reload_page Reload
+</script>

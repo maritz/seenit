@@ -21,7 +21,7 @@ var PageController = Backbone.Router.extend({
     var controller = 'main',
         action = 'index',
         parameters = [],
-        refresh = false,
+        pageExists = false,
         timeout = false,
         now = +new Date(),
         $pageDiv,
@@ -47,7 +47,7 @@ var PageController = Backbone.Router.extend({
         'data-lastLoad': now
       }).appendTo(this.config.$content);
     } else {
-      refresh = true;
+      pageExists = true;
       timeout = $pageDiv.data('lastLoad')+this.config.pageTimeout < now;
     }
     
@@ -55,20 +55,22 @@ var PageController = Backbone.Router.extend({
       var req = {
         params: parameters,
         $context: $pageDiv,
-        refresh: refresh,
+        pageExists: pageExists,
         timeout: timeout
       }, 
       res = {
         show: function (html, no_handle) {
           self.loading--; // this ensures that if you started loading a new page while already loading a page, the loading animation isn't stopped on the first page that finishes but on the last one.
           if (self.loading < 1) {
-            self.loading = 0; // just to be sure ;D
+            self.loading = 0; // just to be sure this doesn't somehow fall below zero
             self.trigger('page_loading_done');
           }
           if ( ! no_handle) {
             self.breadcrumb(controller, action, parameters);
             self.replacePage($pageDiv, html, controller, action);
-            $pageDiv.data('lastLoad', now);
+            if ( ! pageExists || timeout ) {
+              $pageDiv.data('lastLoad', now);
+            }
           }
         }
       };
@@ -87,11 +89,11 @@ var PageController = Backbone.Router.extend({
   
   replacePage: function ($div, html, controller, action) {
     var self = this,
-        siblings = this.config.$breadcrumb.siblings();
+        siblings = $div.siblings();
     $div.hide();
     if (html && html !== '' && html !== true) {
       $div.html(html);
-    } else if (html === true) {
+    } else if (html !== true) {
       this.template(controller, action, {}, function (html) {
         $div.html(html);
         if (typeof(self.views[controller]) !== 'undefined' &&
@@ -122,6 +124,7 @@ var PageController = Backbone.Router.extend({
   },
   
   _templates: {},
+  jade: require('jade'),
   template: function (module, name, locals, callback) {
     var self = this,
     tmpl_module;
@@ -157,7 +160,7 @@ var PageController = Backbone.Router.extend({
         self._templates[module] = {};
         
         tmpl_module.append(data).children('script').each(function (i, val) {
-          var tmpl = Haml(val.innerHTML),
+          var tmpl = self.jade.compile(val.innerHTML),
               loaded_name = val.getAttribute('name');
           self._templates[module][loaded_name] = tmpl;
           if (loaded_name === name) {
