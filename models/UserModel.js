@@ -58,7 +58,6 @@ var userModel = module.exports = nohm.model('User', {
     },
     salt: {
       // DO NOT CHANGE THE SALTING METHOD, IT WILL INVALIDATE STORED PASSWORDS!
-      // only valid exception is of course if the password is changed.
       defaultValue: uid()
     }
   },
@@ -84,40 +83,6 @@ var userModel = module.exports = nohm.model('User', {
           });
         }
       });
-    },
-    
-    getAllowedProperties: function (sessionUser) {
-      var selfValid = sessionUser && ! isNaN(sessionUser.id) && sessionUser.id > 0;
-      var props = this.allProperties();
-      if ( ! selfValid || sessionUser.id !== this.id) {
-        // TODO: evaluate what should be public and what shouldn't be.
-        delete props.email;
-      }
-      delete props.password;
-      delete props.salt;
-      return props;
-    },
-    
-    getBoxInfo: function (id, callback) {
-      var info = {},
-      self = this,
-      userLoaded =  function (err) {
-        if (err) {
-          callback(false);
-        } else {
-          info.id = self.id;
-          info.name = self.p('name');
-          // TODO: get the privilege level and teamlist.
-          callback(info);
-        }
-      };
-      if (!this.__loaded && id) {
-        this.load(id, userLoaded);
-      } else if (this.id && this.__loaded) {
-        userLoaded();
-      } else {
-        callback(false);
-      }
     },
     
     fill: function (data, fields, fieldCheck) {
@@ -156,7 +121,7 @@ var userModel = module.exports = nohm.model('User', {
     create: function (data, callback) {
       var self = this;
       
-      this.fill(data, true);
+      this.fill(data);
       this.save(callback);
     },
     
@@ -166,6 +131,14 @@ var userModel = module.exports = nohm.model('User', {
       
       this.fill(data, fields);
       this.valid(false, false, callback);
+    },
+    
+    // makes sure there is no accidental exposure of the password/salt through allProperties
+    allProperties: function (stringify) {
+      var props = this._super_allProperties.call(this);
+      delete props.password;
+      delete props.salt;
+      return stringify ? JSON.stringify(props) : props;
     }
   }
 });

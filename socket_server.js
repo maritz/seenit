@@ -1,11 +1,10 @@
 var io = require('socket.io');
 var file_helper = require('./helpers/file.js');
-var fs = require('fs');
 var config = require('./config.js');
 var channels = {};
 
-exports.init = function (app_or_port) {
-  io = io.listen(app_or_port, config.socket.options);
+exports.init = function (server) {
+  io = io.listen(server, config.socket.options);
 
   var controller_files = file_helper.getFiles(__dirname, '/socket_controllers/');
   
@@ -20,6 +19,4 @@ exports.init = function (app_or_port) {
       console.log('Warning: Found socket controller without connection Handler export.');
     }
   });
-  
-  return io;
 };
