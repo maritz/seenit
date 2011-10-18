@@ -8,12 +8,12 @@
     "description": "NOPE NOPE NOPE",
     "dependencies": {
       "cluster": "0.6.9",
-      "socket.io": "0.8.3",
-      "nohm": "0.6.0",
+      "socket.io": "0.8.5",
+      "nohm": "0.6.1",
       "redis": "0.6.7",
       "express": "2.4.5",
-      "stylus": "0.16.0",
-      "jade": "0.16.0",
+      "stylus": "0.17.0",
+      "jade": "0.16.2",
       "connect-assetmanager": "0.0.21",
       "connect-assetmanager-handlers": "0.0.17"
     }

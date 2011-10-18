@@ -1,0 +1,5 @@
+<script type="text/x-jade-tmpl" name="formHead">
+form( method: 'POST', action: action )
+  - if (typeof(csrf) !== 'undefined')
+    input( type: 'hidden', name: 'csrf-token', value: csrf )
+</script>

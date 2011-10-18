@@ -1,0 +1,83 @@
+<script type="text/x-haml-tmpl" name="username">
+%span.error
+%label=$.t('user.labels.name')
+%input{ name: 'name', validate: 'validate', required: 'required' }
+.input_loading Checking
+</script>
+
+<script type="text/x-haml-tmpl" name="password">
+%span.error
+%label=$.t('user.labels.password')
+%input{ type: 'password', name: 'password', validate: true }
+.input_loading Checking
+</script>
+
+<script type="text/x-haml-tmpl" name="email">
+%span.error
+%label=$.t('user.labels.email')
+%input{ name: 'email', validate: 'validate' }
+.input_loading Checking
+</script>
+
+<script type="text/x-haml-tmpl" name="gacc">
+%li
+  %span.error
+  %label=$.t('user.labels.game')
+  %select{ name: 'game'}
+    %option Counter-Strike
+    %option Starcraft II
+%li
+  %label=$.t('user.labels.gacc')
+  %input{ name: 'gacc'}
+  .input_loading Checking
+</script>
+
+<script type="text/x-haml-tmpl" name="register">
+%h1=$.t('user.register.headline')
+%form#register_form.two_columns.default.register{ method: 'post' }
+  .fieldset_wrapper
+    %fieldset
+      %legend=$.t('user.headline.legend_mandatory')
+      %ul
+        %li=partial('username')
+        %li=partial('password')
+    %input{ type: 'button', name: 'login', value: $.t('general.userbox.login')}
+    %input{ type: 'submit', name: 'register', value: $.t('user.labels.register')}
+    .input_loading Checking
+    %span.error.login_failed Login failed
+    
+  .fieldset_wrapper  
+    %fieldset
+      %legend=$.t('user.headline.legend_optional')
+      %span.optional_description=$.t('user.headline.legend_optional_desc')
+      %ul
+        %li=partial('email')
+      %ul.gacc
+        %li.headline=$.t('user.headline.legend_gacc')
+        =partial('gacc')
+        %li
+          %input.add_gacc{type: "button", value: $.t('user.labels.gacc_add')}
+</script>
+
+<script type="text/x-haml-tmpl" name="profile">
+%h1=$.t('user.profile.headline')
+%form#profile_form.two_columns.default.profile{ method: 'post' }
+  .fieldset_wrapper
+    %fieldset
+      %legend=$.t('user.headline.legend_mandatory')
+      %ul
+        %li=partial('username')
+        %li=partial('password')
+    %input{ type: 'submit', name: 'profile_submit', value: $.t('user.profile.submit')}
+    
+  .fieldset_wrapper  
+    %fieldset
+      %legend=$.t('user.headline.legend_optional')
+      %ul
+        %li=partial('email')
+      %ul.gacc
+        %li.headline=$.t('user.headline.legend_gacc')
+        =partial('gacc')
+        %li
+          %input.add_gacc{type: "button", value: $.t('user.labels.gacc_add')}
+</script>

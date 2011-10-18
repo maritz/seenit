@@ -9,24 +9,26 @@ var config = require('./config.js');
 var oneDay = 86400000;
 
 var stylus = stylus.middleware({
-    src: __dirname+'/static/'
-  });
+  src: __dirname+'/static/'
+});
   
 exports.init = function (server) {
   
   server.use(stylus);
   
-  server.use(express['static'](__dirname + '/static', { maxAge: oneDay }));
+  server.use(express['static'](__dirname + '/static', { 
+    maxAge: server.set('env') !== 'production' ? 1 : oneDay 
+  }));
   
   var basedir = __dirname + '/static/js/';
   
   // reverse order of how it ends up in the merged files.
   var files = Array.prototype.concat(
-    file_helper.getFiles(basedir, 'libs/'),
+    file_helper.getFiles(basedir, 'libs/', ['modernizr-2.0.6.custom.min.js']),
     file_helper.getFiles(basedir, 'controllers/'),
     file_helper.getFiles(basedir, 'models/'),
     file_helper.getFiles(basedir, 'views/'),
-    file_helper.getFiles(basedir, '', ['modernizr-2.0.6.custom.min.js']));
+    file_helper.getFiles(basedir, ''));
   
   assetManagerMiddleware = assetManager({
     'js': {
@@ -58,5 +60,4 @@ exports.init = function (server) {
       }
     });
   });
-  
-}
+};
