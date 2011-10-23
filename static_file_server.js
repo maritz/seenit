@@ -25,10 +25,11 @@ exports.init = function (server) {
   // reverse order of how it ends up in the merged files.
   var files = Array.prototype.concat(
     file_helper.getFiles(basedir, 'libs/', ['modernizr-2.0.6.custom.min.js']),
-    file_helper.getFiles(basedir, 'controllers/'),
+    file_helper.getFiles(basedir, 'utility/'),
     file_helper.getFiles(basedir, 'models/'),
     file_helper.getFiles(basedir, 'views/'),
-    file_helper.getFiles(basedir, ''));
+    file_helper.getFiles(basedir, '')
+  );
   
   assetManagerMiddleware = assetManager({
     'js': {
@@ -55,6 +56,7 @@ exports.init = function (server) {
       locals: {
         cache: true,
         cacheTimestamp: assetManagerMiddleware.cacheTimestamps || {js: 0},
+        i18n_hashes: JSON.stringify(require(__dirname+'/helpers/i18n.js').getHashes()),
         js_files: server.set('env') === 'development' ? files : false,
         socket_url: config.socket.url
       }

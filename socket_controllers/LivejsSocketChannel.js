@@ -3,6 +3,7 @@ var fs = require('fs');
 var EventEmitter = new require('events').EventEmitter;
 
 var e = new EventEmitter();
+e.setMaxListeners(100);
 
 var file_list;
 exec('find static/', function(err, stdout, stderr) {

@@ -99,9 +99,11 @@ var App = Backbone.Router.extend({
     
     _.extend(locals, {
       partial: function (name, locals_) {
-        locals_ = _.extend(locals, locals_);
+        locals_ = locals_ || {}
+        locals_.parentLocals = locals;
         return self.template(module, name, locals_);
-      }
+      },
+      template: self.template
     });
     
     var options = {

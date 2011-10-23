@@ -1,25 +1,43 @@
-var _r = function (fn, unshift) {
-  if(fn === true) {
-    $(function () {
-      $.each(_r.fns, function (id, fnn) {
-        fnn();
-      });
-      _r.done = true;
+(function () {
+  var needed_done = {};
+  function checkNeededDone () {
+    return _.all(needed_done, function (value) {
+      return !!value;
     });
-    return true;
+  };
+  window._r = function (fn, unshift) {
+    if(fn === true) {
+      $(function () {
+        $.each(_r.fns, function (id, fnn) {
+          fnn();
+        });
+        _r.done = true;
+      });
+      return true;
+    }
+    
+    if (typeof(fn) === 'string') {
+      if (unshift === true) {
+        needed_done[fn] = true;
+        checkNeededDone();
+      } else {
+        needed_done[fn] = false;
+      }
+      return true;
+    }
+    
+    if (typeof(_r.done) !== 'undefined')
+      return fn();
+    
+    if (typeof(_r.fns) === 'undefined') {
+      _r.fns = [fn];
+    } else if (unshift) {
+      _r.fns.unshift(fn);
+    } else {
+      _r.fns.push(fn);
+    }
   }
-  
-  if (typeof(_r.done) !== 'undefined')
-    return fn();
-  
-  if (typeof(_r.fns) === 'undefined') {
-    _r.fns = [fn];
-  } else if (unshift) {
-    _r.fns.unshift(fn);
-  } else {
-    _r.fns.push(fn);
-  }
-};
+})();
 
 if (typeof(console) === 'undefined') {
   var noop = function () {};

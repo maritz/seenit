@@ -29,6 +29,10 @@
         var form_fieldcheck_timeout = #{form_fieldcheck_timeout}
     script( src: '/socket.io/socket.io.js' )
 
+    - if (typeof(i18n_hashes) !== 'undefined')
+      script( type: 'text/javascript')
+        var i18n_hashes = JSON.parse('!{i18n_hashes}');
+
     - if (Array.isArray(js_files))
       - each file in js_files
         script( src: '/js/'+file )
