@@ -6,10 +6,7 @@ input( name: 'name', validate: 'validate', required: 'required' )
 </script>
 
 <script type="text/x-jade-tmpl" name="password">
-span.error
-label=$.t('user.labels.password')
-input( type: 'password', name: 'password', validate: true )
-.input_loading Checking
+!= form('input', { type: 'password', label: $.t('user.labels.password'), name: 'password', validate: true })
 </script>
 
 <script type="text/x-jade-tmpl" name="email">
@@ -30,5 +27,4 @@ form#register_form.two_columns.default.register( method: 'post' )
         li!=partial('password')
     input( type: 'button', name: 'login', value: $.t('general.userbox.login'))
     input( type: 'submit', name: 'register', value: $.t('user.labels.register'))
-    
 </script>

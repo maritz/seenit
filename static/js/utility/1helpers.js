@@ -1,12 +1,13 @@
 (function () {
   var needed_done = {};
+  var go_when_needed_done = false;
   function checkNeededDone () {
     return _.all(needed_done, function (value) {
       return !!value;
     });
   };
   window._r = function (fn, unshift) {
-    if(fn === true) {
+    if(fn === true && checkNeededDone()) {
       $(function () {
         $.each(_r.fns, function (id, fnn) {
           fnn();
@@ -14,12 +15,17 @@
         _r.done = true;
       });
       return true;
+    } else if (fn === true) {
+      go_when_needed_done = true;
+      return true;
     }
     
     if (typeof(fn) === 'string') {
       if (unshift === true) {
         needed_done[fn] = true;
-        checkNeededDone();
+        if (go_when_needed_done && checkNeededDone()) {
+          _r(true);
+        }
       } else {
         needed_done[fn] = false;
       }

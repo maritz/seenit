@@ -1,3 +1,6 @@
+
+_r('form_templates');
+
 var App = Backbone.Router.extend({
   
   initialize: function (spec) {
@@ -13,6 +16,10 @@ var App = Backbone.Router.extend({
     this.currentView = null;
     this.route('*args', 'routeToView', this.router);
     this._templates = {};
+    this.template('form', 'input', {}, function () {
+      // make sure we have the form templates loaded so we can safely call them from other templates
+      _r('form_templates', true);
+    });
   },
   
   // some base stuff that other things can extend from
@@ -103,7 +110,9 @@ var App = Backbone.Router.extend({
         locals_.parentLocals = locals;
         return self.template(module, name, locals_);
       },
-      template: self.template
+      form: function (element, params) {
+        return self.template('form', element, params);
+      }
     });
     
     var options = {

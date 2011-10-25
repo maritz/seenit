@@ -3,3 +3,12 @@ form( method: 'POST', action: action )
   - if (typeof(csrf) !== 'undefined')
     input( type: 'hidden', name: 'csrf-token', value: csrf )
 </script>
+
+
+<script type="text/x-jade-tmpl" name="input">
+span.error
+- if (locals.label)
+  label=label
+input( type: locals.label, name: locals.name, validate: locals.validate, required: locals.required )
+.input_loading!= $.t('forms.labels.checking')
+</script>

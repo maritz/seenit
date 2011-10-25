@@ -14,12 +14,13 @@
       storage.store('lang', lang);
     }
   }
+  _r("i18n");
   
   var localDict = false
   , loadJSperanto = function (dict) {
     i18n_options.dictionary = dict;
     $.jsperanto.init(function(){
-      _r("i18n_done");
+      _r("i18n", true);
     }, i18n_options);
   };
   
