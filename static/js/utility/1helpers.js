@@ -10,7 +10,7 @@
     if(fn === true && checkNeededDone()) {
       $(function () {
         $.each(_r.fns, function (id, fnn) {
-          fnn();
+          fnn(window.app);
         });
         _r.done = true;
       });
@@ -33,7 +33,7 @@
     }
     
     if (typeof(_r.done) !== 'undefined')
-      return fn();
+      return fn(window.app);
     
     if (typeof(_r.fns) === 'undefined') {
       _r.fns = [fn];

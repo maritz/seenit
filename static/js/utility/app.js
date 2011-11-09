@@ -13,6 +13,7 @@ var App = Backbone.Router.extend({
 
     this.models = {};
     this.views = {};
+    this.formHandler = {};
     this.currentView = null;
     this.route('*args', 'routeToView', this.router);
     this._templates = {};
@@ -27,9 +28,8 @@ var App = Backbone.Router.extend({
     
     pageView: Backbone.View.extend({
       
-      $el: $('#content'),
-      
       initialize: function (module, action, locals) {
+        this.$el = window.app.config.$content;
         this.module = module;
         this.action = action;
         this.locals = locals;
@@ -43,6 +43,30 @@ var App = Backbone.Router.extend({
         });
       }
       
+    }),
+    
+    model: Backbone.Model.extend({
+      required: [],
+      validations: {},
+      validate: function (attrs) {
+        var errors = {};
+        var self = this;
+        _.each(attrs, function (val, key) {
+          if (self.required.indexOf(key) !== -1
+            && val.length === 0) {
+            return errors[key] = 'forms.errors.notEmpty';
+          }
+          if (self.validations.hasOwnProperty(key)) {
+            var error = self.validations[key].call(self, val);
+            if (error) {
+              return errors[key] = error;
+            }
+          }
+        });
+        if (Object.keys(errors).length > 0) {
+          return errors;
+        }
+      }
     })
   },
   
@@ -68,9 +92,10 @@ var App = Backbone.Router.extend({
     try {
       if ( ! this.views.hasOwnProperty(module) || ! this.views[module].hasOwnProperty(action) ) {
         // try to just load a template without a proper view
+        console.log('No view found, rendering default view. ('+module+':'+action+')');
         this.currentView = new this.base.pageView(module, action, {});
       } else {
-        this.currentView = new this.views[module][action]();
+        this.currentView = new this.views[module][action](this.config.$content);
       }
       this.breadcrumb(module, action, parameters);
     } catch(e) {
@@ -132,7 +157,7 @@ var App = Backbone.Router.extend({
       if (typeof(callback) !== 'function') {
         console.dir(this._templates);
         console.dir(arguments);
-        throw new Error('Can\'t call _template without a callback if the template module was not loaded yet!');
+        throw new Error('Can\'t call _template without a callback if the template module was not loaded yet! (might be an invalid template call)');
       }
       tmpl_module = $('<div id="tmpl_'+module+'"></div>').appendTo('#templates');
       $.get('/templates/tmpl-'+module+'.html', function (data) {

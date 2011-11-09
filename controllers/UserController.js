@@ -19,7 +19,7 @@ function loadUser (req, res, next){
       if (err) {
         next(new UserError('Did not find user with id "'+id+'".\nerror: '+err));
       } else {
-        req.user = user;
+        req.loaded_user = user;
         next();
       }
     });
@@ -48,23 +48,51 @@ app.get('/', auth.isLoggedIn, function (req, res) {
 });
 
 app.get('/show/:userId', auth.isLoggedIn, loadUser, function (req, res) {
-  res.send(req.user.allProperties());
+  res.send(req.loaded_user.allProperties());
 });
 
-app.all('/create', function (req, res) {
-  var user = new User();
-  var name = req.param('name') || false;
-  var password = req.param('password') || false;
-  user.create({name: name, password: password}, function (err) {
+
+function store (req, res) {
+  var user = req.loaded_user;
+  var data = {
+    name: req.param('name'),
+    password: req.param('password'),
+    email: req.param('email')
+  };
+  user.store(data, function (err) {
     var response = user.__inDB ? 'ok' : 'saving failed: ' + err +'\nvalidation errors: '+ JSON.stringify(user.errors);
     res.send(response);
   });
-});
-
-function logout (req) {
-  req.session.userdata = {};
-  req.session.logged_in = false; 
 }
+
+function newUser (req, res, next) {
+  req.loaded_user = new User();
+  next();
+}
+
+app.post('/', newUser, store);
+
+app.all('/create', newUser, store);
+
+app.put('/', loadUser, auth.isSelfOrAdmin, store);
+
+app.all('/update', loadUser, auth.isSelfOrAdmin, store);
+
+app.get('/checkName', function (req, res) {
+  if (req.param('name')) {
+    User.find({name: req.param('name')}, function (err, ids) {
+      if (err) {
+        res.send('Error: '+err);
+      } else if (ids.length > 0) {
+        res.send('name taken');
+      } else {
+        res.send('ok');
+      }
+    });
+  } else {
+    res.send('no user specified');
+  }
+});
 
 app.get('/login', function (req, res) {
   // TODO: needs login-per-ip counter and ban.
@@ -85,10 +113,18 @@ app.get('/login', function (req, res) {
   });
 });
 
+function logout (req) {
+  req.session.userdata = {};
+  req.session.logged_in = false; 
+}
+
 app.get('/logout', function (req, res) {
   logout(req);
   res.send('ok');
 });
+
+
+
 
 app.mounted(function (parent){
   console.log('mounted User REST controller');

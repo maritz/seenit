@@ -1,30 +1,31 @@
 <script type="text/x-jade-tmpl" name="username">
-span.error
-label=$.t('user.labels.name')
-input( name: 'name', validate: 'validate', required: 'required' )
-.input_loading Checking
+!= form('input', { name: 'name', label: $.t('user.labels.name'), required: true })
 </script>
 
 <script type="text/x-jade-tmpl" name="password">
-!= form('input', { type: 'password', label: $.t('user.labels.password'), name: 'password', validate: true })
+!= form('input', { type: 'password', name: 'password', label: $.t('user.labels.password'), required: true })
+</script>
+
+<script type="text/x-jade-tmpl" name="password_repeat">
+!= form('input', { type: 'password', name: 'password_repeat', label: $.t('user.labels.password_repeat'), required: true })
 </script>
 
 <script type="text/x-jade-tmpl" name="email">
-span.error
-label=$.t('user.labels.email')
-input( name: 'email', validate: 'validate' )
-.input_loading Checking
+!= form('input', { name: 'email', label: $.t('user.labels.email') })
 </script>
 
 <script type="text/x-jade-tmpl" name="register">
 h1!=$.t('user.register.headline')
-form#register_form.two_columns.default.register( method: 'post' )
+form( novalidate: true)
+  input( type: 'hidden', name: 'csrf-token', value: locals.csrf )
+  
   .fieldset_wrapper
     fieldset
       legend=$.t('user.headline.legend_mandatory')
       ul
         li!=partial('username')
         li!=partial('password')
-    input( type: 'button', name: 'login', value: $.t('general.userbox.login'))
-    input( type: 'submit', name: 'register', value: $.t('user.labels.register'))
+        li!=partial('password_repeat')
+        li!=partial('email')
+    != form('input', { type: 'submit', name: 'register', value: $.t('user.labels.register'), error: false, label: false, loading: false, link: false })
 </script>

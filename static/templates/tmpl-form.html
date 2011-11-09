@@ -1,14 +1,24 @@
-<script type="text/x-jade-tmpl" name="formHead">
-form( method: 'POST', action: action )
-  - if (typeof(csrf) !== 'undefined')
-    input( type: 'hidden', name: 'csrf-token', value: csrf )
-</script>
-
-
 <script type="text/x-jade-tmpl" name="input">
-span.error
-- if (locals.label)
-  label=label
-input( type: locals.label, name: locals.name, validate: locals.validate, required: locals.required )
-.input_loading!= $.t('forms.labels.checking')
+- var id = 'input_'+(Math.floor(Math.random()*10))+(+new Date());
+- if (locals.error !== false)
+  span.error
+
+- if (locals.label && locals.label !== false)
+  label(for: id)= label
+- else if (locals.label !== false)
+  label(for: id)!= $.t('forms.labels.'+locals.name)
+  
+- if (typeof(locals.link) === 'undefined')
+  - locals.link = true
+  
+input( id: id
+  type: locals.type,
+  name: locals.name,
+  required: locals.required,
+  value: locals.value,
+  "data-link": locals.link
+  )
+  
+- if (locals.loading !== false)
+  .loading!= $.t('forms.labels.checking')
 </script>

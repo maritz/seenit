@@ -118,7 +118,7 @@ var userModel = module.exports = nohm.model('User', {
       return props;
     },
     
-    create: function (data, callback) {
+    store: function (data, callback) {
       var self = this;
       
       this.fill(data);
