@@ -3,9 +3,15 @@ var User = Registry.Models.User;
 var app = require('express').createServer();
 var auth = require(__dirname+'/../helpers/auth');
 
-function UserError(msg){
+function UserError(msg, code){
   this.name = 'UserError';
-  this.message = msg;
+  if (typeof(msg) === 'string') {
+    this.message = msg;
+  } else {
+    this.data = msg;
+    this.message = 'custom';
+  }
+  this.code = code || 500;
   Error.call(this, msg);
 }
 
@@ -17,7 +23,7 @@ function loadUser (req, res, next){
   var load = function (id) {
     user.load(id, function (err) {
       if (err) {
-        next(new UserError('Did not find user with id "'+id+'".\nerror: '+err));
+        next(new UserError('Did not find user with id "'+id+'".\nerror: '+err, 404));
       } else {
         req.loaded_user = user;
         next();
@@ -30,11 +36,11 @@ function loadUser (req, res, next){
   } else {
     user.find({name:id}, function (err, ids) {
       if (err) {
-        next(new UserError('Did not find user with name "'+id+'".\nerror: '+err));
+        next(new UserError('Did not find user with name "'+id+'".\nerror: '+err, 404));
       } else if (ids.length === 0) {
-        next(new UserError('Did not find user with name "'+id+'".'));
+        next(new UserError('Did not find user with name "'+id+'".', 404));
       } else if (ids.length > 1) {
-        next(new UserError('Found multiple matches with name "'+id+'".'));
+        next(new UserError('Found multiple matches with name "'+id+'".', 500));
       } else {
         load(ids[0]);
       }
@@ -44,7 +50,7 @@ function loadUser (req, res, next){
 
 app.get('/', auth.isLoggedIn, function (req, res) {
   User.find(function (err, ids) {
-    res.send('ids: '+JSON.stringify(ids));
+    res.ok({ids: ids});
   });
 });
 
@@ -53,7 +59,7 @@ app.get('/show/:userId', auth.isLoggedIn, loadUser, function (req, res) {
 });
 
 
-function store (req, res) {
+function store (req, res, next) {
   var user = req.loaded_user;
   var data = {
     name: req.param('name'),
@@ -62,9 +68,9 @@ function store (req, res) {
   };
   user.store(data, function (err) {
     if (user.__inDB) {
-      res.send({result: 'success', data: {}});
+      next();
     } else {
-      res.send({result: 'error', data: {error: err, fields: user.errors}}, 400);
+      next(new UserError({error: err, fields: user.errors}, 400));
     }
   });
 }
@@ -74,44 +80,57 @@ function newUser (req, res, next) {
   next();
 }
 
-app.post('/', newUser, store);
+function sendOk (req, res) {
+  res.ok();
+}
 
-app.all('/create', newUser, store);
+function setSessionToLoadedUser (req, res) {
+  if (req.loaded_user && req.loaded_user instanceof User && loaded_user.__inDB) {
+    req.session.logged_in = true;
+    var userdata = req.session.userdata = req.loaded_user.allProperties();
+    res.ok({user: userdata});
+  } else {
+    throw new UserError('Can\'t set session to req.loaded_user because it\'s not a valid and loaded nohm model.');
+  }  
+}
 
-app.put('/', loadUser, auth.isSelfOrAdmin, store);
+app.post('/', newUser, store, setSessionToLoadedUser);
 
-app.all('/update', loadUser, auth.isSelfOrAdmin, store);
+app.all('/create', newUser, store, setSessionToLoadedUser);
 
-app.get('/checkName', function (req, res) {
+app.put('/', loadUser, auth.isSelfOrAdmin, store, sendOk);
+
+app.all('/update', loadUser, auth.isSelfOrAdmin, store, sendOk);
+
+app.get('/checkName', function (req, res, next) {
   if (req.param('name')) {
     User.find({name: req.param('name')}, function (err, ids) {
       if (err) {
-        res.send('Error: '+err);
+        throw new UserError('Database error: '+err, 500);
       } else if (ids.length > 0) {
-        res.send('name taken');
+        throw new UserError('Name taken.', 400);
       } else {
-        res.send('ok');
+        res.ok();
       }
     });
   } else {
-    res.send('no user specified');
+    throw new UserError('No name to check in parameters.');
   }
 });
 
-app.get('/login', function (req, res) {
+app.get('/login', function (req, res, next) {
   // TODO: needs login-per-ip counter and ban.
   var user = new User();
   var name = req.param('name') || false;
   var password = req.param('password') || false;
   user.login(name, password, function (success) {
     if (success) {
-      req.session.logged_in = true;
-      req.session.userdata = user.allProperties();
-      res.send('ok, hello '+user.p('name'));
+      req.loaded_user = user;
+      setSessionToLoadedUser(req, res, next);
     } else {
       setTimeout(function () { // artificial delay to make bruteforcing less practical
         logout(req);
-        res.send('wrong authentication');
+        throw new UserError('Wrong authentication.', 400);
       }, 400);
     }
   });
@@ -124,15 +143,12 @@ function logout (req) {
 
 app.get('/logout', function (req, res) {
   logout(req);
-  res.send('ok');
+  res.ok();
 });
-
-
 
 
 app.mounted(function (parent){
   console.log('mounted User REST controller');
 });
-
 
 module.exports = app;

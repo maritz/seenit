@@ -2,8 +2,10 @@ _r(function (app) {
 
   app.formHandler = formHandler = function (view, model) {
     this.view = view;
-    this.model = model || view.model || new Backbone.Modle.extend({});
-    this.nextChecks = [];
+    this.model = model || view.model;
+    if (typeof(this.model) === 'undefined') {
+      throw new Error('formHandler requires a model or the view to have a model');
+    }
   };
   
   formHandler.prototype.getInputByName = function (name) {
@@ -51,7 +53,7 @@ _r(function (app) {
     }
     attrs[name] = $this.val();
     
-    if ($this.attr('required')) {
+    if (this.model.required.indexOf(name) === -1 && $this.attr('required')) {
       this.model.required.push(name);
     }
     
@@ -62,11 +64,17 @@ _r(function (app) {
     var $form = this.view.$el;
     var self = this;
     
-    $form.delegate('input[data-link]', 'blur', function () {
+    var $linkedInputs = $form.delegate('input[data-link]', 'blur', function () {
       self.blurHandler(this);
     });
     
-    this.model.bind("change", function(model) {
+    $linkedInputs.each(function () {
+      if ($(this).attr('required')) {
+        this.model.required.push(name);
+      }
+    });
+    
+    this.model.bind("change", function(model, collection, attributes) {
       _.each(model.changedAttributes(), function (val, key) {
         
         self.clearError(key);
@@ -95,14 +103,27 @@ _r(function (app) {
     
     $form.bind('submit', function (e) {
       e.preventDefault();
-      debugger;
+      var $inputs = $form.find('input');
+      $inputs.prop('disabled', true);
       self.model.save(undefined, {
-        error: function (model, resp, asd, test) {
-          debugger;
+        
+        error: function (model, response) {
+          $inputs.prop('disabled', false);
+          var fields = JSON.parse(response.responseText).data.fields;
+          _.each(fields, function (val, key) {
+            if (_.isArray(val) && val.length > 0) {
+              var err = {};
+              err[key] = val[0];
+              self.model.trigger('error', model, err);
+            }
+          });
         },
-        success: function () {
-          debugger;
+        
+        success: function (model, response) {
+          $inputs.prop('disabled', false);
+          self.model.trigger('saved', model);
         }
+        
       });
     });
     

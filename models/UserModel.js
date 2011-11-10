@@ -122,7 +122,10 @@ var userModel = module.exports = nohm.model('User', {
       var self = this;
       
       this.fill(data);
-      this.save(callback);
+      this.save(function () {
+        delete self.errors.salt;
+        callback.apply(self, Array.prototype.slice.call(arguments, 0));
+      });
     },
     
     checkProperties: function (data, fields, callback) {

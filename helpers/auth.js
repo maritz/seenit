@@ -1,7 +1,9 @@
 var User = require(__dirname+'/../registry.js').Models.User;
 
-function AuthError(msg){
-  this.name = 'AuthError: '+msg;
+function AuthError(msg, code){
+  this.name = 'AuthError';
+  this.message = msg;
+  this.code = code || 401
   Error.call(this, msg);
 }
 
@@ -12,7 +14,7 @@ exports.isLoggedIn = function (req, res, next) {
   if (req.session.logged_in) {
     next();
   } else {
-    next(new AuthError('need login'));
+    throw new AuthError('Needs login.');
   }
 };
 
@@ -26,11 +28,11 @@ exports.isSelfOrAdmin = function (req, res, next) {
       next();
     } else {
       // TODO: check current admin/privilege status
-      next(new AuthError('neither self nor admin'));
+      next(new AuthError('Need admin or self privileges.'));
     }
   } else if ( ! req.session.logged_in) {
-    next(new AuthError('need login'));
+    next(new AuthError('Need login.'));
   } else {
-    next(new AuthError('need to load user first'));
+    next(new AuthError('Need to load user before checking for admin/self.', 500));
   }
 };
