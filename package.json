@@ -1,8 +1,8 @@
 {
-    "name": "game",
+    "name": "node-stack",
     "version": "0.0.1",
     "engines": {
-        "node" : ">=0.4.10" 
+        "node" : ">=0.4.9" 
     },
     "author": "Moritz Peters",
     "description": "NOPE NOPE NOPE",
@@ -11,7 +11,7 @@
       "socket.io": "0.8.5",
       "nohm": "0.6.1",
       "redis": "0.6.7",
-      "express": "2.4.5",
+      "express": "2.5.0",
       "stylus": "0.17.0",
       "jade": "0.16.2",
       "connect-assetmanager": "0.0.21",

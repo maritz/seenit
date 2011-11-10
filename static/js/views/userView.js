@@ -3,22 +3,16 @@ _r(function (app) {
     app.views.user = {}
   }
   
-  app.views.user.register = Backbone.View.extend({
+  app.views.user.register = app.base.formView.extend({
     
-    initialize: function ($el) {
-      this.$el = $el;
+    init: function () {
       this.model = new app.models.user();
-      this.render();
-    },
-    
-    render: function () {
-      var self = this;
-      app.template('user', 'register', {model: this.model, view: this}, function (html) {
-        self.$el.html(html);
-        self.handler = new app.formHandler(self);
-        self.handler.link();
-      });
+      this.locals = {
+        model: this.model,
+        view: this
+      };
     }
+    
     
   });
   

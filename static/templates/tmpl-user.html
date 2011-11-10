@@ -29,3 +29,7 @@ form( novalidate: true)
         li!=partial('email')
     != form('input', { type: 'submit', name: 'register', value: $.t('user.labels.register'), error: false, label: false, loading: false, link: false })
 </script>
+
+<script type="text/x-jade-tmpl" name="index">
+a( href: '#User/register') Register
+</script>

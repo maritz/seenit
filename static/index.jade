@@ -16,13 +16,15 @@
     a(href: '#main') Main
     br
     a(href: '#main/details') Main details
+    br
+    a(href: '#user') User 
     #breadcrumb
     #content
     #templates
 
     script( src: '//ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.js' )
     script
-      !window.jQuery && document.write(unescape('%3Cscript src="/js/jquery-1.6.2.min.js"%3E%3C/script%3E'));
+      !window.jQuery && document.write(unescape('%3Cscript src="/js/libs/jquery-1.6.2.js"%3E%3C/script%3E'));
 
     - if (typeof(form_fieldcheck_timeout) !== 'undefined')
       script

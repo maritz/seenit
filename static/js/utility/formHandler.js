@@ -14,7 +14,7 @@ _r(function (app) {
       $el = $('input[name="'+name+'"]', $form);
     }
     return $el;
-  }
+  };
   
   formHandler.prototype.setError = function (name, error) {
     var $el = this.getInputByName(name);
@@ -25,22 +25,22 @@ _r(function (app) {
     }
     
     $errSpan.html($.t(error)).show('slow');
-  }
+  };
   
   formHandler.prototype.clearError = function (name) {
     var $el = this.getInputByName(name);
     $el.siblings('span.error').html('').hide('fast');
-  }
+  };
   
   formHandler.prototype.setLoading = function (name) {
     var $el = this.getInputByName(name);
     $el.siblings('.loading').show();
-  }
+  };
   
   formHandler.prototype.clearLoading = function (name) {
     var $el = this.getInputByName(name);
     $el.siblings('.loading').hide();
-  }
+  };
   
   formHandler.prototype.blurHandler = function (context) {
     var $this = $(context);
@@ -95,8 +95,9 @@ _r(function (app) {
     
     $form.bind('submit', function (e) {
       e.preventDefault();
+      debugger;
       self.model.save(undefined, {
-        error: function () {
+        error: function (model, resp, asd, test) {
           debugger;
         },
         success: function () {
@@ -106,6 +107,6 @@ _r(function (app) {
     });
     
     return this;
-  }
+  };
   
 });

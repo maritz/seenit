@@ -32,7 +32,7 @@ var App = Backbone.Router.extend({
         this.$el = window.app.config.$content;
         this.module = module;
         this.action = action;
-        this.locals = locals;
+        this.locals = locals || {};
         this.render();
       },
       
@@ -41,6 +41,35 @@ var App = Backbone.Router.extend({
         window.app.template(this.module, this.action, this.locals, function (html) {
           self.$el.html(html);
         });
+      }
+      
+    }),
+    
+    formView: Backbone.View.extend({
+      
+      initialize: function (module, action, $el) {
+        this.module = module;
+        this.action = action;
+        this.locals = {};
+        this.$el = $el;
+        
+        if (this.init && typeof(this.init) === 'function') {
+          this.init();
+        }
+        this.render();
+      },
+      
+      render: function () {
+        var self = this;
+        app.template('user', 'register', {model: this.model, view: this}, function (html) {
+          self.afterRender.call(self, html);
+        });
+      },
+      
+      afterRender: function (html) {
+        this.$el.html(html);
+        this.handler = new app.formHandler(this);
+        this.handler.link();
       }
       
     }),
@@ -93,9 +122,9 @@ var App = Backbone.Router.extend({
       if ( ! this.views.hasOwnProperty(module) || ! this.views[module].hasOwnProperty(action) ) {
         // try to just load a template without a proper view
         console.log('No view found, rendering default view. ('+module+':'+action+')');
-        this.currentView = new this.base.pageView(module, action, {});
+        this.currentView = new this.base.pageView(module, action);
       } else {
-        this.currentView = new this.views[module][action](this.config.$content);
+        this.currentView = new this.views[module][action](module, action, this.config.$content);
       }
       this.breadcrumb(module, action, parameters);
     } catch(e) {

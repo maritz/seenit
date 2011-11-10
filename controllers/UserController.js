@@ -23,7 +23,8 @@ function loadUser (req, res, next){
         next();
       }
     });
-  }
+  };
+  
   if (!!id.match(/^[\d]*$/)) {
     load(id);
   } else {
@@ -39,7 +40,7 @@ function loadUser (req, res, next){
       }
     });
   }
-};
+}
 
 app.get('/', auth.isLoggedIn, function (req, res) {
   User.find(function (err, ids) {
@@ -60,8 +61,11 @@ function store (req, res) {
     email: req.param('email')
   };
   user.store(data, function (err) {
-    var response = user.__inDB ? 'ok' : 'saving failed: ' + err +'\nvalidation errors: '+ JSON.stringify(user.errors);
-    res.send(response);
+    if (user.__inDB) {
+      res.send({result: 'success', data: {}});
+    } else {
+      res.send({result: 'error', data: {error: err, fields: user.errors}}, 400);
+    }
   });
 }
 
