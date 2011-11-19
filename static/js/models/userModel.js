@@ -2,20 +2,11 @@ _r(function (app) {
 
   app.models.User = app.base.model.extend({
     urlRoot: '/REST/User/',
+    nohmName: 'User',
     validations: {
-      name: function (value) {
-        if (value.length < 6) {
-          return 'user.errors.name_short';
-        }
-      },
       password: function (value) {
         var password_repeat = this.view.$el.find('input[name="password_repeat"]').val();
-        if ((password_repeat+'').length > 0) {
-          this.set({password_repeat: password_repeat});
-        }
-        if (value.length < 6) {
-          return 'user.errors.password_short';
-        }
+        this.set({password_repeat: password_repeat});
       },
       password_repeat: function (value) {
         if (value !== this.view.$el.find('input[name="password"]').val()) {

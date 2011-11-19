@@ -49,6 +49,13 @@ exports.init = function (server) {
   server.use(assetManagerMiddleware);
   server.use(express.favicon());
   
+  var models = require(__dirname+'/registry.js').Models;
+  server.use(require(__dirname+'/../nohm/lib/nohm.js').Nohm.getConnectValidationMiddleware([{
+     model: models.User,
+     blacklist: ['salt']
+  }]));
+  
+  
   server.get('/', function (req, res, next) { 
     res.render(__dirname+'/static/index.jade', {
       layout: false,

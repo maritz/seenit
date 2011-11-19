@@ -79,10 +79,19 @@ var App = Backbone.Router.extend({
       validate: function (attrs) {
         var errors = {};
         var self = this;
+        if (self.nohmName) {
+          var nohmErrors = nohmValidations.validate(self.nohmName, attrs);
+        }
         _.each(attrs, function (val, key) {
+          if (self.required.indexOf(key) !== -1 && typeof(val) !== 'string') {
+            debugger;
+          }
           if (self.required.indexOf(key) !== -1
             && val.length === 0) {
             return errors[key] = 'forms.errors.notEmpty';
+          }
+          if (nohmErrors && nohmErrors[key] && nohmErrors[key].length > 0) {
+            return errors[key] = 'forms.errors.'+nohmErrors[key][0];
           }
           if (self.validations.hasOwnProperty(key)) {
             var error = self.validations[key].call(self, val);
