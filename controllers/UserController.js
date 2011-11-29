@@ -90,7 +90,7 @@ function setSessionToLoadedUser (req, res) {
     var userdata = req.session.userdata = req.loaded_user.allProperties();
     res.ok({user: userdata});
   } else {
-    throw new UserError('Can\'t set session to req.loaded_user because it\'s not a valid and loaded nohm model.');
+    next(new UserError('Can\'t set session to req.loaded_user because it\'s not a valid and loaded nohm model.'));
   }  
 }
 
@@ -106,15 +106,15 @@ app.get('/checkName', function (req, res, next) {
   if (req.param('name')) {
     User.find({name: req.param('name')}, function (err, ids) {
       if (err) {
-        throw new UserError('Database error: '+err, 500);
+        next(new UserError('Database error: '+err, 500));
       } else if (ids.length > 0) {
-        throw new UserError('Name taken.', 400);
+        next(new UserError('Name taken.', 400));
       } else {
         res.ok();
       }
     });
   } else {
-    throw new UserError('No name to check in parameters.');
+    next(new UserError('No name to check in parameters.'));
   }
 });
 
@@ -130,7 +130,7 @@ app.get('/login', function (req, res, next) {
     } else {
       setTimeout(function () { // artificial delay to make bruteforcing less practical
         logout(req);
-        throw new UserError('Wrong authentication.', 400);
+        next(new UserError('Wrong authentication.', 400));
       }, 400);
     }
   });
