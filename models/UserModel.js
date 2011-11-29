@@ -15,7 +15,7 @@ var uid = function uid () {
 
 var password_minlength = 6;
 
-var userModel = module.exports = nohm.model('User', {
+module.exports = nohm.model('User', {
   idGenerator: 'increment',
   properties: {
     name: {
@@ -23,14 +23,18 @@ var userModel = module.exports = nohm.model('User', {
       unique: true,
       validations: [
         'notEmpty',
-        ['minLength', 4]
+        ['length', {
+          min: 4
+        }]
       ]
     },
     email: {
       type: 'string',
       unique: true,
       validations: [
-        ['email', true]
+        ['email', {
+          optional: true
+        }]
       ]
     },
     password: {
@@ -53,7 +57,9 @@ var userModel = module.exports = nohm.model('User', {
       },
       validations: [
         'notEmpty',
-        ['minLength', password_minlength]
+        ['length', {
+          min: password_minlength
+        }]
       ]
     },
     salt: {
@@ -87,8 +93,6 @@ var userModel = module.exports = nohm.model('User', {
     
     fill: function (data, fields, fieldCheck) {
       var props = {},
-          passwordInField,
-          passwordChanged = false,
           self = this,
           doFieldCheck = typeof(fieldCheck) === 'function';
           
@@ -129,7 +133,6 @@ var userModel = module.exports = nohm.model('User', {
     },
     
     checkProperties: function (data, fields, callback) {
-      var self = this;    
       callback = typeof(fields) === 'function' ? fields : callback;
       
       this.fill(data, fields);
