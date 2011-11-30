@@ -1,6 +1,6 @@
 _r(function (app) {
 
-  app.formHandler = formHandler = function (view, model) {
+  var formHandler = app.formHandler = function (view, model) {
     this.view = view;
     this.model = model || view.model;
     if (typeof(this.model) === 'undefined') {
@@ -74,25 +74,15 @@ _r(function (app) {
       }
     });
     
-    this.model.bind("change", function(model, collection, attributes) {
-      _.each(model.changedAttributes(), function (val, key) {
-        
+    this.model.bind("change", function(model, key) {
+      if (key) {
+        console.log('changed', key);
         self.clearError(key);
-        
-        // do async validations
-        if (model.asyncValidations.hasOwnProperty(key)) {
-          self.setLoading(key);
-          var error = model.asyncValidations[key].call(model, val, function (err) {
-            self.clearLoading(key);
-            if (err) {
-              var errors = {};
-              errors[key] = err;
-              model.trigger('error', model, errors);
-            }
-          });
-        }
-        
-      });
+      } else {
+        _.each(model.getChangedValidationAttributes(), function (val, key) {
+          self.clearError(key);
+        });
+      }
     });
     
     this.model.bind("error", function(model, error) {
@@ -119,9 +109,10 @@ _r(function (app) {
           });
         },
         
-        success: function (model, response) {
+        success: function (model) {
           $inputs.prop('disabled', false);
           self.model.trigger('saved', model);
+          console.log('saved');
         }
         
       });

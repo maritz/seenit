@@ -1,5 +1,5 @@
 
-_r('form_templates');
+_r('form_templates'); // see app.initiaize
 
 var App = Backbone.Router.extend({
   
@@ -23,95 +23,12 @@ var App = Backbone.Router.extend({
     });
   },
   
-  // some base stuff that other things can extend from
-  base: {
-    
-    pageView: Backbone.View.extend({
-      
-      initialize: function (module, action, locals) {
-        this.$el = window.app.config.$content;
-        this.module = module;
-        this.action = action;
-        this.locals = locals;
-        this.render();
-      },
-      
-      render: function () {
-        var self = this;
-        window.app.template(this.module, this.action, this.locals, function (html) {
-          self.$el.html(html);
-        });
-      }
-      
-    }),
-    
-    formView: Backbone.View.extend({
-      
-      initialize: function (module, action, $el) {
-        this.module = module;
-        this.action = action;
-        this.$el = $el;
-        this.locals = {};
-        if (this.init && typeof(this.init) === 'function') {
-          this.init();
-        }
-        this.render();
-      },
-      
-      render: function () {
-        var self = this;
-        window.app.template(this.module, this.action, this.locals, function (html) {
-          self.afterRender.call(self, html);
-        });
-      },
-      
-      afterRender: function (html) {
-        this.$el.html(html);
-        this.handler = new app.formHandler(this);
-        this.handler.link();
-      }
-      
-    }),
-    
-    model: Backbone.Model.extend({
-      required: [],
-      validations: {},
-      validate: function (attrs) {
-        var errors = {};
-        var self = this;
-        if (self.nohmName) {
-          var nohmErrors = nohmValidations.validate(self.nohmName, attrs);
-        }
-        _.each(attrs, function (val, key) {
-          if (self.required.indexOf(key) !== -1 && typeof(val) !== 'string') {
-            debugger;
-          }
-          if (self.required.indexOf(key) !== -1
-            && val.length === 0) {
-            return errors[key] = 'forms.errors.notEmpty';
-          }
-          if (nohmErrors && nohmErrors[key] && nohmErrors[key].length > 0) {
-            return errors[key] = 'forms.errors.'+nohmErrors[key][0];
-          }
-          if (self.validations.hasOwnProperty(key)) {
-            var error = self.validations[key].call(self, val);
-            if (error) {
-              return errors[key] = error;
-            }
-          }
-        });
-        if (Object.keys(errors).length > 0) {
-          return errors;
-        }
-      }
-    })
-  },
+  base: {}, // backbone.extend.js
   
   router: function(route){
     var module = 'main',
         action = 'index',
-        parameters = [],
-        self = this;
+        parameters = [];
     
     this.currentRoute = route; // for reloading
     

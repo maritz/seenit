@@ -4,6 +4,7 @@ var assetManager = require('connect-assetmanager');
 var assetHandlers = require('connect-assetmanager-handlers');
 var file_helper = require('./helpers/file.js');
 var config = require('./config.js');
+var Nohm = require('nohm').Nohm;
 
 
 var oneDay = 86400000;
@@ -49,11 +50,8 @@ exports.init = function (server) {
   server.use(assetManagerMiddleware);
   server.use(express.favicon());
   
-  var models = require(__dirname+'/registry.js').Models;
-  server.use(require(__dirname+'/../nohm/lib/nohm.js').Nohm.getConnectValidationMiddleware([{
-     model: models.User,
-     blacklist: ['salt']
-  }]));
+  Nohm.setExtraValidations(__dirname+'/models/validations.js');
+  server.use(Nohm.connect());
   
   
   server.get('/', function (req, res, next) { 
