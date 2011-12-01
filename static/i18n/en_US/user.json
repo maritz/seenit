@@ -1,0 +1,19 @@
+module.exports = { // node 0.4.x does not support loading pure json yet.
+  general: {
+    forms: {
+      errors: {
+        notEmpty: "testasd"
+      },
+      labels: {
+        name: "User name",
+        password: "Password",
+        password_repeat: "Repeat password",
+        email: "E-Mail"
+      }
+    }
+  },
+  register: {
+    headline: "Registration",
+    legend: "Your basic information"
+  }
+};

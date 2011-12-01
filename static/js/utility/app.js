@@ -47,9 +47,9 @@ var App = Backbone.Router.extend({
       if ( ! this.views.hasOwnProperty(module) || ! this.views[module].hasOwnProperty(action) ) {
         // try to just load a template without a proper view
         console.log('No view found, rendering default view. ('+module+':'+action+')');
-        this.currentView = new this.base.pageView(module, action, {});
+        this.currentView = new this.base.pageView(module, action);
       } else {
-        this.currentView = new this.views[module][action](module, action, this.config.$content);
+        this.currentView = new this.views[module][action](module, action);
       }
       this.breadcrumb(module, action, parameters);
     } catch(e) {
@@ -87,9 +87,11 @@ var App = Backbone.Router.extend({
       partial: function (name, locals_) {
         locals_ = locals_ || {}
         locals_.parentLocals = locals;
+        locals_._t = locals._t;
         return self.template(module, name, locals_);
       },
       form: function (element, params) {
+        params._t = locals._t;
         return self.template('form', element, params);
       }
     });

@@ -4,9 +4,9 @@
   span.error
 
 - if (locals.label && locals.label !== false)
-  label(for: id)= label
+  label(for: id, "data-label": locals["data-label"])= label
 - else if (locals.label !== false)
-  label(for: id)!= $.t('forms.labels.'+locals.name)
+  label(for: id, "data-label": locals["data-label"])!= $.t('forms.labels.'+locals.name)
   
 - if (typeof(locals.link) === 'undefined')
   - locals.link = true

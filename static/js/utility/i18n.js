@@ -2,7 +2,8 @@
   var i18n_options = {
     interpolationPrefix: '{',
     interpolationSuffix: '}',
-    reusePrefix: "_(" 
+    reusePrefix: "_(",
+    setDollarT: false
   },
   lang = false;
   
@@ -44,6 +45,25 @@
       storage.store('lang', newLang)
       storage.store('dict', null);
       window.location.reload();
+    }
+  };
+  
+  jQuery.t = function(name, submodule, module) {
+    module = module || 'generic';
+    submodule = submodule || 'general';
+    var search_string = module+'.'+submodule+'.'+name;
+    var t = $.jsperanto.translate(search_string);
+    if (t !== search_string) {
+      return t;
+    } else {
+      if (submodule !== 'general') {
+        return arguments.callee(name, 'general', module);
+      } else if (module !== 'generic') {
+        return arguments.callee(name, 'general', 'generic');
+      } else {
+        console.log('i18n didn\'t find '+name);
+        return name+'(not translated)';
+      }
     }
   };
 })(window.storage);

@@ -6,6 +6,18 @@ _r(function (app) {
     if (typeof(this.model) === 'undefined') {
       throw new Error('formHandler requires a model or the view to have a model');
     }
+    this.autoLabels();
+  };
+  
+  formHandler.prototype.autoLabels = function () {
+    var $label = this.view.$el.find('[data-label]');
+    var i18n = this.view.i18n;
+    $label.each(function () {
+      var $this = $(this);
+      var str = 'forms.labels.'+$this.data('label');
+      $this.html(jQuery.t(str, i18n[1], i18n[0]));
+      $this.data('label', null);
+    });
   };
   
   formHandler.prototype.getInputByName = function (name) {
@@ -26,7 +38,7 @@ _r(function (app) {
       $errSpan = $('.general_error', this.view.$el);
     }
     
-    $errSpan.html($.t(error)).show('slow');
+    $errSpan.html($.t('forms.errors.'+error, this.view.i18n[1], this.view.i18n[0])).show('slow');
   };
   
   formHandler.prototype.clearError = function (name) {
@@ -79,6 +91,7 @@ _r(function (app) {
         console.log('changed', key);
         self.clearError(key);
       } else {
+        console.log('lol');
         _.each(model.getChangedValidationAttributes(), function (val, key) {
           self.clearError(key);
         });
@@ -95,6 +108,7 @@ _r(function (app) {
       e.preventDefault();
       var $inputs = $form.find('input');
       $inputs.prop('disabled', true);
+      // TODO: do client side validation first!
       self.model.save(undefined, {
         
         error: function (model, response) {
