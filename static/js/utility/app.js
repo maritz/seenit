@@ -12,6 +12,7 @@ var App = Backbone.Router.extend({
     _.extend(this.config, spec);
 
     this.models = {};
+    this.collections = {};
     this.views = {};
     this.formHandler = {};
     this.currentView = null;
@@ -48,6 +49,7 @@ var App = Backbone.Router.extend({
         // try to just load a template without a proper view
         console.log('No view found, rendering default view. ('+module+':'+action+')');
         this.currentView = new this.base.pageView(module, action);
+        this.currentView.render();
       } else {
         this.currentView = new this.views[module][action](module, action);
       }
@@ -57,6 +59,10 @@ var App = Backbone.Router.extend({
       console.log('Routing error in route '+route+':');
       console.log(e.stack);
     }
+  },
+  
+  go: function (str) {
+    this.navigate('#/'+str, true);
   },
   
   reload: function () {

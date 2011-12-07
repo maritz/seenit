@@ -1,22 +1,31 @@
 _r(function (app) {
   app.base.pageView = Backbone.View.extend({
-      
+    
+    auto_render: false,
+    
     initialize: function (module, action) {
       var self = this;
       this.$el = window.app.config.$content;
       this.module = module;
       this.action = action;
-      this.i18n = [];
+      this.i18n = [module, action];
       this.addLocals({
         _t: function (name, submodule) {
           submodule = submodule || self.action;
           return $.t(name, submodule, self.module);
-        }
+        },
+        view: this
       });
       if (this.init && typeof(this.init) === 'function') {
         this.init();
       }
-      this.render();
+      if (this.model) {
+        this.addLocals({model: this.model});
+        this.model.view = this;
+      }
+      if (this.auto_render) {
+        this.render();
+      }
     },
     
     addLocals: function (locals) {
@@ -41,12 +50,29 @@ _r(function (app) {
       
   app.base.formView = app.base.pageView.extend({
     
+    initialize: function (module, action) {
+      app.base.pageView.prototype.initialize.call(this, module, action);
+      
+      if (this.saved) {
+        this.model.bind('saved', this.saved);
+      }
+      if (this.error) {
+        this.model.bind('error', this.error);
+      }
+    },
+    
     afterRender: function (html) {
       this.$el.html(html);
       this.handler = new app.formHandler(this);
       this.handler.link();
     }
     
+  });
+  
+  app.base.collection = Backbone.Collection.extend({
+    parse: function (response) {
+      return response.data ? response.data : [];
+    }
   });
   
   app.base.model = Backbone.Model.extend({
@@ -65,7 +91,9 @@ _r(function (app) {
       };
       
       var origAttributes = _.clone(attributes);
-      if ( ! attributes) {
+      console.log('set');
+      if ( ! attributes || !options || options.validate !== true) {
+        console.log('orig set');
         origSet();
       } else {
         var ret = self.validateSerial(attributes);
@@ -119,11 +147,11 @@ _r(function (app) {
       }
       
       var count = 0;
-      var checkCallback = function (key, err, cacheResult) {
+      var checkCallback = function (key, err) {
         if (err && ! errors[key]) {
           errors[key] = err;
         }
-        if ( err && ! cacheResult) {
+        if ( err) {
           delete attributes[key];
         }
         if (++count === length) {
@@ -133,8 +161,8 @@ _r(function (app) {
       _.each(attributes, function (value, key) {
         // do async validations
         if (self.asyncValidations.hasOwnProperty(key)) {
-          self.asyncValidations[key].call(self, value, function (error, cacheResult) {
-            checkCallback(key, error, cacheResult);
+          self.asyncValidations[key].call(self, value, function (error) {
+            checkCallback(key, error);
           });
         } else {
           checkCallback();

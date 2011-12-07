@@ -1,9 +1,12 @@
-var config = require('./config.js');
-var registry = require('./registry.js');
+var config = require(__dirname+'/config.js');
 var express = require('express');
 
 var nohm = require('nohm').Nohm;
-var redisClient = require('redis').createClient(config.nohm.port || 6379);
+var redis = require('redis');
+var redisClient = redis.createClient(config.nohm.port || 6379);
+
+require(__dirname+'/registry.js');
+
 nohm.setPrefix(config.nohm.prefix || 'game');
 
 redisClient.select(config.nohm.db || 0, function (err) {

@@ -68,8 +68,7 @@ _r(function (app) {
     if (this.model.required.indexOf(name) === -1 && $this.attr('required')) {
       this.model.required.push(name);
     }
-    
-    this.model.set(attrs);
+    this.model.set(attrs, {validate: true});
   };
   
   formHandler.prototype.link = function () {

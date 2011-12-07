@@ -2,6 +2,7 @@ var Registry = require(__dirname+'/../registry.js');
 var User = Registry.Models.User;
 var app = require('express').createServer();
 var auth = require(__dirname+'/../helpers/auth');
+var async = require('async');
 
 function UserError(msg, code){
   this.name = 'UserError';
@@ -48,9 +49,23 @@ function loadUser (req, res, next){
   }
 }
 
-app.get('/', auth.isLoggedIn, function (req, res) {
+app.get('/', /*auth.isLoggedIn,*/ function (req, res, next) {
   User.find(function (err, ids) {
-    res.ok({ids: ids});
+    if (err) {
+      next(new UserError('Fetching the user ids failed: '+err));
+    } else {
+      async.map(ids, function loadById(id, callback) {
+        var user = new User(id, function (err) {
+          callback(err, user.allProperties());
+        });
+      }, function doneLoading(err, users) {
+        if (err) {
+          next(new UserError('Fetching the userlist failed: '+err));
+        } else {
+          res.ok(users);
+        }
+      });
+    }
   });
 });
 

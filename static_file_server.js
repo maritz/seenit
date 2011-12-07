@@ -28,11 +28,12 @@ exports.init = function (server) {
     file_helper.getFiles(basedir, 'libs/', ['modernizr-2.0.6.custom.min.js']),
     file_helper.getFiles(basedir, 'utility/'),
     file_helper.getFiles(basedir, 'models/'),
+    file_helper.getFiles(basedir, 'collections/'),
     file_helper.getFiles(basedir, 'views/'),
     file_helper.getFiles(basedir, '')
   );
   
-  assetManagerMiddleware = assetManager({
+  var assetManagerMiddleware = assetManager({
     'js': {
       'route': /\/js\/[0-9]+\/merged\.js/,
       'path': __dirname + '/static/js/',

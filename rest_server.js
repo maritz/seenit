@@ -27,9 +27,8 @@ controller_files.forEach(function (val) {
 
 server.use(function (err, req, res, next) {
   if (err && err instanceof Error) {
-    console.log('Error: '+err.name);
+    console.log('responding with error: '+err.name);
     console.dir(err.message);
-    console.dir(err.stack);
     var code = err.code || 500;
     var data = err.data || {error: {name: err.name, msg: err.message}};
     res.json({result: 'error', data: data}, code);

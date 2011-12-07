@@ -42,7 +42,7 @@
   
   window.i18n = {
     lang: function (newLang) {
-      storage.store('lang', newLang)
+      storage.store('lang', newLang);
       storage.store('dict', null);
       window.location.reload();
     }

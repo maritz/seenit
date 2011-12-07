@@ -22,13 +22,10 @@ _r(function (app) {
     },
     asyncValidations: {
       name: function (value, callback) {
-        console.log('hi!');
-        $.get(this.urlRoot+'checkName?name='+value, function (response) {
-          if (response.result !== 'success') {
-            callback('user.errors.name_taken', true);
-          } else {
-            callback(undefined, true);
-          }
+        $.get(this.urlRoot+'checkName?name='+value, function () {
+          callback(undefined, true);
+        }).error(function () {
+          callback('name_taken', true);
         });
       }
     }

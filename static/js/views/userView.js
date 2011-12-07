@@ -3,26 +3,39 @@ _r(function (app) {
     app.views.user = {};
   }
   
-  app.views.user.register = app.base.formView.extend({
+  app.views.user.index = app.base.pageView.extend({
     
     init: function () {
       var self = this;
       
-      var model = this.model = new app.models.User();
-      model.view = this;
-      
-      this.i18n = ['user', 'register'];
-      
-      this.addLocals({
-        model: model,
-        view: this
+      var list = new app.collections.User();
+      list.fetch({
+        success: function (collection, response) {
+          console.log(JSON.stringify(collection));
+          self.addLocals({
+            users: collection
+          });
+          self.render();
+        },
+        error: function (collection, response) {
+          console.log('fetching error');
+          debugger;
+        }
       });
       
-      model.bind('saved', this.saved);
-    },
+    }
+    
+  });
+  
+  app.views.user.register = app.base.formView.extend({
+    
+    auto_render: true,
+    
+    model: new app.models.User(),
     
     saved: function () {
-      app.navigate('#/User/details/', true);
+      debugger;
+      app.go('User/details/');
       model.unbind('saved', this.saved);
     }
     

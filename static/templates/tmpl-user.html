@@ -32,4 +32,13 @@ form( novalidate: true)
 
 <script type="text/x-jade-tmpl" name="index">
 a( href: '#User/register')= _t('register')
+
+- if (users)
+  - console.log(users)
+  ul
+    each submodel in users.models
+      li!= JSON.stringify(submodel.toJSON())
+      -console.log(submodel);
+- else
+  | No users found
 </script>

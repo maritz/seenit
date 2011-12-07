@@ -9,11 +9,12 @@
     "dependencies": {
       "cluster": "0.6.9",
       "socket.io": "0.8.5",
-      "nohm": "0.6.1",
-      "redis": "0.6.7",
+      "nohm": "0.7.0",
+      "redis": "0.7.1",
       "express": "2.5.0",
       "stylus": "0.17.0",
       "jade": "0.16.2",
+      "async": "0.1.15",
       "connect-assetmanager": "0.0.21",
       "connect-assetmanager-handlers": "0.0.17"
     }
