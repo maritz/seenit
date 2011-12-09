@@ -1,5 +1,4 @@
 var file_helper = require('./helpers/file.js');
-var config = require('./config.js');
 var express = require('express');
 var server = express.createServer();
 

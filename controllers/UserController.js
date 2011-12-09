@@ -82,7 +82,7 @@ function store (req, res, next) {
     email: req.param('email')
   };
   user.store(data, function (err) {
-    if (user.__inDB) {
+    if ( ! err) {
       next();
     } else {
       next(new UserError({error: err, fields: user.errors}, 400));
