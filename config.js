@@ -34,5 +34,9 @@ module.exports = {
     port: 6379,
     db: 5,
     prefix: 'game'
+  },
+  "redis": {
+    port: 6379,
+    db: 4
   }
 };

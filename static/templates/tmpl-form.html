@@ -1,15 +1,19 @@
 <script type="text/x-jade-tmpl" name="input">
 - var id = 'input_'+(Math.floor(Math.random()*10))+(+new Date());
-- if (locals.error !== false)
-  span.error
 
-- if (locals.label && locals.label !== false)
-  label(for: id, "data-label": locals["data-label"])= label
-- else if (locals.label !== false)
-  label(for: id, "data-label": locals["data-label"])!= $.t('forms.labels.'+locals.name)
+- if (locals.type !== 'submit')
+  - if (locals.error !== false)
+    span.error
   
-- if (typeof(locals.link) === 'undefined')
-  - locals.link = true
+  - if (locals.label && locals.label !== false && locals["data-label"])
+    label(for: id, "data-label": locals["data-label"])= label
+  - else if (locals.label !== false && locals["data-label"])
+    label(for: id, "data-label": locals["data-label"])!= $.t('forms.labels.'+locals.name)
+  - else if (locals.label !== false)
+    label(for: id, "data-label": locals.name)
+    
+  - if (typeof(locals.link) === 'undefined')
+    - locals.link = true
   
 input( id: id
   type: locals.type,
@@ -19,6 +23,6 @@ input( id: id
   "data-link": locals.link
   )
   
-- if (locals.loading !== false)
+- if (locals.type !== 'submit' && locals.loading !== false)
   .loading!= $.t('forms.labels.checking')
 </script>

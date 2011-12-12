@@ -16,6 +16,7 @@
       "jade": "0.16.2",
       "async": "0.1.15",
       "connect-assetmanager": "0.0.21",
-      "connect-assetmanager-handlers": "0.0.17"
+      "connect-assetmanager-handlers": "0.0.17",
+      "hashlib": ">=1.0.1"
     }
 }

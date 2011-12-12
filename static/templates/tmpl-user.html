@@ -1,44 +1,43 @@
 <script type="text/x-jade-tmpl" name="username">
-!= form('input', { name: 'name', 'data-label': 'name'})
+!= form('input', { name: 'name'})
 </script>
 
 <script type="text/x-jade-tmpl" name="password">
-!= form('input', { type: 'password', name: 'password', 'data-label': 'password'})
+!= form('input', { type: 'password', name: 'password'})
 </script>
 
 <script type="text/x-jade-tmpl" name="password_repeat">
-!= form('input', { type: 'password', name: 'password_repeat', 'data-label': 'password_repeat', required: true })
+!= form('input', { type: 'password', name: 'password_repeat', required: true })
 </script>
 
 <script type="text/x-jade-tmpl" name="email">
-!= form('input', { name: 'email', 'data-label': 'email'})
+!= form('input', { name: 'email'})
 </script>
 
 <script type="text/x-jade-tmpl" name="register">
 h1!=_t('headline')
 form( novalidate: true)
   input( type: 'hidden', name: 'csrf-token', value: locals.csrf )
-  
+
   .fieldset_wrapper
     fieldset
       legend=_t('legend')
+      span.error.general_error
       ul
         li!=partial('username')
         li!=partial('password')
         li!=partial('password_repeat')
         li!=partial('email')
-    != form('input', { type: 'submit', name: 'register', 'data-label': 'submit', error: false, label: false, loading: false, link: false })
+    != form('input', { type: 'submit', name: 'register', value: _t('forms.submit') })
 </script>
 
 <script type="text/x-jade-tmpl" name="index">
 a( href: '#User/register')= _t('register')
 
 - if (users)
-  - console.log(users)
   ul
-    each submodel in users.models
-      li!= JSON.stringify(submodel.toJSON())
-      -console.log(submodel);
+    each model in users.models
+      li!= JSON.stringify(model.toJSON())
 - else
   | No users found
 </script>

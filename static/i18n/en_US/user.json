@@ -9,8 +9,10 @@ module.exports = { // node 0.4.x does not support loading pure json yet.
         password: "Password",
         password_repeat: "Repeat password",
         email: "E-Mail"
-      }
-    }
+      },
+      submit: "Sign Up"
+    },
+    register: "Sign Up"
   },
   register: {
     headline: "Registration",

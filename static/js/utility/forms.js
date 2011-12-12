@@ -3,6 +3,7 @@ _r(function (app) {
   var formHandler = app.formHandler = function (view, model) {
     this.view = view;
     this.model = model || view.model;
+    this.csrf = false;
     if (typeof(this.model) === 'undefined') {
       throw new Error('formHandler requires a model or the view to have a model');
     }
@@ -21,6 +22,9 @@ _r(function (app) {
   };
   
   formHandler.prototype.getInputByName = function (name) {
+    if ( ! name) {
+      return $();
+    }
     var $form = this.view.$el;
     var $el = $('input[data-link="'+name+'"]', $form);
     
@@ -71,9 +75,23 @@ _r(function (app) {
     this.model.set(attrs, {validate: true});
   };
   
+  formHandler.prototype.getCsrf = function (callback) {
+    var self = this;
+    $.getJSON('/REST/Util/csrf', function (response) {
+      var token = $.cookie(response.data);
+      $.cookie(response.csrf_key, null);
+      self.csrf = token;
+      if (callback) {
+        callback();
+      }
+    });
+  };
+  
   formHandler.prototype.link = function () {
     var $form = this.view.$el;
     var self = this;
+    
+    this.getCsrf();
     
     var $linkedInputs = $form.delegate('input[data-link]', 'blur', function () {
       self.blurHandler(this);
@@ -85,16 +103,10 @@ _r(function (app) {
       }
     });
     
-    this.model.bind("change", function(model, key) {
-      if (key) {
-        console.log('changed', key);
-        self.clearError(key);
-      } else {
-        console.log('lol');
-        _.each(model.getChangedValidationAttributes(), function (val, key) {
-          self.clearError(key);
-        });
-      }
+    this.model.bind("valid", function (model, attributes) {
+      _.each(attributes, function (val, key) {
+        self.clearError(key, val);
+      });
     });
     
     this.model.bind("error", function(model, error) {
@@ -108,11 +120,15 @@ _r(function (app) {
       var $inputs = $form.find('input');
       $inputs.prop('disabled', true);
       // TODO: do client side validation first!
-      self.model.save(undefined, {
-        
+      self.model.set({'csrf-token': self.csrf});
+      self.model.save(undefined, {        
         error: function (model, response) {
+          var data =JSON.parse(response.responseText).data;
+          if (data.error.msg === 'crsf failure') {
+            self.setError(null, 'csrf');
+          }
           $inputs.prop('disabled', false);
-          var fields = JSON.parse(response.responseText).data.fields;
+          var fields = data.fields;
           _.each(fields, function (val, key) {
             if (_.isArray(val) && val.length > 0) {
               var err = {};
@@ -120,6 +136,7 @@ _r(function (app) {
               self.model.trigger('error', model, err);
             }
           });
+          self.getCsrf();
         },
         
         success: function (model) {

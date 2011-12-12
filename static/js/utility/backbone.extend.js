@@ -14,13 +14,13 @@ _r(function (app) {
           submodule = submodule || self.action;
           return $.t(name, submodule, self.module);
         },
-        view: this
+        _view: this
       });
       if (this.init && typeof(this.init) === 'function') {
         this.init();
       }
       if (this.model) {
-        this.addLocals({model: this.model});
+        this.addLocals({_model: this.model});
         this.model.view = this;
       }
       if (this.auto_render) {
@@ -80,7 +80,6 @@ _r(function (app) {
     validations: {},
     asyncValidations: {},
     
-    _previousSuccess: {},
     /**
      * Overwriting Backbone.set() to do async validations before we set it.
      */
@@ -91,9 +90,8 @@ _r(function (app) {
       };
       
       var origAttributes = _.clone(attributes);
-      console.log('set');
+      
       if ( ! attributes || !options || options.validate !== true) {
-        console.log('orig set');
         origSet();
       } else {
         var ret = self.validateSerial(attributes);
@@ -105,14 +103,10 @@ _r(function (app) {
             if (_.size(errors) > 0 ) {
               self.trigger('error', self, errors);
             }
-            _.each(origAttributes, function (val, key) {
-              var success = attributes.hasOwnProperty(key);
-              if ( success && ! self._previousSuccess[key]) {
-                self.trigger('change', self, key);
-              }
-              self._previousSuccess[key] = success;
-            });
-            origSet();
+            if (_.size(attributes) > 0) {
+              self.trigger('valid', self, attributes);
+              origSet();
+            }
           });
         });
       }

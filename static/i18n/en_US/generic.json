@@ -1,9 +1,13 @@
 module.exports = { // node 0.4.x does not support loading pure json yet.
   "greetings": "Hello",
   general: {
-    form: {
+    forms: {
       errors: {
+        csrf: "CSRF Check failed. You might be the victim of an attempted hack, but we foiled it for now. Please check your computer for viruses and worms.",
         notEmpty: "testasd"
+      },
+      labels: {
+        checking: "Checking ..."
       }
     }
   }
