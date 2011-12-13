@@ -52,6 +52,7 @@ exports.init = function (server) {
   server.use(express.favicon());
   
   Nohm.setExtraValidations(__dirname+'/models/validations.js');
+  
   server.use(Nohm.connect());
   
   

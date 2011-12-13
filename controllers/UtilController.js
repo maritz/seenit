@@ -12,7 +12,10 @@ app.get('/csrf', function (req, res) {
   var new_token = hashlib.sha1(Math.random()*(Math.random()*1000000));
   var new_key = hashlib.sha1(+ new Date()).substring(0,7);
   tokens.push(new_token);
-  res.cookie(new_key, new_token, {path: '/', maxAge: 900000});
+  
+  // we set a cookie for 30 seconds. 
+  // the client has to read it with the provided key and store it in a variable or use it directly
+  res.cookie(new_key, new_token, {path: '/', maxAge: 30000});
   res.ok(new_key);
 });
 

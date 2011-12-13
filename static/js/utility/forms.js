@@ -79,10 +79,58 @@ _r(function (app) {
     var self = this;
     $.getJSON('/REST/Util/csrf', function (response) {
       var token = $.cookie(response.data);
-      $.cookie(response.csrf_key, null);
+      $.cookie(response.csrf_key, null, { path: '/' });
       self.csrf = token;
       if (callback) {
         callback();
+      }
+    });
+  };
+  
+  formHandler.prototype.submit = function (e) {
+    e.preventDefault();
+    var self = this;
+    
+    this.$inputs.prop('disabled', true);
+    
+    var attributes =  {}
+    this.$inputs.each(function () {
+      var $item = $(this);
+      attributes[$item.attr('name')] = $item.val();
+    });
+
+    self.model.validation(attributes, function (valid) {
+      
+      if ( ! valid) {
+        self.$inputs.prop('disabled', false);
+      } else {
+        attributes['csrf-token'] = self.csrf;
+        self.model.set(attributes);
+        debugger;
+        self.model.save(undefined, {        
+          error: function (model, response) {
+            var data = JSON.parse(response.responseText).data;
+            if (data.error.msg === 'crsf failure') {
+              self.setError(null, 'csrf');
+            }
+            this.$inputs.prop('disabled', false);
+            var fields = data.fields;
+            _.each(fields, function (val, key) {
+              if (_.isArray(val) && val.length > 0) {
+                var err = {};
+                err[key] = val[0];
+                self.model.trigger('error', model, err);
+              }
+            });
+            self.getCsrf();
+          },
+          
+          success: function (model) {
+            this.$inputs.prop('disabled', false);
+            self.model.trigger('saved', model);
+          }
+          
+        });
       }
     });
   };
@@ -93,13 +141,15 @@ _r(function (app) {
     
     this.getCsrf();
     
-    var $linkedInputs = $form.delegate('input[data-link]', 'blur', function () {
+    this.$inputs = $('input[data-link]');
+    
+    $form.delegate('input[data-link]', 'blur', function () {
       self.blurHandler(this);
     });
     
-    $linkedInputs.each(function () {
+    this.$inputs.each(function () {
       if ($(this).attr('required')) {
-        this.model.required.push(name);
+        self.model.required.push(name);
       }
     });
     
@@ -116,36 +166,7 @@ _r(function (app) {
     });
     
     $form.bind('submit', function (e) {
-      e.preventDefault();
-      var $inputs = $form.find('input');
-      $inputs.prop('disabled', true);
-      // TODO: do client side validation first!
-      self.model.set({'csrf-token': self.csrf});
-      self.model.save(undefined, {        
-        error: function (model, response) {
-          var data =JSON.parse(response.responseText).data;
-          if (data.error.msg === 'crsf failure') {
-            self.setError(null, 'csrf');
-          }
-          $inputs.prop('disabled', false);
-          var fields = data.fields;
-          _.each(fields, function (val, key) {
-            if (_.isArray(val) && val.length > 0) {
-              var err = {};
-              err[key] = val[0];
-              self.model.trigger('error', model, err);
-            }
-          });
-          self.getCsrf();
-        },
-        
-        success: function (model) {
-          $inputs.prop('disabled', false);
-          self.model.trigger('saved', model);
-          console.log('saved');
-        }
-        
-      });
+      self.submit.call(self, e);
     });
     
     return this;

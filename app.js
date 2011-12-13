@@ -12,7 +12,6 @@ registry.redis = redis.createClient(config.redis.port || 6379);
 
 nohm.setPrefix(config.nohm.prefix || 'game');
 
-    console.log('test1');
 async.series([
   function (cb) {
     registry.redis.select(config.redis.db || 0, cb);

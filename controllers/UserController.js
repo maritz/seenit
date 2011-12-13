@@ -69,7 +69,7 @@ app.get('/', /*auth.isLoggedIn,*/ function (req, res, next) {
   });
 });
 
-app.get('/show/:userId', auth.isLoggedIn, loadUser, function (req, res) {
+app.get('/:userId', auth.isLoggedIn, loadUser, function (req, res) {
   res.send(req.loaded_user.allProperties());
 });
 
@@ -159,6 +159,10 @@ function logout (req) {
 app.get('/logout', function (req, res) {
   logout(req);
   res.ok();
+});
+
+app.del('/:id', loadUser, auth.isSelfOrAdmin, function () {
+  next(new UserError('this isn\'t implemented, dummy'));
 });
 
 
