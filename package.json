@@ -8,14 +8,14 @@
     "description": "NOPE NOPE NOPE",
     "dependencies": {
       "cluster": "0.6.9",
-      "socket.io": "0.8.5",
+      "socket.io": "0.8.7",
       "nohm": "0.7.1",
       "redis": "0.7.1",
-      "express": "2.5.0",
-      "stylus": "0.17.0",
-      "jade": "0.16.2",
+      "express": "2.5.2",
+      "stylus": "0.20.0",
+      "jade": "0.19.0",
       "async": "0.1.15",
-      "connect-assetmanager": "0.0.21",
+      "connect-assetmanager": "0.0.24",
       "connect-assetmanager-handlers": "0.0.17",
       "hashlib": ">=1.0.1"
     }
