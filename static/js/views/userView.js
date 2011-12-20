@@ -9,18 +9,11 @@ _r(function (app) {
       var self = this;
       
       var list = new app.collections.User();
-      list.fetch({
-        success: function (collection, response) {
-          console.log(JSON.stringify(collection));
-          self.addLocals({
-            users: collection
-          });
-          self.render();
-        },
-        error: function (collection, response) {
-          console.log('fetching error');
-          debugger;
-        }
+      list.fetch(function (collection) {
+        self.addLocals({
+          users: collection
+        });
+        self.render();
       });
       
     }
@@ -34,9 +27,8 @@ _r(function (app) {
     model: new app.models.User(),
     
     saved: function () {
-      debugger;
       app.go('User/details/');
-      model.unbind('saved', this.saved);
+      this.model.unbind('saved', this.saved);
     }
     
   });

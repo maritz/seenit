@@ -72,6 +72,15 @@ _r(function (app) {
   app.base.collection = Backbone.Collection.extend({
     parse: function (response) {
       return response.data ? response.data : [];
+    },
+    fetch: function (options) {
+      if (typeof(options) === 'function') {
+        options = {
+          success: options,
+          error: options
+        };
+      }
+      return Backbone.Collection.prototype.fetch.call(this, options);
     }
   });
   
@@ -81,18 +90,25 @@ _r(function (app) {
     asyncValidations: {},
     
     /**
-     * Overwriting Backbone.set() to do async validations before we set it.
+     * Overwriting Backbone.Model.parse() to use the proper root in the response json.
      */
-    set: function(attributes, options) {
+    parse: function (resp) {
+     return resp.data;
+    },
+    
+    /**
+     * Overwriting Backbone.Model.set() to do async validations before we set it.
+     */
+    set: function (attributes, options) {
       var self = this;
       var origSet = function (valid, attributes) {
         if (typeof (valid) === 'undefined' || valid === true) {
-          Backbone.Model.prototype.set.call(self, attributes, options);
+          return Backbone.Model.prototype.set.call(self, attributes, options);
         }
       };
       
       if ( ! attributes || attributes.length === 0 || !options || options.validate !== true) {
-        origSet();
+        return origSet(undefined, attributes);
       } else {
         this.validation(attributes, origSet);
       }

@@ -16,7 +16,7 @@ browser
   .chain
   .session()
   .open('/')
-  .assertTitle('CHANGEME')
+  .assertTitle('CHANGE ME')
   .end(function(err){
     browser.testComplete(function() {
       console.log('done');
