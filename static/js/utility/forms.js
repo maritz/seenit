@@ -1,5 +1,5 @@
 _r(function (app) {
-
+  
   var formHandler = app.formHandler = function (view, model) {
     this.view = view;
     this.model = model || view.model;
@@ -61,21 +61,24 @@ _r(function (app) {
   };
   
   formHandler.prototype.blurHandler = function (context) {
-    if (this._submitting === true) {
-      return false;
-    }
-    var $this = $(context);
-    var attrs = {};
-    var name = $this.data('link');
-    if (name === 'data-link') {
-      name = $this.attr('name');
-    }
-    attrs[name] = $this.val();
-    
-    if (this.model.required.indexOf(name) === -1 && $this.attr('required')) {
-      this.model.required.push(name);
-    }
-    this.model.set(attrs, {validate: true});
+    var self = this;
+    _.delay(function () {
+      if (self._submitting === true) {
+        return false;
+      }
+      var $this = $(context);
+      var attrs = {};
+      var name = $this.data('link');
+      if (name === 'data-link') {
+        name = $this.attr('name');
+      }
+      attrs[name] = $this.val();
+      
+      if (self.model.required.indexOf(name) === -1 && $this.attr('required')) {
+        self.model.required.push(name);
+      }
+      self.model.set(attrs, {validate: true});
+    }, 200);
   };
   
   formHandler.prototype.getCsrf = function (callback) {
@@ -101,7 +104,7 @@ _r(function (app) {
     
     this.$inputs.prop('disabled', true);
     
-    var attributes =  {}
+    var attributes =  {};
     this.$inputs.each(function () {
       var $item = $(this);
       attributes[$item.attr('name')] = $item.val();
@@ -111,6 +114,7 @@ _r(function (app) {
       
       if ( ! valid) {
         self.$inputs.prop('disabled', false);
+      self._submitting = false;
       } else {
         attributes['csrf-token'] = self.csrf;
         delete self.csrf;

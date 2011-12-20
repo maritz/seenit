@@ -9,6 +9,9 @@ _r(function (app) {
       this.module = module;
       this.action = action;
       this.i18n = [module, action];
+      
+      _.bindAll(this);
+      
       this.addLocals({
         _t: function (name, submodule) {
           submodule = submodule || self.action;

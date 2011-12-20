@@ -47,7 +47,7 @@ var App = Backbone.Router.extend({
     try {
       if ( ! this.views.hasOwnProperty(module) || ! this.views[module].hasOwnProperty(action) ) {
         // try to just load a template without a proper view
-        console.log('No view found, rendering default view. ('+module+':'+action+')');
+        console.log('No view found, trying to render default view. ('+module+':'+action+')');
         this.currentView = new this.base.pageView(module, action);
         this.currentView.render();
       } else {
@@ -62,7 +62,7 @@ var App = Backbone.Router.extend({
   },
   
   go: function (str) {
-    this.navigate('#/'+str, true);
+    this.navigate('#'+str, true);
   },
   
   reload: function () {
