@@ -4,13 +4,13 @@ var async = require('async');
 
 var nohm = require('nohm').Nohm;
 var redis = require('redis');
-var nohm_redis_client = redis.createClient(config.nohm.port || 6379);
+var nohm_redis_client = redis.createClient(config.nohm.port);
 
 var registry = require(__dirname+'/registry.js');
 
-registry.redis = redis.createClient(config.redis.port || 6379);
+registry.redis = redis.createClient(config.redis.port);
 
-nohm.setPrefix(config.nohm.prefix || 'game');
+nohm.setPrefix(config.nohm.prefix);
 
 async.series([
   function (cb) {

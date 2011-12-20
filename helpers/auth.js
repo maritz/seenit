@@ -20,7 +20,7 @@ exports.isLoggedIn = function (req, res, next) {
 
 exports.isSelfOrAdmin = function (req, res, next) {
   if (req.session.logged_in && req.loaded_user) {
-    if (req.session.userdata.id === req.loaded_user.id) {
+    if (req.session.userdata.id === +req.loaded_user.id) {
       // loaded user is session user
       next();
     } else if (req.session.admin === true) {

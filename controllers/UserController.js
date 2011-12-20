@@ -32,9 +32,9 @@ function loadUser (req, res, next){
     });
   };
   
-  if (!!id.match(/^[\d]*$/)) {
+  if (id && !!id.match(/^[\d]*$/)) {
     load(id);
-  } else {
+  } else if (id) {
     user.find({name:id}, function (err, ids) {
       if (err) {
         next(new UserError('Did not find user with name "'+id+'".\nerror: '+err, 404));
@@ -46,10 +46,12 @@ function loadUser (req, res, next){
         load(ids[0]);
       }
     });
+  } else {
+    next(new UserError('Called method that requires user id but none provided.'));
   }
 }
 
-app.get('/', /*auth.isLoggedIn,*/ function (req, res, next) {
+app.get('/', auth.isLoggedIn, function (req, res, next) {
   User.find(function (err, ids) {
     if (err) {
       next(new UserError('Fetching the user ids failed: '+err));
@@ -69,7 +71,7 @@ app.get('/', /*auth.isLoggedIn,*/ function (req, res, next) {
   });
 });
 
-app.get('/:userId', auth.isLoggedIn, loadUser, function (req, res) {
+app.get('/:userId([0-9]+)', auth.isLoggedIn, loadUser, function (req, res) {
   res.send(req.loaded_user.allProperties());
 });
 
@@ -95,27 +97,23 @@ function newUser (req, res, next) {
   next();
 }
 
-function sendOk (req, res) {
-  res.ok();
+function sendSessionUserdata(req, res) {
+  res.ok(req.session.userdata);
 }
 
-function setSessionToLoadedUser (req, res) {
+function updateSession (req, res, next) {
   if (req.loaded_user && req.loaded_user instanceof User && req.loaded_user.__inDB) {
     req.session.logged_in = true;
-    var userdata = req.session.userdata = req.loaded_user.allProperties();
-    res.ok({user: userdata});
+    req.session.userdata = req.loaded_user.allProperties();
+    next();
   } else {
     next(new UserError('Can\'t set session to req.loaded_user because it\'s not a valid and loaded nohm model.'));
   }  
 }
 
-app.post('/', newUser, store, setSessionToLoadedUser);
+app.post('/', newUser, store, updateSession, sendSessionUserdata);
 
-app.all('/create', newUser, store, setSessionToLoadedUser);
-
-app.put('/', loadUser, auth.isSelfOrAdmin, store, sendOk);
-
-app.all('/update', loadUser, auth.isSelfOrAdmin, store, sendOk);
+app.put('/:userId([0-9]+)', auth.isLoggedIn, loadUser, auth.isSelfOrAdmin, store, updateSession, sendSessionUserdata);
 
 app.get('/checkName', function (req, res, next) {
   if (req.param('name')) {
@@ -133,7 +131,7 @@ app.get('/checkName', function (req, res, next) {
   }
 });
 
-app.get('/login', function (req, res, next) {
+function login (req, res, next) {
   // TODO: needs login-per-ip counter and ban.
   var user = new User();
   var name = req.param('name') || false;
@@ -141,7 +139,7 @@ app.get('/login', function (req, res, next) {
   user.login(name, password, function (success) {
     if (success) {
       req.loaded_user = user;
-      setSessionToLoadedUser(req, res, next);
+      next();
     } else {
       setTimeout(function () { // artificial delay to make bruteforcing less practical
         logout(req);
@@ -149,7 +147,9 @@ app.get('/login', function (req, res, next) {
       }, 400);
     }
   });
-});
+}
+
+app.post('/login', login, updateSession, sendSessionUserdata);
 
 function logout (req) {
   req.session.userdata = {};
@@ -161,7 +161,7 @@ app.get('/logout', function (req, res) {
   res.ok();
 });
 
-app.del('/:id', loadUser, auth.isSelfOrAdmin, function () {
+app.del('/:userId([0-9]+)', loadUser, auth.isSelfOrAdmin, function () {
   next(new UserError('this isn\'t implemented, dummy'));
 });
 

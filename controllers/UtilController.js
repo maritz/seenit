@@ -6,7 +6,7 @@ app.get('/csrf', function (req, res) {
     req.session.csrf_tokens = [];
   }
   var tokens = req.session.csrf_tokens;
-  if (tokens.length > 20) {
+  if (tokens.length > 30) {
     tokens.shift();
   }
   var new_token = hashlib.sha1(Math.random()*(Math.random()*1000000));

@@ -5,6 +5,7 @@ var server = express.createServer();
 module.exports = server;
 
 server.use(express.bodyParser());
+server.use(express.methodOverride());
 server.use(express.cookieParser());
 server.use(express.session({ secret: "some secret this is " }));
 
@@ -17,6 +18,9 @@ server.use(function (req, res, next) {
   // csrf check
   if (['POST', 'PUT', 'DELETE'].indexOf(req.method) !== -1) {
     var tokens = req.session.csrf_tokens;
+    if (typeof (tokens) === 'undefined') {
+      return next(new Error('crsf failure (request token first)'));
+    }
     var user_token = req.param('csrf-token');
     var index = tokens.indexOf(user_token);
     if (tokens.length === 0 ||  index=== -1) {
@@ -37,6 +41,13 @@ controller_files.forEach(function (val) {
   server.use('/'+name, require(__dirname+val));
 });
 
+server.all('*', function (req, res, next) {
+  var notFoundError = new Error('Resource not available with given METHOD and URL.');
+  console.log(req.method, req.url);
+  notFoundError.code = 404;
+  next(notFoundError);
+});
+
 server.use(function (err, req, res, next) {
   if (err && err instanceof Error) {
     console.log('responding with error: '+err.name);
@@ -44,6 +55,9 @@ server.use(function (err, req, res, next) {
     var code = err.code || 500;
     var data = err.data || {error: {name: err.name, msg: err.message}};
     res.json({result: 'error', data: data}, code);
+    if (['ReferenceError', 'TypeError', 'SyntaxError'].indexOf(err.name) >= 0) {
+      console.log(err.stack);
+    }
   } else {
     console.log('uncaught error');
     console.dir(err);
