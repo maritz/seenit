@@ -3,23 +3,38 @@ _r(function (app) {
     app.views.user = {};
   }
   
-  app.views.user.index = app.base.pageView.extend({
+  /**
+   * #/User/list
+   */
+  app.views.user.list = app.base.pageView.extend({
     
     init: function () {
       var self = this;
       
       var list = new app.collections.User();
-      list.fetch(function (collection) {
-        self.addLocals({
-          users: collection
-        });
-        self.render();
+      list.fetch({
+        success: function (collection) {
+          self.addLocals({
+            users: collection
+          });
+          self.render();
+        },
+        error: function (collection, response) {
+          var json = JSON.parse(response.responseText);
+          if (json.data.error.msg === 'Needs login.') {
+            app.overlay({view: 'login_needed'});
+          } else {
+            app.overlay();
+          }
+        }
       });
-      
     }
     
   });
   
+  /**
+   * #/User/register
+   */
   app.views.user.register = app.base.formView.extend({
     
     auto_render: true,

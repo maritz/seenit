@@ -160,6 +160,22 @@ module.exports = {
           t.equal(body.data.name, 'test_user10_2', 'Updating a user did not return the correct name.');
           t.done();
         });
+      },
+      "DEL /15 not in db": function (t) {
+        t.expect(1);
+        
+        h.del(json, '/User/15', {}, function (err, res, body) {
+          t.equal(body.result, 'error', 'Removing inexistant user didn\'t fail.');
+          t.done();
+        });
+      },
+      "DEL /10": function (t) {
+        t.expect(1);
+        
+        h.del(json, '/User/10', {}, function (err, res, body) {
+          t.equal(body.result, 'success', 'Removing user failed.');
+          t.done();
+        });
       }
     },
     "server didn't crash": function (t) {

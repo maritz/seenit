@@ -161,8 +161,22 @@ app.get('/logout', function (req, res) {
   res.ok();
 });
 
-app.del('/:userId([0-9]+)', loadUser, auth.isSelfOrAdmin, function () {
-  next(new UserError('this isn\'t implemented, dummy'));
+app.del('/:userId([0-9]+)', loadUser, auth.isSelfOrAdmin, function (req, res, next) {
+  var doLogout = false;
+  if (req.session.userdata.id === req.loaded_user.id) {
+    doLogout = true;
+  }
+  req.loaded_user.remove(function (err) {
+    if (err) {
+      next(new UserError('Delete failed: '+err, 500));
+    } else {
+      if (doLogout) {
+        logout(req, res);
+      } else {
+        res.ok();
+      }
+    }
+  });
 });
 
 

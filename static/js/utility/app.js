@@ -124,8 +124,10 @@ var App = Backbone.Router.extend({
       tmpl_module = $('<div id="tmpl_'+module+'"></div>').appendTo('#templates');
       $.get('/templates/tmpl-'+module+'.html', function (data) {
         var found = false;
-        if (!data)
+        if (!data) {
+          console.log('Template module "'+module+'" not found.');
           return callback(false);
+        }
         self._templates[module] = {};
         
         tmpl_module.append(data).children('script').each(function (i, val) {
@@ -137,6 +139,7 @@ var App = Backbone.Router.extend({
           }
         }).end().remove();
         if (!found) {
+          console.log('Template view "'+name+'" not found in module "'+module+'"');
           callback(false);
         } else {
           callback(found(locals));
