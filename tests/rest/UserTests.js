@@ -147,6 +147,20 @@ module.exports = {
           t.done();
         });
       },
+      "PUT /10 no login": function (t) {
+        t.expect(2);
+        
+        h.logout(function () {
+          h.put(json, '/User/10', {
+            name: 'test_user10_2',
+            password: pw
+          }, function (err, res, body) {
+            t.equal(body.result, 'error', 'Updating a user without login worked.');
+            t.equal(body.data.error.msg, 'need_login', 'Updating a user without login did not return the correct error.');
+            t.done();
+          });
+        });
+      },
       "PUT /10 data": function (t) {
         t.expect(4);
         
@@ -158,6 +172,26 @@ module.exports = {
           t.notEqual(body.data, undefined, 'Updating a user did not return the correct id.');
           t.equal(body.data.id, 10, 'Updating a user did not return the correct id.');
           t.equal(body.data.name, 'test_user10_2', 'Updating a user did not return the correct name.');
+          t.done();
+        });
+      },
+      "DEL /10 no login": function (t) {
+        t.expect(2);
+        
+        h.logout(function () {
+          h.del(json, '/User/10', {}, function (err, res, body) {
+            t.equal(body.result, 'error', 'Removing a user without login worked.');
+            t.equal(body.data.error.msg, 'need_login', 'Removing a user without login did not return the correct error.');
+            t.done();
+          });
+        });
+      },
+      "DEL /9 not self": function (t) {
+        t.expect(2);
+        
+        h.del(json, '/User/9', {}, function (err, res, body) {
+          t.equal(body.result, 'error', 'Removing a different user worked.');
+          t.equal(body.data.error.msg, 'privileges_low', 'Removing a different user did not return the correct error.');
           t.done();
         });
       },
@@ -179,7 +213,7 @@ module.exports = {
       }
     },
     "server didn't crash": function (t) {
-      json.get(url+'/User/', function (err, res, body) {
+      json.get(url+'/User/', function (err, res) {
         t.notEqual(res, null, 'Did not receive any data');
         t.done();
       });

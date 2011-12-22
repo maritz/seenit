@@ -21,7 +21,7 @@ _r(function (app) {
         },
         error: function (collection, response) {
           var json = JSON.parse(response.responseText);
-          if (json.data.error.msg === 'Needs login.') {
+          if (json.data.error.msg === 'needs_login') {
             app.overlay({view: 'login_needed'});
           } else {
             app.overlay();

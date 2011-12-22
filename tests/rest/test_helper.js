@@ -88,7 +88,7 @@ var testError = module.exports.testError = function (t, result, name, msg) {
 };
 
 module.exports.needsLogin = function (t, result) {
-  testError(t, result, 'AuthError', 'Needs login.');
+  testError(t, result, 'AuthError', 'need_login');
 };
 
 module.exports.notFound = function (t, result) {
