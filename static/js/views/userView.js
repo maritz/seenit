@@ -21,7 +21,7 @@ _r(function (app) {
         },
         error: function (collection, response) {
           var json = JSON.parse(response.responseText);
-          if (json.data.error.msg === 'needs_login') {
+          if (json.data.error.msg === 'need_login') {
             app.overlay({view: 'login_needed'});
           } else {
             app.overlay();
@@ -44,6 +44,26 @@ _r(function (app) {
     saved: function () {
       app.go('User/details/');
       this.model.unbind('saved', this.saved);
+    }
+    
+  });
+  
+  
+  /**
+   * #/User/login or manual call
+   */
+  app.views.user.login = app.base.formView.extend({
+    
+    auto_render: true,
+    
+    model: new app.models.Self(),
+    
+    /**
+     * Login successful
+     */
+    saved: function () {
+      app.closeOverlay();
+      $.jGrowl('Login successful');
     }
     
   });

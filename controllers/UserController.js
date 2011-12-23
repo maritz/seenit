@@ -143,7 +143,7 @@ function login (req, res, next) {
     } else {
       setTimeout(function () { // artificial delay to make bruteforcing less practical
         logout(req);
-        next(new UserError('Wrong authentication.', 400));
+        next(new UserError({error: 'Wrong authentication.', fields: {general: ['wrong_login']}}, 400));
       }, 400);
     }
   });

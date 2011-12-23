@@ -30,4 +30,8 @@ _r(function (app) {
     }
   });
   
+  app.models.Self = app.base.model.extend({
+    urlRoot: '/REST/User/login'
+  });
+  
 });

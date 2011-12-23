@@ -38,6 +38,10 @@
   display: none;
   word-wrap: elipsis;
 }
+.fake_link {
+  cursor: pointer;
+  color: #66f;
+}
 .jGrowl-notification,
 .jGrowl-closer {
   background-color: #333;

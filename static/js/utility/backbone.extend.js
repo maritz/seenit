@@ -3,9 +3,9 @@ _r(function (app) {
     
     auto_render: false,
     
-    initialize: function (module, action) {
+    initialize: function (module, action, $el) {
       var self = this;
-      this.$el = window.app.config.$content;
+      this.$el = $el || window.app.config.$content;
       this.module = module;
       this.action = action;
       this.i18n = [module, action];
@@ -53,8 +53,8 @@ _r(function (app) {
       
   app.base.formView = app.base.pageView.extend({
     
-    initialize: function (module, action) {
-      app.base.pageView.prototype.initialize.call(this, module, action);
+    initialize: function () {
+      app.base.pageView.prototype.initialize.apply(this, arguments);
       
       if (this.saved) {
         this.model.bind('saved', this.saved);
@@ -161,7 +161,7 @@ _r(function (app) {
       var self = this;
       var length = _.size(attributes);
       if ( ! attributes || length < 1 || _.size(self.asyncValidations) < 1) {
-        callback(attributes, errors);
+        return callback(attributes, errors);
       }
       
       var count = 0;

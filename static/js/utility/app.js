@@ -44,20 +44,26 @@ var App = Backbone.Router.extend({
       }
     }
     
+    this.closeOverlay();
     try {
-      if ( ! this.views.hasOwnProperty(module) || ! this.views[module].hasOwnProperty(action) ) {
-        // try to just load a template without a proper view
-        console.log('No view found, trying to render default view. ('+module+':'+action+')');
-        this.currentView = new this.base.pageView(module, action);
-        this.currentView.render();
-      } else {
-        this.currentView = new this.views[module][action](module, action);
-      }
+      this.currentView = this.view(module, action);
       this.breadcrumb(module, action, parameters);
     } catch(e) {
       $.jGrowl('Sorry, there was an error while trying to process your action');
       console.log('Routing error in route '+route+':');
       console.log(e.stack);
+    }
+  },
+  
+  view: function(module, action, $el) {
+    if ( ! this.views.hasOwnProperty(module) || ! this.views[module].hasOwnProperty(action) ) {
+      // try to just load a template without a proper view
+      console.log('No view found, trying to render default view. ('+module+':'+action+')');
+      var view = new this.base.pageView(module, action, $el);
+      view.render();
+      return view;
+    } else {
+      return this.currentView = new this.views[module][action](module, action, $el);
     }
   },
   

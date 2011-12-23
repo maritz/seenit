@@ -6,9 +6,20 @@ a#reload_page Reload
 <script type="text/x-jade-tmpl" name="error">
 h1 General Error
 | Sadly there was a general error. Please do make understand for then.
+
+- console.log(locals);
+if locals.error
+  span.error= locals.error
 </script>
 
 <script type="text/x-jade-tmpl" name="login_needed">
 h1 Login needed
 | Please log in to view this content.
+
+- var rand = Math.floor(Math.random()*100000);
+.login( id: 'login'+rand )
+script
+  _.defer(function () {
+    app.view('user', 'login', $('#login'+#{rand}))
+  });
 </script>
