@@ -10,5 +10,8 @@ module.exports = { // node 0.4.x does not support loading pure json yet.
         checking: "Checking ..."
       }
     }
+  },
+  overlays: {
+    login_needed: "Login needed for this action"
   }
 };

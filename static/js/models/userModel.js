@@ -4,6 +4,14 @@ _r(function (app) {
     urlRoot: '/REST/User/',
     nohmName: 'User',
     pw_repeat_set_once: false,
+    initialize: function () {
+      var self = this;
+      this.set({'creation_time': +new Date()});
+      console.log('initializing user model', self.get('creation_time'));
+      this.bind('error', function () {
+        console.log('error in user model', self.get('creation_time'));
+      });
+    },
     validations: {
       password: function () {
         var $password_repeat_el = this.view.$el.find('input[name="password_repeat"]');
@@ -22,7 +30,7 @@ _r(function (app) {
     asyncValidations: {
       name: function (value, callback) {
         $.get(this.urlRoot+'checkName?name='+value, function () {
-            callback(undefined, true);
+          callback(undefined, true);
         }).error(function () {
           callback('name_taken', true);
         });
@@ -31,7 +39,13 @@ _r(function (app) {
   });
   
   app.models.Self = app.base.model.extend({
-    urlRoot: '/REST/User/login'
+    urlRoot: '/REST/User/login',
+    
+    logout: function () {
+      $.get('/REST/User/logout', function () {
+        window.location.reload();
+      });
+    }
   });
   
 });

@@ -7,7 +7,8 @@ var App = Backbone.Router.extend({
     var self = this;
     this.config = {
       $content: $('#content'),
-      $breadcrumb: $('#breadcrumb')
+      $breadcrumb: $('#breadcrumb'),
+      $navigation: $('#navigation')
     };
     _.extend(this.config, spec);
 
@@ -15,12 +16,23 @@ var App = Backbone.Router.extend({
     this.collections = {};
     this.views = {};
     this.formHandler = {};
-    this.currentView = null;
+    this.current = {
+      module: null,
+      action: null,
+      view: null
+    };
     this.route('*args', 'routeToView', this.router);
     this._templates = {};
+    this.selfUser = null;
+    
     this.template('form', 'input', {}, function () {
       // make sure we have the form templates loaded so we can safely call them from other templates
       _r('form_templates', true);
+    });
+    
+    this.template('page', 'top_navigation', {}, function (html) {
+      self.config.$navigation.html(html);
+      self.navigation();
     });
   },
   
@@ -29,7 +41,8 @@ var App = Backbone.Router.extend({
   router: function(route){
     var module = 'main',
         action = 'index',
-        parameters = [];
+        parameters = [],
+        previous = this.current;
     
     this.currentRoute = route; // for reloading
     
@@ -44,14 +57,27 @@ var App = Backbone.Router.extend({
       }
     }
     
-    this.closeOverlay();
     try {
-      this.currentView = this.view(module, action);
-      this.breadcrumb(module, action, parameters);
+      var id = +new Date();
+      this.config.$content
+        .empty()
+        .append($('<div id="content_'+id+'"></div>'));
+      this.current = {
+        module: module,
+        action: action,
+        view: this.view(module, action, $('#content_'+id))
+      };
+      this.navigation();
+      this.breadcrumb(parameters);
     } catch(e) {
-      $.jGrowl('Sorry, there was an error while trying to process your action');
-      console.log('Routing error in route '+route+':');
-      console.log(e.stack);
+      this.current = previous;
+      if (e !== 'view_stop') {
+        $.jGrowl('Sorry, there was an error while trying to process your action');
+        console.log('Routing error in route '+route+':');
+        console.log(e.stack);
+      } else {
+        console.log('view stopped rendering');
+      }
     }
   },
   
@@ -63,7 +89,7 @@ var App = Backbone.Router.extend({
       view.render();
       return view;
     } else {
-      return this.currentView = new this.views[module][action](module, action, $el);
+      return (this.current.view = new this.views[module][action](module, action, $el));
     }
   },
   
@@ -75,16 +101,41 @@ var App = Backbone.Router.extend({
     this.router(this.currentRoute);
   },
   
-  breadcrumb: function (module, action, parameters) {
-    var locals = {
-      module: module,
-      action: action,
-      parameters: parameters && parameters.length && parameters[0].match(/[\d]*/) && parameters[0]
-    },
-    self = this;
+  breadcrumb: function (parameters) {
+    return;
+    var locals = _.extend({
+        parameters: parameters && parameters.length && parameters[0].match(/[\d]*/) && parameters[0]
+      }, this.current),
+      self = this;
     this.template('page', 'breadcrumb', locals, function (html) {
       self.config.$breadcrumb.html(html);
     });
+  },
+  
+  navigation: function  ()  {
+    var self = this;
+    var $nav = this.config.$navigation;
+    $nav
+      .find('li')
+        .removeClass('active')
+      .has('a[href^="#'+this.current.module+'"]')
+      .first()
+        .addClass('active');
+    var $subnav = $nav
+      .find('ul.sub_navigation')
+        .empty()
+    this.template(this.current.module, 'sub_navigation', {
+        _t: function (name) {
+          return $.t(name, 'general', self.current.module);
+        }
+      }, function (html) {
+      $subnav
+        .html(html)
+        .find('li')
+          .removeClass('active')
+        .has('a[href^="#'+self.current.module+'/'+self.current.action+'"]')
+          .addClass('active');
+    }); 
   },
   
   _templates: {},

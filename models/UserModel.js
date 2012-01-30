@@ -76,10 +76,11 @@ module.exports = nohm.model('User', {
         return;
       }
       this.find({name: name}, function (err, ids) {
+        console.log('login found', err, name, ids);
         if (ids.length === 0) {
           callback(false);
         } else {
-          // optimization possibility: do a custom redis query
+          // optimization possibility: do a custom redis query AND/OR add the password to the find.
           self.load(ids[0], function (err) {
             if (!err && self.p('password') === hasher(password, self.p('salt'))) {
               callback(true);

@@ -1,0 +1,18 @@
+
+<script type="text/x-jade-tmpl" name="login_needed">
+- locals.header = $.t('login_needed', 'overlays')
+- var rand = Math.floor(Math.random()*100000);
+.login( id: 'login'+rand )
+script
+  _.defer(function () {
+    app.view('user', 'login', $('#login'+#{rand}))
+  });
+</script>
+
+<script type="text/x-jade-tmpl" name="error">
+- locals.header = 'General Error'
+.btn.error Error
+p Sadly there was an unknown error. Please contact an administrator.
+| Error message:
+pre= locals.error
+</script>

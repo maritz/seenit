@@ -1,22 +1,21 @@
 <script type="text/x-jade-tmpl" name="register">
 h1!=_t('headline')
-form( novalidate: true)
+form.form-horizontal( novalidate: true)
 
-  .fieldset_wrapper
     fieldset
       legend=_t('legend')
       span.error.general_error
-      ul
-        li!=partial('username')
-        li!=partial('password')
-        li!=partial('password_repeat')
-        li!=partial('email')
+      
+      !=partial('username')
+      !=partial('password')
+      !=partial('password_repeat')
+      !=partial('email')
     != form('input', { type: 'submit', name: 'register', value: _t('forms.submit') })
 </script>
 
-<script type="text/x-jade-tmpl" name="index">
-ul
-  each link in ['register', 'profile', 'list']
+<script type="text/x-jade-tmpl" name="sub_navigation">
+ul.nav.pills
+  each link in ['register', 'profile', 'list', 'logout']
     li
       a( href: '#user/'+link)= _t(link)
 </script>
@@ -37,6 +36,7 @@ span Some stinking user details!
 <script type="text/x-jade-tmpl" name="profile">
 span
   br 
+  =Math.random()
   the user profile is not implemented yet. :(
   br 
   but you can look at the json data in the API 
@@ -52,14 +52,12 @@ span
 
 <script type="text/x-jade-tmpl" name="login">
 form( novalidate: true)
-  .fieldset_wrapper
-    fieldset
-      legend=_t('login')
-      span.error.general_error
-      ul
-        li!=partial('username')
-        li!=partial('password')
-    != form('input', { type: 'submit', name: 'login', value: _t('forms.submit') })
+  fieldset
+    span=_t('login_legend')
+    span.error.general_error
+    !=partial('username')
+    !=partial('password')
+  != form('input', { type: 'submit', name: 'login', value: _t('forms.login') })
 </script>
 
 
@@ -73,7 +71,7 @@ form( novalidate: true)
 </script>
 
 <script type="text/x-jade-tmpl" name="password_repeat">
-!= form('input', { type: 'password', name: 'password_repeat', required: true })
+!= form('input', { type: 'password', name: 'password_repeat' })
 </script>
 
 <script type="text/x-jade-tmpl" name="email">

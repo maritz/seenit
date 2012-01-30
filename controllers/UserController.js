@@ -123,7 +123,9 @@ app.get('/checkName', function (req, res, next) {
       } else if (ids.length > 0) {
         next(new UserError('Name taken.', 400));
       } else {
-        res.ok();
+        setTimeout(function () {
+          res.ok();
+        }, 1000);
       }
     });
   } else {

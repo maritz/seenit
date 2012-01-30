@@ -26,6 +26,7 @@ exports.init = function (server) {
   // reverse order of how it ends up in the merged files.
   var files = Array.prototype.concat(
     file_helper.getFiles(basedir, 'libs/', ['modernizr-2.0.6.custom.min.js']),
+    file_helper.getFiles(basedir, 'libs/bootstrap/'),
     file_helper.getFiles(basedir, 'utility/'),
     file_helper.getFiles(basedir, 'models/'),
     file_helper.getFiles(basedir, 'collections/'),

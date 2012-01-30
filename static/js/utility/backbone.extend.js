@@ -2,6 +2,7 @@ _r(function (app) {
   app.base.pageView = Backbone.View.extend({
     
     auto_render: false,
+    model_generated: false,
     
     initialize: function (module, action, $el) {
       var self = this;
@@ -9,6 +10,15 @@ _r(function (app) {
       this.module = module;
       this.action = action;
       this.i18n = [module, action];
+      
+      if (this.model) {
+        if ( ! this.model.hasOwnProperty('get')) {
+          this.model = new this.model();
+          this.model_generated = true;
+        }
+        this.addLocals({_model: this.model});
+        this.model.view = this;
+      }
       
       _.bindAll(this);
       
@@ -22,14 +32,32 @@ _r(function (app) {
       if (this.init && typeof(this.init) === 'function') {
         this.init();
       }
-      if (this.model) {
-        this.addLocals({_model: this.model});
-        this.model.view = this;
-      }
+      
       if (this.auto_render) {
         this.render();
       }
+      
+      this._gc_interval = setInterval(this._check_gc, 250);
     },
+    
+    _check_gc: function () {
+      if ($(this.$el.selector).length === 0) {
+        clearInterval(this._gc_interval);
+        if (this.model_generated) {
+          this.model.unbind();
+          delete this.model;
+        }
+        this.unbind();
+        delete this;
+      }
+    },
+    
+    /*destroy: function () {
+      if (this.model_generated) {
+        delete this.model;
+      }
+      Backbone.View.prototype.desctor.apply(this, arguments);
+    },*/
     
     addLocals: function (locals) {
       if (!this.locals) {
@@ -118,6 +146,7 @@ _r(function (app) {
     },
     
     validation: function (attributes, callback) {
+      console.log('validating', Object.keys(attributes));
       var self = this;
       var ret = this.validateSerial(attributes);
       attributes = ret.attributes;
@@ -169,7 +198,7 @@ _r(function (app) {
         if (err && ! errors[key]) {
           errors[key] = err;
         }
-        if ( err) {
+        if (err) {
           delete attributes[key];
         }
         if (++count === length) {

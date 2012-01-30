@@ -2,7 +2,7 @@ module.exports = { // node 0.4.x does not support loading pure json yet.
   general: {
     forms: {
       errors: {
-        notEmpty: "testasd"
+        notEmpty: "Mustn't be empty"
       },
       labels: {
         name: "User name",

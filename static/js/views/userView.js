@@ -10,21 +10,29 @@ _r(function (app) {
     
     init: function () {
       var self = this;
+      var success = function (collection) {
+        self.addLocals({
+          users: collection
+        });
+        self.render();
+      };
       
       var list = new app.collections.User();
       list.fetch({
-        success: function (collection) {
-          self.addLocals({
-            users: collection
-          });
-          self.render();
-        },
+        success: success,
         error: function (collection, response) {
           var json = JSON.parse(response.responseText);
           if (json.data.error.msg === 'need_login') {
             app.overlay({view: 'login_needed'});
+      
+            var retry = function () {
+              console.log('retrying');
+              app.unbind('login', retry);
+              list.fetch({success: success});
+            };
+            app.bind('login', retry);
           } else {
-            app.overlay();
+            app.overlay({locals: {error: json.data.error.msg}, view: 'error'});
           }
         }
       });
@@ -39,7 +47,7 @@ _r(function (app) {
     
     auto_render: true,
     
-    model: new app.models.User(),
+    model: app.models.User,
     
     saved: function () {
       app.go('User/details/');
@@ -56,7 +64,7 @@ _r(function (app) {
     
     auto_render: true,
     
-    model: new app.models.Self(),
+    model: app.models.Self,
     
     /**
      * Login successful
@@ -64,8 +72,23 @@ _r(function (app) {
     saved: function () {
       app.closeOverlay();
       $.jGrowl('Login successful');
+      app.trigger('login');
+      app.selfUser = this.model;
     }
     
+  });
+  
+  
+  /**
+   * #/User/logout
+   */
+  app.views.user.logout = app.base.pageView.extend({    
+    init: function () {
+      debugger;
+      if (app.selfUser) {
+        app.selfUser.logou();
+      }
+    }
   });
   
 });

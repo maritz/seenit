@@ -1,25 +1,26 @@
 <script type="text/x-jade-tmpl" name="breadcrumb">
-a( href: '##{module}')= module
-a#reload_page Reload
+ul.breadcrumb
+  li
+    a( href: '##{module}')= module
+    span.divider |
+  li
+    a#reload_page Reload
 </script>
 
-<script type="text/x-jade-tmpl" name="error">
-h1 General Error
-| Sadly there was a general error. Please do make understand for then.
-
-- console.log(locals);
-if locals.error
-  span.error= locals.error
+<script type="text/x-jade-tmpl" name="top_navigation">
+ul.nav.tabs
+  li
+    a(href: '#main') Main
+  li
+    a(href: '#user') User
+ul.sub_navigation
 </script>
 
-<script type="text/x-jade-tmpl" name="login_needed">
-h1 Login needed
-| Please log in to view this content.
-
-- var rand = Math.floor(Math.random()*100000);
-.login( id: 'login'+rand )
-script
-  _.defer(function () {
-    app.view('user', 'login', $('#login'+#{rand}))
-  });
+<script type="text/x-jade-tmpl" name="modal">
+.modal
+  .modal-header
+    a.close(data-dismiss:"modal") x
+    h3=header
+  .modal-body
+    !=body
 </script>

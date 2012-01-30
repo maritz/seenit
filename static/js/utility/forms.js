@@ -25,6 +25,9 @@ _r(function (app) {
     if ( ! name) {
       return $();
     }
+    if (name instanceof jQuery) {
+      return name;
+    }
     var $form = this.view.$el;
     var $el = $('input[data-link="'+name+'"]', $form);
     
@@ -36,28 +39,41 @@ _r(function (app) {
   
   formHandler.prototype.setError = function (name, error) {
     var $el = this.getInputByName(name);
-    var $errSpan = $el.siblings('span.error');
+    var $errSpan = $el.next('span.input_error');
     
     if ($el.length === 0) {
       $errSpan = $('.general_error', this.view.$el);
     }
     
-    $errSpan.html($.t('forms.errors.'+error, this.view.i18n[1], this.view.i18n[0])).show('slow');
+    $el.parents('.control-group').removeClass('success').addClass('error');
+    $errSpan.html($.t('forms.errors.'+error, this.view.i18n[1], this.view.i18n[0])).show();
   };
   
   formHandler.prototype.clearError = function (name) {
     var $el = this.getInputByName(name);
-    $el.siblings('span.error').html('').hide('fast');
+    $el.siblings('span.error').html('').hide();
   };
   
   formHandler.prototype.setLoading = function (name) {
     var $el = this.getInputByName(name);
-    $el.siblings('.loading').show();
+    $el.siblings('.loading').removeClass('hidden');
+    $el.attr('disabled', true);
   };
   
   formHandler.prototype.clearLoading = function (name) {
     var $el = this.getInputByName(name);
-    $el.siblings('.loading').hide();
+    $el.siblings('.loading').addClass('hidden');
+    $el.attr('disabled', false);
+  };
+  
+  formHandler.prototype.setSuccess = function (name) {
+    var $el = this.getInputByName(name);
+    var $parent = $el.parents('.control-group').removeClass('error');
+    if ($el.val().length > 0) {
+      $parent.addClass('success');
+    }
+    this.clearLoading(name);
+    this.clearError(name);
   };
   
   formHandler.prototype.blurHandler = function (context) {
@@ -77,6 +93,8 @@ _r(function (app) {
       if (self.model.required.indexOf(name) === -1 && $this.attr('required')) {
         self.model.required.push(name);
       }
+      self.clearError(name);
+      self.setLoading(name);
       self.model.set(attrs, {validate: true});
     }, 200);
   };
@@ -153,6 +171,13 @@ _r(function (app) {
     var $form = this.view.$el;
     var self = this;
     
+    var is_linked = $form.data('linked');
+    if (is_linked) {
+      return false;
+    } else {
+      $form.data('linked', true);
+    }
+    
     this.getCsrf();
     
     this.$inputs = $('input[data-link]');
@@ -169,12 +194,13 @@ _r(function (app) {
     
     this.model.bind("valid", function (model, attributes) {
       _.each(attributes, function (val, key) {
-        self.clearError(key, val);
+        self.setSuccess(key, val);
       });
     });
     
     this.model.bind("error", function(model, error) {
       _.each(error, function (val, key) {
+        self.clearLoading(key);
         self.setError(key, val);
       });
     });
