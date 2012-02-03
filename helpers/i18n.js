@@ -17,7 +17,7 @@ var checkHashChange = function checkHashChange (lang) {
 var loadTranslations = function (lang, file) {
   try {
     delete require.cache[require.resolve(basedir + lang + '/' + file)];
-    var name = file.substring(0, file.lastIndexOf('.json'));
+    var name = file.substring(0, file.lastIndexOf('.js'));
     translations[lang][name] = require(basedir + lang + '/' + file);
     checkHashChange(lang);
   } catch (e) {
@@ -33,7 +33,7 @@ try {
       files = fs.readdirSync(basedir + lang);
       if (Array.isArray(files)) {
         files.forEach(function (file) {
-          if (file.lastIndexOf('.json') === file.length - 5) {
+          if (file.lastIndexOf('.js') === file.length - 3) {
             fs.watchFile(basedir + lang + '/' + file, function () {
               loadTranslations(lang, file);
             });

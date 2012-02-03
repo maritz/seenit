@@ -1,0 +1,3 @@
+to install hashlib:
+
+npm install https://github.com/brainfucker/hashlib/tarball/master
