@@ -104,14 +104,20 @@ _r(function (app) {
       return false;
     }
     var self = this;
-    $.getJSON('/REST/Util/csrf', function (response) {
-      var token = $.cookie(response.data);
-      $.cookie(response.csrf_key, null, { path: '/' });
-      self.csrf = token;
+    if (self.csrf) {
       if (callback) {
         callback();
       }
-    });
+    } else {
+      $.getJSON('/REST/Util/csrf', function (response) {
+        var token = $.cookie(response.data);
+        $.cookie(response.key, null, { path: '/' });
+        self.csrf = token;
+        if (callback) {
+          callback();
+        }
+      });
+    }
   };
   
   formHandler.prototype.submit = function (e) {
@@ -134,14 +140,17 @@ _r(function (app) {
         self.$inputs.prop('disabled', false);
       self._submitting = false;
       } else {
-        attributes['csrf-token'] = self.csrf;
+        attributes['_csrf'] = self.csrf;
         delete self.csrf;
         self.model.set(attributes);
         self.model.save(undefined, {        
           error: function (model, response) {
-            var data = JSON.parse(response.responseText).data;
-            if (data.error.msg === 'crsf failure') {
+            var data;
+            if (response.responseText === 'Forbidden') {
               self.setError(null, 'csrf');
+              data = {fields: []};
+            } else {
+              data = JSON.parse(response.responseText).data;
             }
             self.$inputs.prop('disabled', false);
             var fields = data.fields;
@@ -180,7 +189,7 @@ _r(function (app) {
     
     this.getCsrf();
     
-    this.$inputs = $('input[data-link]');
+    this.$inputs = $('input[data-link]', $form);
     
     $form.delegate('input[data-link]', 'blur', function () {
       self.blurHandler(this);

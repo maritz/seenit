@@ -9,26 +9,14 @@ server.use(express.methodOverride());
 server.use(express.cookieParser());
 server.use(express.session({ secret: "some secret this is " }));
 
+server.use(express.csrf());
+
 server.use(function (req, res, next) {
   res.ok = function (data) {
     data = data || {};
     res.json({result: 'success', data: data});
   };
   
-  // csrf check
-  if (['POST', 'PUT', 'DELETE'].indexOf(req.method) !== -1) {
-    var tokens = req.session.csrf_tokens;
-    if (typeof (tokens) === 'undefined') {
-      return next(new Error('crsf failure (request token first)'));
-    }
-    var user_token = req.param('csrf-token');
-    var index = tokens.indexOf(user_token);
-    if (tokens.length === 0 ||  index=== -1) {
-      return next(new Error('crsf failure'));
-    } else {
-      tokens.splice(index, 1);
-    }
-  }
   next();
 });
 
