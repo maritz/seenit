@@ -1,4 +1,4 @@
-module.exports = { // node 0.4.x does not support loading pure json yet.
+module.exports = {
   "greetings": "Hello",
   general: {
     forms: {
