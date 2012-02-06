@@ -53,7 +53,7 @@ span
 <script type="text/x-jade-tmpl" name="login">
 form( novalidate: true)
   fieldset
-    span=_t('login_legend')
+    span!=_t('login_legend')
     span.error.general_error
     !=partial('username')
     !=partial('password')

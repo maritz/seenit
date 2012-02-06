@@ -12,7 +12,12 @@ module.exports = {
       },
       submit: "Sign Up"
     },
-    register: "Sign Up"
+    login_legend: 'Please log in to use all features of this Page. '+
+      '<br/>If you do not have an account yet, you may <a href="#user/register" onclick="app.closeOverlay()">create one here</a>.',
+    register: "Sign Up",
+    profile: "Profile",
+    list: "Index",
+    logout: "Log out"
   },
   register: {
     headline: "Registration",

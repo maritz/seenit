@@ -9,7 +9,7 @@ _r(function (app) {
       this.set({'creation_time': +new Date()});
       console.log('initializing user model', self.get('creation_time'));
       this.bind('error', function () {
-        console.log('error in user model', self.get('creation_time'), arguments);
+        console.log('error in user model', self.get('creation_time'));
       });
     },
     validations: {

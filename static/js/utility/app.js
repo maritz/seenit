@@ -32,7 +32,7 @@ var App = Backbone.Router.extend({
     
     this.template('page', 'top_navigation', {}, function (html) {
       self.config.$navigation.html(html);
-      self.navigation();
+      //self.navigation();
     });
   },
   
@@ -42,7 +42,8 @@ var App = Backbone.Router.extend({
     var module = 'main',
         action = 'index',
         parameters = [],
-        previous = this.current;
+        previous = this.current,
+        self = this;
     
     this.currentRoute = route; // for reloading
     
@@ -59,16 +60,15 @@ var App = Backbone.Router.extend({
     
     try {
       var id = +new Date();
-      this.config.$content
-        .empty()
-        .append($('<div id="content_'+id+'"></div>'));
-      this.current = {
-        module: module,
-        action: action,
-        view: this.view(module, action, $('#content_'+id))
-      };
-      this.navigation();
-      this.breadcrumb(parameters);
+      this.view(module, action, null, function (view) {
+        self.current = {
+          module: module,
+          action: action,
+          view: view
+        };
+        self.navigation();
+        self.breadcrumb(parameters);
+      });
     } catch(e) {
       this.current = previous;
       if (e !== 'view_stop') {
@@ -81,16 +81,36 @@ var App = Backbone.Router.extend({
     }
   },
   
-  view: function(module, action, $el) {
+  view: function(module, action, $el, callback) {
+    if (typeof (callback) !== 'function') {
+      callback = $.noop;
+    }
+    var view;
+    var after_render = function () {
+      if ($el.hasClass('main_content')) {
+        $el.siblings().remove();
+      }
+      callback(view);
+    }
+    
+    $el = $el || $('<div></div>').appendTo('#content').addClass('main_content');
+    $el.data('module', module);
+    $el.data('action', action);
+    
     if ( ! this.views.hasOwnProperty(module) || ! this.views[module].hasOwnProperty(action) ) {
       // try to just load a template without a proper view
       console.log('No view found, trying to render default view. ('+module+':'+action+')');
-      var view = new this.base.pageView(module, action, $el);
+      view = new this.base.pageView(module, action, $el);
       view.render();
-      return view;
     } else {
-      return (this.current.view = new this.views[module][action](module, action, $el));
+      view = new this.views[module][action](module, action, $el);
     }
+    if (view.rendered) {
+      after_render()
+    } else {
+      view.once('rendered', after_render);
+    }
+    return view;
   },
   
   go: function (str) {
@@ -172,13 +192,16 @@ var App = Backbone.Router.extend({
       } else {
         return html;
       }
-    } else {
+    } else if ( ! this._templates.hasOwnProperty(module)) {
       if (typeof(callback) !== 'function') {
         console.dir(this._templates);
         console.dir(arguments);
         throw new Error('Can\'t call _template without a callback if the template module was not loaded yet! (might be an invalid template call)');
       }
       tmpl_module = $('<div id="tmpl_'+module+'"></div>').appendTo('#templates');
+      if (module === null) {
+        debugger;
+      }
       $.get('/templates/tmpl-'+module+'.html', function (data) {
         var found = false;
         if (!data) {
@@ -202,6 +225,9 @@ var App = Backbone.Router.extend({
           callback(found(locals));
         }
       }, 'html');
+    } else {
+      console.log('Template "'+name+'" in module "'+module+'" not found.');
+      callback(false);
     }
   }
 });

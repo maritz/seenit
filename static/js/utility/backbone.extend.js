@@ -1,4 +1,15 @@
 _r(function (app) {
+  
+  Backbone.Events.once = function (event, fn) {
+    var self = this;
+    var wrap = function () {
+      Backbone.Events.unbind.call(self, event, wrap);
+      fn.apply(this, Array.prototype.slice.call(arguments, 0));
+    };
+    
+    Backbone.Events.bind.call(this, event, wrap);
+  };
+  
   app.base.pageView = Backbone.View.extend({
     
     auto_render: false,
@@ -6,10 +17,14 @@ _r(function (app) {
     
     initialize: function (module, action, $el) {
       var self = this;
+      
+      _.extend(this, Backbone.Events);
+      
       this.$el = $el || window.app.config.$content;
       this.module = module;
       this.action = action;
       this.i18n = [module, action];
+      this.rendered = false;
       
       if (this.model) {
         if ( ! this.model.hasOwnProperty('get')) {
@@ -52,13 +67,6 @@ _r(function (app) {
       }
     },
     
-    /*destroy: function () {
-      if (this.model_generated) {
-        delete this.model;
-      }
-      Backbone.View.prototype.desctor.apply(this, arguments);
-    },*/
-    
     addLocals: function (locals) {
       if (!this.locals) {
         this.locals = {};
@@ -69,7 +77,10 @@ _r(function (app) {
     render: function () {
       var self = this;
       window.app.template(this.module, this.action, this.locals, function (html) {
-        self.afterRender.call(self, html);
+        if (self.afterRender.call(self, html) !== false) {
+          self.trigger('rendered');
+          self.rendered = true;
+        }
       });
     },
     
