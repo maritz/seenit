@@ -55,8 +55,8 @@ form( novalidate: true)
   fieldset
     span!=_t('login_legend')
     span.error.general_error
-    !=partial('username')
-    !=partial('password')
+    !=form('input', { name: 'name', link: false})
+    !=form('input', { type: 'password', name: 'password', link: false})
   != form('input', { type: 'submit', name: 'login', value: _t('forms.login') })
 </script>
 

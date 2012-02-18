@@ -10,10 +10,13 @@ _r(function (app) {
     Backbone.Events.bind.call(this, event, wrap);
   };
   
+  _.extend(app, Backbone.Events);
+  
   app.base.pageView = Backbone.View.extend({
     
     auto_render: false,
     model_generated: false,
+    max_age: 10000,
     
     initialize: function (module, action, $el) {
       var self = this;
@@ -52,18 +55,21 @@ _r(function (app) {
         this.render();
       }
       
-      this._gc_interval = setInterval(this._check_gc, 250);
+      this._gc_interval = setInterval(function () {
+        self._check_gc();
+      }, 250);
+      
+      this._expiration = this.max_age + (+new Date());
     },
     
     _check_gc: function () {
-      if ($(this.$el.selector).length === 0) {
+      if (this.rendered && this.$el.parent().length === 0) {
         clearInterval(this._gc_interval);
         if (this.model_generated) {
           this.model.unbind();
           delete this.model;
         }
         this.unbind();
-        delete this;
       }
     },
     
@@ -86,6 +92,10 @@ _r(function (app) {
     
     afterRender: function (html) {
       this.$el.html(html);
+    },
+    
+    isExpired: function () {
+      return +new Date() > this._expiration;
     }
     
   });

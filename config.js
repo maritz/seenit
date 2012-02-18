@@ -1,4 +1,6 @@
-module.exports = {
+var env = process.env.NODE_ENV || 'development';
+
+var defaults = {
   "static": {
     port: 3003
   },
@@ -31,12 +33,37 @@ module.exports = {
     }
   },
   "nohm": {
+    url: 'localhost',
     port: 6379,
     db: 5,
     prefix: 'game'
   },
   "redis": {
+    url: 'localhost',
     port: 6379,
     db: 4
   }
 };
+
+if (env === 'production' || env === 'staging') {
+  defaults["static"].port = 80;
+  defaults.nohm = {
+    host: 'carp.redistogo.com',
+    port: 9391,
+    pw: '3a8d7880bf3757d5a7af2b4029d93f17',
+    db: 0,
+    prefix: 'stack'
+  };
+  defaults.redis = {
+    host: 'carp.redistogo.com',
+    port: 9391,
+    pw: '3a8d7880bf3757d5a7af2b4029d93f17',
+    db: 0
+  };
+}
+
+if (env === 'staging') {
+  defaults['static'].port = 3004;
+}
+
+module.exports = defaults;

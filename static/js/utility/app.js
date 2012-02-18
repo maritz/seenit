@@ -3,7 +3,7 @@ _r('form_templates'); // see app.initiaize
 
 var App = Backbone.Router.extend({
   
-  initialize: function (spec) {
+  initialize: function (spec) {    
     var self = this;
     this.config = {
       $content: $('#content'),
@@ -38,7 +38,7 @@ var App = Backbone.Router.extend({
   
   base: {}, // backbone.extend.js
   
-  router: function(route){
+  router: function(route, force_rerender){
     var module = 'main',
         action = 'index',
         parameters = [],
@@ -58,8 +58,16 @@ var App = Backbone.Router.extend({
       }
     }
     
+    var data_expired = this.current.view !== null ? this.current.view.isExpired() : false;
+    
+    if (this.current.module === module && this.current.action === action) {
+      if (this.current.view !== null && ! force_rerender && ! data_expired) {
+        console.log('data not stale, not reloading view');
+        return false;
+      }
+    }
+    
     try {
-      var id = +new Date();
       this.view(module, action, null, function (view) {
         self.current = {
           module: module,
@@ -91,9 +99,13 @@ var App = Backbone.Router.extend({
         $el.siblings().remove();
       }
       callback(view);
-    }
+    };
     
-    $el = $el || $('<div></div>').appendTo('#content').addClass('main_content');
+    if (!$el) {
+      $el = $('<div></div>')
+              .appendTo('#content')
+              .addClass('main_content');
+    }
     $el.data('module', module);
     $el.data('action', action);
     
@@ -106,7 +118,7 @@ var App = Backbone.Router.extend({
       view = new this.views[module][action](module, action, $el);
     }
     if (view.rendered) {
-      after_render()
+      after_render();
     } else {
       view.once('rendered', after_render);
     }
@@ -118,7 +130,7 @@ var App = Backbone.Router.extend({
   },
   
   reload: function () {
-    this.router(this.currentRoute);
+    this.router(this.currentRoute, true);
   },
   
   breadcrumb: function (parameters) {
@@ -143,7 +155,7 @@ var App = Backbone.Router.extend({
         .addClass('active');
     var $subnav = $nav
       .find('ul.sub_navigation')
-        .empty()
+        .empty();
     this.template(this.current.module, 'sub_navigation', {
         _t: function (name) {
           return $.t(name, 'general', self.current.module);

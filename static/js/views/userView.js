@@ -22,17 +22,16 @@ _r(function (app) {
         success: success,
         error: function (collection, response) {
           var json = JSON.parse(response.responseText);
+          window.history.back();
           if (json.data.error.msg === 'need_login') {
             app.overlay({view: 'login_needed'});
       
-            var retry = function () {
-              console.log('retrying');
-              app.unbind('login', retry);
+            app.once('login', function () {
               list.fetch({success: success});
-            };
-            app.bind('login', retry);
+            });
           } else {
             app.overlay({locals: {error: json.data.error.msg}, view: 'error'});
+            self.trigger('error');
           }
         }
       });
@@ -48,6 +47,8 @@ _r(function (app) {
     auto_render: true,
     
     model: app.models.User,
+    
+    max_age: 1000*60*60,
     
     saved: function () {
       app.go('User/details/');

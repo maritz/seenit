@@ -1,5 +1,7 @@
 _r(function (app) {
   
+  var csrf = null;
+  
   var formHandler = app.formHandler = function (view, model) {
     this.view = view;
     this.model = model || view.model;
@@ -8,6 +10,10 @@ _r(function (app) {
       throw new Error('formHandler requires a model or the view to have a model');
     }
     this.autoLabels();
+    
+    if (csrf === null) {
+      this.getCsrf();
+    }
   };
   
   formHandler.prototype.autoLabels = function () {
@@ -101,18 +107,20 @@ _r(function (app) {
   
   formHandler.prototype.getCsrf = function (callback) {
     if (this._submitting === true) {
+      console.log('remove check? (forms.js getCsrfl if');
       return false;
     }
-    var self = this;
-    if (self.csrf) {
+    
+    if (csrf) {
       if (callback) {
         callback();
       }
     } else {
       $.getJSON('/REST/Util/csrf', function (response) {
         var token = $.cookie(response.data);
-        $.cookie(response.key, null, { path: '/' });
-        self.csrf = token;
+        $.cookie(response.data, null, { path: '/' });
+        
+        csrf = token;
         if (callback) {
           callback();
         }
@@ -140,8 +148,8 @@ _r(function (app) {
         self.$inputs.prop('disabled', false);
       self._submitting = false;
       } else {
-        attributes['_csrf'] = self.csrf;
-        delete self.csrf;
+        attributes['_csrf'] = csrf;
+        
         self.model.set(attributes);
         self.model.save(undefined, {        
           error: function (model, response) {
@@ -162,7 +170,6 @@ _r(function (app) {
               }
             });
             self._submitting = false;
-            self.getCsrf();
           },
           
           success: function (model) {
@@ -186,8 +193,6 @@ _r(function (app) {
     } else {
       $form.data('linked', true);
     }
-    
-    this.getCsrf();
     
     this.$inputs = $('input[data-link]', $form);
     
