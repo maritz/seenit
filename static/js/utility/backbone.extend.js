@@ -59,7 +59,7 @@ _r(function (app) {
         self._check_gc();
       }, 250);
       
-      this._expiration = this.max_age + (+new Date());
+      this._expiration = this.max_age + 1+new Date();
     },
     
     _check_gc: function () {

@@ -42,11 +42,14 @@ exports.init = function (server) {
       'files': files,
       'preManipulate': {
         'MSIE': [],
-        '^': server.set('env') !== 'development' ? [
-            //assetHandlers.uglifyJsOptimize
+        '^': false && server.set('env') !== 'development' ? [
+            assetHandlers.uglifyJsOptimize
           ] : [] // only minify if in production mode
       },
-      'debug': server.set('env') === 'development' // minification only in production mode
+      /**
+       * Minification doesn't work and is completely disabled.
+       */
+      'debug': true && server.set('env') === 'development' // minification only in production mode
     }
   });
   server.use(assetManagerMiddleware);
