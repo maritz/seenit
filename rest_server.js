@@ -1,6 +1,7 @@
 var file_helper = require('./helpers/file.js');
 var express = require('express');
 var server = express.createServer();
+var nohm = require('nohm').Nohm;
 
 module.exports = server;
 
@@ -17,7 +18,18 @@ server.use(function (req, res, next) {
     res.json({result: 'success', data: data});
   };
   
-  next();
+  req.user = nohm.factory('User');
+  if ( req.session.userdata && ! isNaN(req.session.userdata.id)) {
+    req.user.load(req.session.userdata.id, function (err) {
+      if (err) {
+        req.session.logged_in = false;
+        req.session.userdata = undefined;
+      }
+      next();
+    });
+  } else {
+    next();
+  }
 });
 
   

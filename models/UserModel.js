@@ -65,9 +65,38 @@ module.exports = nohm.model('User', {
     salt: {
       // DO NOT CHANGE THE SALTING METHOD, IT WILL INVALIDATE STORED PASSWORDS!
       defaultValue: uid()
+    },
+    acl: {
+      type: 'json',
+      defaultValue: {
+        User: ['self', 'create']
+      }
     }
   },
   methods: {
+    
+    grant: function (action, subject, callback) {
+      
+    },
+    
+    may: function (action, subject, id, callback) {
+      var acl = this.p('acl');
+      
+      if (acl.hasOwnProperty(subject)) {
+        if ( (Array.isArray(acl[subject]) && acl[subject].indexOf(action) !== -1) || 
+          acl[subject] === '*') {
+          return callback(undefined, true);
+        }
+      }
+      
+      // did not find the proper role
+      callback(undefined, false);
+    },
+    
+    revoke: function (aciton, subject, callback) {
+      
+    },
+    
     
     login: function (name, password, callback) {
       var self = this;

@@ -111,9 +111,9 @@ function updateSession (req, res, next) {
   }  
 }
 
-app.post('/', newUser, store, updateSession, sendSessionUserdata);
+app.post('/', auth.may('create', 'User'), newUser, store, updateSession, sendSessionUserdata);
 
-app.put('/:userId([0-9]+)', auth.isLoggedIn, loadUser, auth.isSelfOrAdmin, store, updateSession, sendSessionUserdata);
+app.put('/:userId([0-9]+)', auth.isLoggedIn, auth.may('edit', 'User', 'userId'), loadUser, auth.isSelfOrAdmin, store, updateSession, sendSessionUserdata);
 
 app.get('/checkName', function (req, res, next) {
   if (req.param('name')) {

@@ -35,3 +35,20 @@ exports.isSelfOrAdmin = function (req, res, next) {
     next(new AuthError('Need to load user before checking for admin/self.', 500));
   }
 };
+
+exports.may = function (action, subject, param_name) {
+  return function (req, res, next) {
+    param_name = param_name || 'id';
+    var id = req.param(param_name);
+    var may = req.user.may(action, subject, id, function (err, may){
+      if (err) {
+        next(new Error('Checking roles failed'));
+      } else if (may) {
+        next();
+      } else {
+        next(new AuthError('privileges_low'));
+      }
+    });
+  };
+};
+

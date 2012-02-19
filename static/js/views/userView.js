@@ -27,7 +27,7 @@ _r(function (app) {
             app.overlay({view: 'login_needed'});
       
             app.once('login', function () {
-              list.fetch({success: success});
+              list.fetch({success: success, error: function () {console.log('ERROR WHILE FETCHING LIST');}});
             });
           } else {
             app.overlay({locals: {error: json.data.error.msg}, view: 'error'});
