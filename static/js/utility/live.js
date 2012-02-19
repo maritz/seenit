@@ -199,6 +199,7 @@
 
     // performs a HEAD request and passes the header info to the given callback
     getHead: function (url, callback) {
+      return callback(url, {});
       pendingRequests[url] = true;
       var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XmlHttp");
       xhr.open("HEAD", url, true);

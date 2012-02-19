@@ -18,7 +18,7 @@ exports.init = function (server) {
   server.use(stylus);
   
   server.use(express['static'](__dirname + '/static', { 
-    maxAge: server.set('env') !== 'production' ? 1 : oneDay 
+    maxAge: server.set('env') === 'development' ? 1 : oneDay 
   }));
   
   var basedir = __dirname + '/static/js/';
@@ -37,7 +37,7 @@ exports.init = function (server) {
   var assetManagerMiddleware = assetManager({
     'js': {
       'route': /\/js\/[0-9]+\/merged\.js/,
-      'path': __dirname + '/static/js/',
+      'path': basedir,
       'dataType': 'javascript',
       'files': files,
       'preManipulate': {

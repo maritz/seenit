@@ -14,7 +14,16 @@ exec('find static/', function(err, stdout, stderr) {
         fs.watchFile(name, function (curr, prev) {
           if (curr.mtime > prev.mtime) {
             console.log('File '+name+' changed, emitting check');
-            e.emit('checkResources');
+            var file_name = name.replace(/^static/, '');
+            var ext = file_name.substr(file_name.lastIndexOf('.'));
+            if (ext === '.styl') {
+              file_name = '/css/style.css';
+              ext = '.css';
+            }
+            e.emit('checkResources', {
+              file_name: file_name, 
+              ext: ext
+            });
           }
         });
       }
@@ -25,8 +34,8 @@ exec('find static/', function(err, stdout, stderr) {
 exports.connectionHandler = function (socket) {
   console.log('Watching files for changes and sending changes to the client via websocket');
   
-  e.on('checkResources', function () {
-    socket.emit('checkResources');
+  e.on('checkResources', function (filename) {
+    socket.emit('checkResources', filename);
   });
   
 };
