@@ -14,6 +14,9 @@
       
     - if (typeof(locals.link) === 'undefined')
       - locals.link = true
+      
+    - if (typeof(locals.validate) === 'undefined')
+      - locals.validate = true
   
   .controls
     input( id: id
@@ -22,6 +25,7 @@
       required: locals.required,
       value: locals.value,
       "data-link": locals.link
+      "data-validate": locals.validate
       )
       
     - if (locals.type !== 'submit')

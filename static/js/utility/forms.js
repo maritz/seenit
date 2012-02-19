@@ -84,11 +84,14 @@ _r(function (app) {
   
   formHandler.prototype.blurHandler = function (context) {
     var self = this;
+    var $this = $(context);
+    if ( ! $this.data('validate')) {
+      return false;
+    }
     _.delay(function () {
       if (self._submitting === true) {
         return false;
       }
-      var $this = $(context);
       var attrs = {};
       var name = $this.data('link');
       if (name === 'data-link') {
@@ -137,20 +140,26 @@ _r(function (app) {
     this.$inputs.prop('disabled', true);
     
     var attributes =  {};
+    var submit_attributes = {
+      '_csrf': csrf
+    };
     this.$inputs.each(function () {
       var $item = $(this);
-      attributes[$item.attr('name')] = $item.val();
+      var name = $item.attr('name');
+      var value = $item.val();
+      if ($item.data('validate')) {
+        attributes[name] = value;
+      }
+      submit_attributes[name] = value;
     });
 
     self.model.validation(attributes, function (valid) {
       
       if ( ! valid) {
         self.$inputs.prop('disabled', false);
-      self._submitting = false;
-      } else {
-        attributes['_csrf'] = csrf;
-        
-        self.model.set(attributes);
+        self._submitting = false;
+      } else {        
+        self.model.set(submit_attributes);
         self.model.save(undefined, {        
           error: function (model, response) {
             var data;
