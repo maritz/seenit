@@ -14,6 +14,7 @@ var uid = function uid () {
 };
 
 var password_minlength = 6;
+var default_acl = ['view', 'list', 'create', 'edit', 'delete'];
 
 module.exports = nohm.model('User', {
   idGenerator: 'increment',
@@ -71,21 +72,52 @@ module.exports = nohm.model('User', {
       defaultValue: {
         User: ['self', 'create']
       }
+    },
+    admin: {
+      type: 'boolean',
+      defaultValue: false
     }
   },
   methods: {
     
-    grant: function (action, subject, callback) {
-      
+    allow: function (action, subject) {
+      var testInstance = nohm.factory(subject);
+      if (!testInstance) {
+        return false;
+      } else {
+        var acl = this.p('acl');
+        if ( ! acl.hasOwnProperty(subject) || ! Array.isArray(acl[subject])) {
+          acl[subject] = [];
+        }
+        if (Array.isArray(action)) {
+          acl[subject] = action;
+        } else {
+          if (action === '*') {
+            acl[subject] = default_acl;
+          } else if (acl[subject].indexOf(action) === -1) {
+            acl[subject].push(action);
+          }
+        }
+        this.p('acl', acl);
+        return acl;
+      }
     },
     
     may: function (action, subject, id, callback) {
+      var admin = this.p('admin');
+      if (admin === 'true') {
+        return callback(undefined, true);
+      }
       var acl = this.p('acl');
       
-      if (acl.hasOwnProperty(subject)) {
-        if ( (Array.isArray(acl[subject]) && acl[subject].indexOf(action) !== -1) || 
-          acl[subject] === '*') {
+      if (acl.hasOwnProperty(subject) && Array.isArray(acl[subject])) {
+        if (action !== 'self' && acl[subject].indexOf(action) !== -1) {
           return callback(undefined, true);
+        } else if (action !== 'grant' && acl[subject].indexOf('self') !== -1) {
+          var subject_instance = nohm.factory(subject);
+          if (subject_instance.hasOwnProperty('isSelf') && typeof(subject_instance.isSelf) === 'function') {
+            return subject_instance.isSelf(this, id, callback);
+          }
         }
       }
       
@@ -93,8 +125,37 @@ module.exports = nohm.model('User', {
       callback(undefined, false);
     },
     
-    revoke: function (aciton, subject, callback) {
-      
+    deny: function (action, subject) {
+      var self = this;
+      var testInstance = nohm.factory(subject);
+      if (!testInstance) {
+        return false;
+      } else {
+        var acl = this.p('acl');
+        if ( ! acl.hasOwnProperty(subject)) {
+          return acl;
+        }
+        if (Array.isArray(action)) {
+          return action.forEach(function (item) {
+            self.deny(item, subject);
+          });
+        } else {
+          if (action === '*') {
+            delete acl[subject];
+          } else {
+            var index = acl[subject].indexOf(action);
+            if (index !== -1) {
+              acl[subject].splice(index, 1);
+            }
+          }
+        }
+        this.p('acl', acl);
+        return acl;
+      }
+    },
+    
+    isSelf: function (selfUser, id, callback) {
+      callback(undefined, id === selfUser.id);
     },
     
     
@@ -170,8 +231,12 @@ module.exports = nohm.model('User', {
     },
     
     // makes sure there is no accidental exposure of the password/salt through allProperties
-    allProperties: function (stringify) {
+    allProperties: function (show_privates, stringify) {
       var props = this._super_allProperties.call(this);
+      if ( ! show_privates) {
+        delete props.email;
+        delete props.acl;
+      }
       delete props.password;
       delete props.salt;
       return stringify ? JSON.stringify(props) : props;

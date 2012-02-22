@@ -2,13 +2,20 @@ var file_helper = require('./helpers/file.js');
 var express = require('express');
 var server = express.createServer();
 var nohm = require('nohm').Nohm;
+var registry = require(__dirname+'/registry.js');
+var RedisSessionStore = require('connect-redis')(express);
 
 module.exports = server;
 
 server.use(express.bodyParser());
 server.use(express.methodOverride());
 server.use(express.cookieParser());
-server.use(express.session({ secret: "some secret this is " }));
+server.use(express.session({
+  store: new RedisSessionStore({
+    client: registry.redis
+  }), 
+  secret: "some secret this is " 
+}));
 
 server.use(express.csrf());
 

@@ -49,7 +49,7 @@ exports.init = function (server) {
       /**
        * Minification doesn't work and is completely disabled.
        */
-      'debug': true && server.set('env') === 'development' // minification only in production mode
+      'debug': true || server.set('env') === 'development' // minification only in production mode
     }
   });
   server.use(assetManagerMiddleware);

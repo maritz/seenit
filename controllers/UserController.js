@@ -19,7 +19,7 @@ function UserError(msg, code){
 UserError.prototype.__proto__ = Error.prototype;
 
 function loadUser (req, res, next){
-  var id = req.param('userId');
+  var id = req.param('id');
   var user = new User();
   var load = function (id) {
     user.load(id, function (err) {
@@ -71,8 +71,9 @@ app.get('/', auth.isLoggedIn, function (req, res, next) {
   });
 });
 
-app.get('/:userId([0-9]+)', auth.isLoggedIn, loadUser, function (req, res) {
-  res.send(req.loaded_user.allProperties());
+app.get('/:id([0-9]+)', auth.isLoggedIn, loadUser, function (req, res) {
+  var show_private = req.user.p('admin') === 'true' || req.user.id === req.loaded_user.id;
+  res.send(req.loaded_user.allProperties(show_private));
 });
 
 
@@ -113,7 +114,48 @@ function updateSession (req, res, next) {
 
 app.post('/', auth.may('create', 'User'), newUser, store, updateSession, sendSessionUserdata);
 
-app.put('/:userId([0-9]+)', auth.isLoggedIn, auth.may('edit', 'User', 'userId'), loadUser, auth.isSelfOrAdmin, store, updateSession, sendSessionUserdata);
+app.put('/:id([0-9]+)', auth.may('edit', 'User'), loadUser, store, updateSession, sendSessionUserdata);
+
+app.get('/:takeOrGive(take|give)/me/admin', auth.isLoggedIn, function (req, res, next) {
+  var admin = req.param('takeOrGive') === 'give';
+  req.user.p('admin', admin);
+  req.user.save(function (err) {
+    if (err) {
+      next(new Error(err));
+    } else {
+      res.ok();
+    }
+  });
+});
+
+app.get('/take/me/admin', auth.isLoggedIn, function (req, res) {
+  req.user.p('admin', false);
+  req.user.save(function (err) {
+    if (err) {
+      next(new Error(err));
+    } else {
+      res.ok();
+    }
+  });
+});
+
+app.get('/:allowOrDeny(allow|deny)/:id([0-9]+)', auth.may('allow', 'User'), loadUser, function (req, res, next) {
+  var allowOrDeny = req.param('allowOrDeny');
+  var action = req.param('action');
+  var subject = req.param('subject');
+  if (action && subject) {
+    var new_acl = req.loaded_user[allowOrDeny](action, subject);
+    req.loaded_user.save(function (err) {
+      if (err) {
+        next(new Error(err));
+      } else {
+        res.ok(new_acl);
+      };
+    });
+  } else {
+    next(new UserError('Invalid parameters'));
+  }
+});
 
 app.get('/checkName', function (req, res, next) {
   if (req.param('name')) {
@@ -125,7 +167,7 @@ app.get('/checkName', function (req, res, next) {
       } else {
         setTimeout(function () {
           res.ok();
-        }, 1000);
+        }, 600);
       }
     });
   } else {

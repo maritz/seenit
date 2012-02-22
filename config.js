@@ -17,7 +17,7 @@ var defaults = {
         'xhr-polling',
         'jsonp-polling'
       ],
-      'log level': 3,
+      'log level': 1,
       'close timeout': 1000,
       'heartbeat timeout': 2,
       'heartbeat interval': 5,
@@ -60,6 +60,7 @@ if (env === 'production' || env === 'staging') {
     pw: '3a8d7880bf3757d5a7af2b4029d93f17',
     db: 0
   };
+  defaults.socket.options["log level"] = 1;
 }
 
 if (env === 'staging') {
