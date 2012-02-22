@@ -43,7 +43,7 @@ _r(function (app) {
     
     logout: function () {
       $.get('/REST/User/logout', function () {
-        window.location.reload();
+        window.location = '/';
       });
     }
   });

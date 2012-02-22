@@ -1,3 +1,7 @@
+.tabs > .active > a,
+.tabs > .active > a:hover {
+  cursor: auto;
+}
 .hidden {
   display: none !important;
 }
@@ -43,4 +47,20 @@
   float: right;
   font-weight: bold;
   cursor: pointer;
+}
+* {
+  position: relative;
+}
+#userbox {
+  border: 1px solid #555;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  -moz-box-shadow: 2px 2px 0 0px #338;
+  -webkit-box-shadow: 2px 2px 0 0px #338;
+  box-shadow: 2px 2px 0 0px #338;
+  padding: 5px;
+  position: absolute;
+  right: 10px;
+  top: 10px;
 }

@@ -1,11 +1,14 @@
 @import "defaults.styl"
 @import "mixins.styl"
 
+.tabs > .active > a, .tabs > .active > a:hover
+  cursor auto
+
 .hidden
-  display: none !important
+  display none !important
 
 .error
-  color: font-color-error
+  color font-color-error
 
 .fake_link
   cursor: pointer
@@ -36,3 +39,17 @@
   float right
   font-weight bold
   cursor pointer
+
+*
+  position relative
+
+#userbox
+  border 1px solid #555
+  border-radius 5px
+  box-shadow 2px, 2px, 0, #338
+  padding 5px
+  position absolute
+  right 10px
+  top 10px
+  
+  

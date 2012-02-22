@@ -195,6 +195,8 @@ function login (req, res, next) {
 
 app.post('/login', login, updateSession, sendSessionUserdata);
 
+app.get('/getLoginData', auth.isLoggedIn, sendSessionUserdata);
+
 function logout (req) {
   req.session.userdata = {};
   req.session.logged_in = false; 

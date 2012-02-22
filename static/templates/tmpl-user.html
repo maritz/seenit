@@ -76,3 +76,11 @@ form( novalidate: true)
 <script type="text/x-jade-tmpl" name="email">
 != form('input', { name: 'email'})
 </script>
+
+<script type="text/x-jade-tmpl" name="userbox">
+- if( loaded.success === true )
+  | logged in as #{loaded.data.name}
+- else
+  | yo, dude. need to 
+  a.open_login(href:'#') log the fuck in!
+</script>

@@ -74,7 +74,6 @@ _r(function (app) {
       app.closeOverlay();
       $.jGrowl('Login successful');
       app.trigger('login');
-      app.selfUser = this.model;
     }
     
   });
@@ -85,11 +84,47 @@ _r(function (app) {
    */
   app.views.user.logout = app.base.pageView.extend({    
     init: function () {
-      debugger;
-      if (app.selfUser) {
-        app.selfUser.logou();
+      if (app.user_self) {
+        app.user_self.logout();
       }
     }
+  });
+  
+  /**
+   * Userbox
+   */
+  app.views.userbox = app.base.pageView.extend({
+    
+    model: app.user_self || app.models.Self,
+    
+    module: 'user',
+    action: 'userbox',
+    
+    $el: $('#userbox'),
+    
+    auto_render: true,
+      
+    locals: {
+      test: 'asd',
+      user: app.user_self
+    },
+    
+    init: function () {
+      app.bind('login', this.render);
+    },
+    
+    load: function (callback) {
+      app.user_self = this.model;
+      $.getJSON('/REST/User/getLoginData')
+        .success(function (result, text, something) {
+          app.user_self.set(result.data);
+          callback(null, result.data);
+        })
+        .error(function (xhr, code, text) {
+          callback(text);
+        });
+    },
+    
   });
   
 });

@@ -17,15 +17,16 @@ _r(function (app) {
     auto_render: false,
     model_generated: false,
     max_age: 10000,
+    $el: window.app.config.$content,
     
     initialize: function (module, action, $el) {
       var self = this;
       
       _.extend(this, Backbone.Events);
       
-      this.$el = $el || window.app.config.$content;
-      this.module = module;
-      this.action = action;
+      this.$el = $el || this.$el;
+      this.module = module || this.module;
+      this.action = action || this.action;
       this.i18n = [module, action];
       this.rendered = false;
       
@@ -82,12 +83,24 @@ _r(function (app) {
     
     render: function () {
       var self = this;
-      window.app.template(this.module, this.action, this.locals, function (html) {
-        if (self.afterRender.call(self, html) !== false) {
-          self.trigger('rendered');
-          self.rendered = true;
-        }
+      this.load(function (err, data) {
+        var locals = _.extend({
+          loaded: {
+            data: err || data,
+            success: !err
+          }
+        }, self.locals);
+        window.app.template(self.module, self.action, locals, function (html) {
+          if (self.afterRender.call(self, html) !== false) {
+            self.trigger('rendered');
+            self.rendered = true;
+          }
+        });
       });
+    },
+    
+    load: function (callback) {
+      callback();
     },
     
     afterRender: function (html) {
