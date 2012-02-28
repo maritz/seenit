@@ -18,18 +18,13 @@ var defaults = {
         'jsonp-polling'
       ],
       'log level': 1,
-      'close timeout': 1000,
-      'heartbeat timeout': 2,
-      'heartbeat interval': 5,
-      'polling duration': 20,
       'flash policy server': true,
       'flash policy port': 3013,
       'destroy upgrade': true,
       'browser client': true,
       'browser client minification': true,
       'browser client etag': true,
-      'browser client handler': false,
-      'client store expiration': 15
+      'browser client gzip': true,
     }
   },
   "nohm": {

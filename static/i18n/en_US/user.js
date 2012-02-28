@@ -10,13 +10,17 @@ module.exports = {
         password_repeat: "Repeat password",
         email: "E-Mail"
       },
-      submit: "Sign Up"
+      submit: "Sign Up",
+      login: "Log in",
     },
+    
     login_legend: 'Please log in to use all features of this Page. '+
       '<br/>If you do not have an account yet, you may <a href="#user/register" onclick="app.closeOverlay()">create one here</a>.',
+      
     register: "Sign Up",
     profile: "Profile",
     list: "Index",
+    login: "Log in",
     logout: "Log out"
   },
   register: {

@@ -33,9 +33,14 @@ exec('find static/', function(err, stdout, stderr) {
 
 exports.connectionHandler = function (socket) {
   console.log('Watching files for changes and sending changes to the client via websocket');
-  
-  e.on('checkResources', function (filename) {
+  var checkResources = function (filename) {
+    console.log('sending checkResources');
     socket.emit('checkResources', filename);
-  });
+  }
   
+  e.on('checkResources', checkResources);
+  
+  socket.on('disconnect', function () {
+    e.removeListener('checkResources', checkResources);
+  });
 };

@@ -3,6 +3,14 @@ _r(function (app) {
     app.views.user = {};
   }
   
+  var isNotLoggedIn = function () {
+    return ! isLoggedIn();
+  }
+  
+  var isLoggedIn = function () {
+    return app.user_self.get('name');
+  }
+  
   /**
    * #/User/list
    */
@@ -22,7 +30,7 @@ _r(function (app) {
         success: success,
         error: function (collection, response) {
           var json = JSON.parse(response.responseText);
-          window.history.back();
+          app.back();
           if (json.data.error.msg === 'need_login') {
             app.overlay({view: 'login_needed'});
       
@@ -48,7 +56,56 @@ _r(function (app) {
     
     model: app.models.User,
     
-    max_age: 1000*60*60,
+    max_age: 0,
+    
+    checkAllowed: isNotLoggedIn,
+    
+    saved: function () {
+      app.go('User/details/');
+      this.model.unbind('saved', this.saved);
+    }
+    
+  });
+  
+  /**
+   * #/User/profile
+   */
+  app.views.user.profile = app.base.formView.extend({
+    
+    auto_render: true,
+    
+    model: app.models.User,
+    
+    max_age: 0,
+    
+    checkAllowed: isLoggedIn,
+    
+    load: function (callback) {
+      this.model.set({'id': app.user_self.id});
+      this.model.fetch({
+        success: function (user, response) {
+          callback(null, user);
+        },
+        error: function (user, response) {
+          app.overlay({locals: {error: response.data}, view: 'error'});
+        }
+      });
+    }
+    
+  });
+  
+  /**
+   * #/User/edit_profile
+   */
+  app.views.user.edit_profile = app.base.formView.extend({
+    
+    auto_render: true,
+    
+    model: app.models.User,
+    
+    max_age: 0,
+    
+    checkAllowed: isLoggedIn,
     
     saved: function () {
       app.go('User/details/');
@@ -65,15 +122,21 @@ _r(function (app) {
     
     auto_render: true,
     
+    max_age: 0,
+    
     model: app.models.Self,
+    
+    checkAllowed: isNotLoggedIn,
     
     /**
      * Login successful
      */
     saved: function () {
-      app.closeOverlay();
       $.jGrowl('Login successful');
-      app.trigger('login');
+      app.once('login', function () {
+        app.back();
+      });
+      app.trigger('logging_in');
     }
     
   });
@@ -110,7 +173,7 @@ _r(function (app) {
     },
     
     init: function () {
-      app.bind('login', this.render);
+      app.bind('logging_in', this.render);
     },
     
     load: function (callback) {
@@ -119,6 +182,7 @@ _r(function (app) {
         .success(function (result, text, something) {
           app.user_self.set(result.data);
           callback(null, result.data);
+          app.trigger('login');
         })
         .error(function (xhr, code, text) {
           callback(text);

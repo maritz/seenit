@@ -13,3 +13,7 @@ livejs.on('connect', function () {
     Live.refreshResource(file_info.file_name, file_type);
   });
 });
+
+livejs.on('disconnect', function () {
+  console.log('OH NOES - livejs socket lost! :-(', (new Date()).toString());
+});

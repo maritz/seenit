@@ -15,9 +15,14 @@ form.form-horizontal( novalidate: true)
 
 <script type="text/x-jade-tmpl" name="sub_navigation">
 ul.nav.pills
-  each link in ['register', 'profile', 'list', 'logout']
-    li
-      a( href: '#user/'+link)= _t(link)
+  - if(app.user_self.get('name'))
+    each link in ['profile', 'list', 'logout']
+      li
+        a( href: '#user/'+link)= _t(link)
+  - else
+    each link in ['register', 'login']
+      li
+        a( href: '#user/'+link)= _t(link)
 </script>
 
 <script type="text/x-jade-tmpl" name="list">
@@ -34,18 +39,17 @@ span Some stinking user details!
 </script>
 
 <script type="text/x-jade-tmpl" name="profile">
-span
-  br
-  the user profile is not implemented yet. :-(
-  br 
-  but you can look at the json data in the API 
-  a( href: "/REST/User/1")
-    /REST/User/[id]
-  br
-  | (
-  span.fake_link(onclick: "app.overlay({view: 'login_needed'})")
-    | login needed
-  | )
+ui
+  li ID: 
+    = loaded.data.id
+  li Name: 
+    = loaded.data.get('name')
+  li E-Mail: 
+    = loaded.data.get('email')
+  li Admin: 
+    = loaded.data.get('admin')
+  li
+    a( href: '#user/edit_profile') Edit
 </script>
 
 

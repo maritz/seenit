@@ -3,7 +3,7 @@ _r('form_templates'); // see app.initiaize
 
 var App = Backbone.Router.extend({
   
-  initialize: function (spec) {    
+  initialize: function (spec) {
     var self = this;
     this.config = {
       $content: $('#content'),
@@ -23,16 +23,26 @@ var App = Backbone.Router.extend({
     };
     this.route('*args', 'routeToView', this.router);
     this._templates = {};
-    this.selfUser = null;
+    this.history = [];
     
     this.template('form', 'input', {}, function () {
       // make sure we have the form templates loaded so we can safely call them from other templates
       _r('form_templates', true);
     });
     
-    this.template('page', 'top_navigation', {}, function (html) {
-      self.config.$navigation.html(html);
-      //self.navigation();
+    var reload_navigation = function (refresh_active) {
+      self.template('page', 'top_navigation', {}, function (html) {
+        self.config.$navigation.html(html);
+        if (refresh_active) {
+          self.navigation();
+        }
+      });
+    }
+    reload_navigation();
+    this.bind('login', function () {
+      if (self.current.module !== null) {
+        _.delay(reload_navigation,0,true);
+      }
     });
   },
   
@@ -43,9 +53,10 @@ var App = Backbone.Router.extend({
         action = 'index',
         parameters = [],
         previous = this.current,
-        self = this;
-    
-    this.currentRoute = route; // for reloading
+        self = this,
+        orig_route = route;
+        
+    self.history_add(orig_route);
     
     if (route !== '') {
       route = route.split('/');
@@ -72,7 +83,8 @@ var App = Backbone.Router.extend({
         self.current = {
           module: module,
           action: action,
-          view: view
+          view: view,
+          route: orig_route
         };
         self.navigation();
         self.breadcrumb(parameters);
@@ -83,6 +95,7 @@ var App = Backbone.Router.extend({
         $.jGrowl('Sorry, there was an error while trying to process your action');
         console.log('Routing error in route '+route+':');
         console.log(e.stack);
+        app.back();
       } else {
         console.log('view stopped rendering');
       }
@@ -130,7 +143,21 @@ var App = Backbone.Router.extend({
   },
   
   reload: function () {
-    this.router(this.currentRoute, true);
+    this.router(this.history[0] || '/', true);
+  },
+  
+  back: function () {
+    this.history.shift();
+    this.navigate(this.history[0] || '', true);
+  },
+  
+  history_add: function (route) {
+    if (route !== this.history[0]) {
+      this.history.unshift(route);
+    }
+    if (this.history.length > 20) {
+      this.history.splice(20);
+    }
   },
   
   breadcrumb: function (parameters) {

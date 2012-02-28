@@ -47,5 +47,6 @@ _r(function (app) {
       });
     }
   });
+  app.user_self = new app.models.Self();
   
 });

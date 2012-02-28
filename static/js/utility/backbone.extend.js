@@ -30,8 +30,13 @@ _r(function (app) {
       this.i18n = [module, action];
       this.rendered = false;
       
+      if ( ! this.checkAllowed()) {
+        this.closeOrBack();
+        return;
+      }
+      
       if (this.model) {
-        if ( ! this.model.hasOwnProperty('get')) {
+        if ( ! this.model.get || ! typeof(this.model.get) === 'function') {
           this.model = new this.model();
           this.model_generated = true;
         }
@@ -60,7 +65,7 @@ _r(function (app) {
         self._check_gc();
       }, 250);
       
-      this._expiration = this.max_age + 1+new Date();
+      this._expiration = +new Date() + this.max_age;
     },
     
     _check_gc: function () {
@@ -109,6 +114,18 @@ _r(function (app) {
     
     isExpired: function () {
       return +new Date() > this._expiration;
+    },
+    
+    checkAllowed: function () {
+      return true;
+    },
+    
+    closeOrBack: function () {
+      if (this.$el.parent()[0] === app.config.$content[0]) {
+        app.back();
+      } else {
+        app.closeOverlay();
+      }
     }
     
   });

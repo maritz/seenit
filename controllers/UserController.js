@@ -73,7 +73,7 @@ app.get('/', auth.isLoggedIn, function (req, res, next) {
 
 app.get('/:id([0-9]+)', auth.isLoggedIn, loadUser, function (req, res) {
   var show_private = req.user.p('admin') === 'true' || req.user.id === req.loaded_user.id;
-  res.send(req.loaded_user.allProperties(show_private));
+  res.ok(req.loaded_user.allProperties(show_private));
 });
 
 
