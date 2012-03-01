@@ -51,7 +51,7 @@ function loadUser (req, res, next){
   }
 }
 
-app.get('/', auth.isLoggedIn, function (req, res, next) {
+app.get('/', auth.isLoggedIn, auth.may('list', 'User'), function (req, res, next) {
   User.find(function (err, ids) {
     if (err) {
       next(new UserError('Fetching the user ids failed: '+err));
@@ -212,7 +212,7 @@ app.get('/logout', function (req, res) {
   res.ok();
 });
 
-app.del('/:userId([0-9]+)', loadUser, auth.isSelfOrAdmin, function (req, res, next) {
+app.del('/:userId([0-9]+)', auth.may('edit', 'User'), loadUser, function (req, res, next) {
   var doLogout = false;
   if (req.session.userdata.id === req.loaded_user.id) {
     doLogout = true;

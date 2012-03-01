@@ -1,5 +1,5 @@
 <script type="text/x-jade-tmpl" name="form">
-h1!=_t('headline')
+h2!=_t('headline')
 form.form-horizontal( novalidate: true)
   - var model = parentLocals._model;
   fieldset
@@ -38,9 +38,9 @@ ul.nav.pills
 </script>
 
 <script type="text/x-jade-tmpl" name="list">
-- if (users)
+- if (data)
   ul
-    each model in users.models
+    each model in data.models
       li!= JSON.stringify(model.toJSON())
 - else
   | No users found
@@ -95,7 +95,8 @@ form( novalidate: true)
 
 <script type="text/x-jade-tmpl" name="userbox">
 - if (data.get('name'))
-  | logged in as #{data.get('name')}
+  | logged in as 
+  a(href: '#user/profile')= data.get('name')
 - else
   | yo, dude. need to 
   a.open_login(href:'#') log the fuck in!

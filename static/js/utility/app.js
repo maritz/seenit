@@ -57,6 +57,7 @@ var App = Backbone.Router.extend({
         self = this,
         orig_route = route;
         
+    self.closeOverlay();
     self.history_add(orig_route);
     
     if (route !== '') {
@@ -135,6 +136,7 @@ var App = Backbone.Router.extend({
       after_render();
     } else {
       view.once('rendered', after_render);
+      view.once('error', after_render);
     }
     return view;
   },

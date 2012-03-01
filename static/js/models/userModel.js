@@ -57,7 +57,8 @@ _r(function (app) {
           self.loaded = true;
           app.trigger('user_loaded', true);
         })
-        .error(function () {
+        .error(function (jqXHR) {
+          jqXHR.handled = true;
           self.loaded = true;
           app.trigger('user_loaded', false);
         });

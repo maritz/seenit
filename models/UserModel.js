@@ -219,7 +219,7 @@ module.exports = nohm.model('User', {
           case 'salt':
           case 'admin':
           case 'acl':
-            return false; // make sure the salt isn't overwritten
+            return false; // make sure these aren't set via store. use the special methods or .p() directly.
           case 'password':
             if( self.id && ! data) {
               return false;

@@ -24,3 +24,15 @@ ul.sub_navigation
   .modal-body
     !=body
 </script>
+
+<script type="text/x-jade-tmpl" name="error">
+| There was an error while rendering the requeste page.
+br
+| You can 
+a.reload_page(href:'#asd') retry
+| , 
+a.go_back(href:'#') go back
+|  or continue browsing from here.
+br
+| We'd also be happy if you could contact an administrator about this so we can make sure it doesn't happen again.
+</script>

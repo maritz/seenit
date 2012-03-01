@@ -18,6 +18,7 @@ exports.isLoggedIn = function (req, res, next) {
 };
 
 exports.isSelfOrAdmin = function (req, res, next) {
+  console.log('DEPRECATED? auth.isSelfOrAdmin');
   if (req.session.logged_in && req.loaded_user) {
     if (req.session.userdata.id === +req.loaded_user.id) {
       // loaded user is session user
@@ -37,16 +38,18 @@ exports.isSelfOrAdmin = function (req, res, next) {
 };
 
 exports.may = function (action, subject, param_name) {
+  param_name = param_name || 'id';
+  var fail = new Error('Checking roles failed');
+  var may_not = new AuthError('privileges_low');
   return function (req, res, next) {
-    param_name = param_name || 'id';
     var id = req.param(param_name);
     var may = req.user.may(action, subject, id, function (err, may){
       if (err) {
-        next(new Error('Checking roles failed'));
+        next(fail);
       } else if (may) {
         next();
       } else {
-        next(new AuthError('privileges_low'));
+        next(may_not);
       }
     });
   };

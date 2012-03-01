@@ -14,36 +14,11 @@ _r(function (app) {
   /**
    * #/user/list
    */
-  app.views.user.list = app.base.pageView.extend({
+  app.views.user.list = app.base.listView.extend({
     
-    init: function () {
-      var self = this;
-      var success = function (collection) {
-        self.addLocals({
-          users: collection
-        });
-        self.render();
-      };
-      
-      var list = new app.collections.User();
-      list.fetch({
-        success: success,
-        error: function (collection, response) {
-          var json = JSON.parse(response.responseText);
-          app.back();
-          if (json.data.error.msg === 'need_login') {
-            app.overlay({view: 'login_needed'});
-      
-            app.once('login', function () {
-              list.fetch({success: success, error: function () {console.log('ERROR WHILE FETCHING LIST');}});
-            });
-          } else {
-            app.overlay({locals: {error: json.data.error.msg}, view: 'error'});
-            self.trigger('error');
-          }
-        }
-      });
-    }
+    collection: app.collections.User,
+    auto_render: true,
+    reload_on_login: true
     
   });
   
@@ -82,18 +57,14 @@ _r(function (app) {
     
     auto_render: true,
     model: app.models.User,
-    checkAllowed: isLoggedIn,
     
     load: function (callback) {
+      var self = this;
       this.model.set({'id': app.user_self.id});
-      this.model.fetch({
-        success: function (user, response) {
-          callback(null, user);
-        },
-        error: function (user, response) {
-          app.overlay({locals: {error: response.data}, view: 'error'});
-        }
-      });
+      this.model.fetch()
+        .always(function (res) {
+          callback(res.status >= 400, self.model);
+        });
     }
     
   });
@@ -111,13 +82,8 @@ _r(function (app) {
     
     load: function (callback) {
       this.model.id = app.user_self.id;
-      this.model.fetch({
-        success: function (user, response) {
-          callback(null, user);
-        },
-        error: function (user, response) {
-          app.overlay({locals: {error: response.data}, view: 'error'});
-        }
+      this.model.fetch(function (user, response) {
+        callback(null, user);
       });
     },
     

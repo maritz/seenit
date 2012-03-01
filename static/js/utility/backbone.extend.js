@@ -72,7 +72,11 @@ _r(function (app) {
       }
       
       if (this.reload_on_login) {
-        app.bind('login', this.render, this);
+        app.once('login', function () {
+          if (self.$el.parent().length !== 0 && (app.current.view === self || ! self.$el.hasClass('main_content'))) {
+            self.render();
+          }
+        });
       }
       
       this._gc_interval = setInterval(function () {
@@ -86,13 +90,16 @@ _r(function (app) {
     _check_gc: function () {
       if (this.rendered && this.$el.parent().length === 0) {
         clearInterval(this._gc_interval);
-        if (this.model_generated) {
-          this.model.unbind();
-          delete this.model;
-        }
-        app.unbind('login', this.render, this);
-        this.unbind();
+        this._unload();
       }
+    },
+    
+    _unload: function () {
+      if (this.model_generated) {
+        this.model.unbind();
+        delete this.model;
+      }
+      this.unbind();
     },
     
     addLocals: function (locals) {
@@ -102,20 +109,50 @@ _r(function (app) {
       this.locals = _.extend(this.locals, locals);
     },
     
-    render: function () {
+    successRender: function (locals) {
       var self = this;
-      this.load(function (err, data) {
-        var locals = _.extend({
-          data: data,
-          err: err
-        }, self.locals);
-        window.app.template(self.module, self.action, locals, function (html) {
+      app.template(this.module, this.action, locals, function (html) {
+        if (html === false) {
+          self.errorRender(locals);
+        } else {
           if (self.afterRender.call(self, html) !== false) {
             self.trigger('rendered');
             self.rendered = true;
             self.delegateEvents();
           }
-        });
+        }
+      });
+    },
+    
+    errorRender: function (locals) {
+      var self = this;
+      var module = 'page';
+      var action = 'error';
+      if (this.own_error_template) {
+        module = this.module;
+        if (_.isString(this.own_error_template)) {
+          action = this.own_error_template;
+        }
+      }
+      app.template(module, action, locals, function (html) {
+        self.afterRender.call(self, html)
+        self.trigger('error');
+        self.rendered = true;
+      });
+    },
+    
+    render: function () {
+      var self = this;
+      this.load(function (err, data) {
+        var locals = _.extend({
+          success: !err,
+          data: err ? err : data,
+        }, self.locals);
+        if (err) {
+          self.errorRender(locals);
+        } else {
+          self.successRender(locals);
+        }
       });
     },
     
@@ -123,7 +160,7 @@ _r(function (app) {
       callback();
     },
     
-    afterRender: function (html) {
+    afterRender: function (html, error) {
       this.$el.html(html);
     },
     
@@ -166,11 +203,56 @@ _r(function (app) {
     }
     
   });
+      
+  app.base.listView = app.base.pageView.extend({
+    
+    initialize: function () {
+      if (this.collection) {
+        if ( ! this.collection.getByCid || typeof(this.collection.getByCid) !== 'function') {
+          this.collection = new this.collection();
+          this.collection_generated = true;
+        }
+        this.addLocals({collection: this.collection});
+      }
+      
+      if ( ! app.base.pageView.prototype.initialize.apply(this, arguments)) {
+        return false;
+      }
+    },
+    
+    _unload: function () {
+      this.collection.unbind();
+      app.base.pageView.prototype._unload.apply(this, arguments);
+    },
+    
+    load: function (callback) {
+      var self = this;
+      
+      this.collection.fetch({
+        success: function (collection) {
+          callback(null, collection);
+        },
+        error: function (collection, response) {
+          var json = JSON.parse(response.responseText);
+          callback(json, null);
+        }
+      });
+    }
+    
+  });
   
   app.base.collection = Backbone.Collection.extend({
+    
+    /**
+     * Overwriting Backbone.Collection.parse() to use the proper root in the response json.
+     */
     parse: function (response) {
       return response.data ? response.data : [];
     },
+    
+    /**
+     * Proxy fetch to accept one argument as a callback for success and options.
+     */
     fetch: function (options) {
       if (typeof(options) === 'function') {
         options = {
@@ -192,6 +274,19 @@ _r(function (app) {
      */
     parse: function (resp) {
      return resp.data;
+    },
+    
+    /**
+     * Proxy fetch to accept one argument as a callback for success and options.
+     */
+    fetch: function (options) {
+      if (typeof(options) === 'function') {
+        options = {
+          success: options,
+          error: options
+        };
+      }
+      return Backbone.Model.prototype.fetch.call(this, options);
     },
     
     /**
