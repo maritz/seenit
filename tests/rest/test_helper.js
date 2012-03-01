@@ -1,6 +1,6 @@
 var Cookie = require('request/vendor/cookie/index.js');
 var async = require('async');
-var json = require('async');
+var json;
 
 module.exports.setJson = function (new_json) {
   json = new_json;

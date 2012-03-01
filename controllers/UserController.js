@@ -158,18 +158,23 @@ app.get('/:allowOrDeny(allow|deny)/:id([0-9]+)', auth.may('allow', 'User'), load
 });
 
 app.get('/checkName', function (req, res, next) {
-  if (req.param('name')) {
-    User.find({name: req.param('name')}, function (err, ids) {
-      if (err) {
-        next(new UserError('Database error: '+err, 500));
-      } else if (ids.length > 0) {
-        next(new UserError('Name taken.', 400));
-      } else {
-        setTimeout(function () {
-          res.ok();
-        }, 600);
-      }
-    });
+  var name = req.param('name');
+  if (name) {
+    if (name === req.user.p('name')) {
+      res.ok('That is your name.');
+    } else {
+      setTimeout(function () {
+        User.find({name: name}, function (err, ids) {
+          if (err) {
+            next(new UserError('Database error: '+err, 500));
+          } else if (ids.length > 0) {
+            next(new UserError('Name taken.', 400));
+          } else {
+              res.ok();
+          }
+        });
+      }, 800);
+    }
   } else {
     next(new UserError('No name to check in parameters.'));
   }

@@ -10,8 +10,8 @@ module.exports = {
         password_repeat: "Repeat password",
         email: "E-Mail"
       },
-      submit: "Sign Up",
       login: "Log in",
+      submit: "Submit changes"
     },
     
     login_legend: 'Please log in to use all features of this Page. '+
@@ -25,6 +25,13 @@ module.exports = {
   },
   register: {
     headline: "Registration",
+    legend: "Your basic information",
+    forms: {
+      submit: "Sign Up"
+    }
+  },
+  edit_profile: {
+    headline: "Edit profile",
     legend: "Your basic information"
   }
 };

@@ -21,7 +21,8 @@
   },
   "dev-dependencies": {
     "soda": "0.2.5",
-    "nodeunit": ">=0.6.4"
+    "nodeunit": ">=0.6.4",
+    "request": "2.9"
   },
   "subdomain": "maritzstack",
   "scripts": {

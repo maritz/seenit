@@ -11,6 +11,7 @@ _r(function (app) {
   };
   
   _.extend(app, Backbone.Events);
+  _.extend(Backbone.Model.prototype, Backbone.Events);
   
   app.base.pageView = Backbone.View.extend({
     
@@ -18,6 +19,8 @@ _r(function (app) {
     model_generated: false,
     max_age: 10000,
     $el: window.app.config.$content,
+    wait_for_user_loaded: true,
+    reload_on_login: false,
     
     initialize: function (module, action, $el) {
       var self = this;
@@ -25,14 +28,15 @@ _r(function (app) {
       _.extend(this, Backbone.Events);
       
       this.$el = $el || this.$el;
+      this.el = this.$el[0];
       this.module = module || this.module;
       this.action = action || this.action;
       this.i18n = [module, action];
       this.rendered = false;
       
       if ( ! this.checkAllowed()) {
-        this.closeOrBack();
-        return;
+        this.closeAndBack();
+        return false;
       }
       
       if (this.model) {
@@ -58,7 +62,17 @@ _r(function (app) {
       }
       
       if (this.auto_render) {
-        this.render();
+        if (this.wait_for_user_loaded && ! app.user_self.loaded) {
+          app.once('user_loaded', function () {
+            self.render();
+          });
+        } else {
+          this.render();
+        }
+      }
+      
+      if (this.reload_on_login) {
+        app.bind('login', this.render, this);
       }
       
       this._gc_interval = setInterval(function () {
@@ -66,6 +80,7 @@ _r(function (app) {
       }, 250);
       
       this._expiration = +new Date() + this.max_age;
+      return true;
     },
     
     _check_gc: function () {
@@ -75,6 +90,7 @@ _r(function (app) {
           this.model.unbind();
           delete this.model;
         }
+        app.unbind('login', this.render, this);
         this.unbind();
       }
     },
@@ -90,15 +106,14 @@ _r(function (app) {
       var self = this;
       this.load(function (err, data) {
         var locals = _.extend({
-          loaded: {
-            data: err || data,
-            success: !err
-          }
+          data: data,
+          err: err
         }, self.locals);
         window.app.template(self.module, self.action, locals, function (html) {
           if (self.afterRender.call(self, html) !== false) {
             self.trigger('rendered');
             self.rendered = true;
+            self.delegateEvents();
           }
         });
       });
@@ -120,11 +135,10 @@ _r(function (app) {
       return true;
     },
     
-    closeOrBack: function () {
+    closeAndBack: function () {
+      app.closeOverlay();
       if (this.$el.parent()[0] === app.config.$content[0]) {
         app.back();
-      } else {
-        app.closeOverlay();
       }
     }
     
@@ -133,12 +147,14 @@ _r(function (app) {
   app.base.formView = app.base.pageView.extend({
     
     initialize: function () {
-      app.base.pageView.prototype.initialize.apply(this, arguments);
-      
-      if (this.saved) {
-        this.model.bind('saved', this.saved);
+      if ( ! app.base.pageView.prototype.initialize.apply(this, arguments)) {
+        return false;
       }
-      if (this.error) {
+      
+      if (_.isFunction(this.saved)) {
+        this.model.once('saved', this.saved);
+      }
+      if (_.isFunction(this.error)) {
         this.model.bind('error', this.error);
       }
     },

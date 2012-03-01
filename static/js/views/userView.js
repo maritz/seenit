@@ -12,7 +12,7 @@ _r(function (app) {
   }
   
   /**
-   * #/User/list
+   * #/user/list
    */
   app.views.user.list = app.base.pageView.extend({
     
@@ -48,36 +48,40 @@ _r(function (app) {
   });
   
   /**
-   * #/User/register
+   * #/user/register
    */
   app.views.user.register = app.base.formView.extend({
     
     auto_render: true,
-    
     model: app.models.User,
-    
     max_age: 0,
-    
     checkAllowed: isNotLoggedIn,
+    wait_for_user_loaded: false,
+    reload_on_login: true,
+    
+    render: function () {
+      if (app.user_self.get('name')) {
+        app.back();
+      } else {
+        app.base.formView.prototype.render.apply(this, _.toArray(arguments));
+      }
+    },
     
     saved: function () {
       app.go('User/details/');
-      this.model.unbind('saved', this.saved);
+      app.user_self.set(this.model.toJSON());
+      app.trigger('login');
     }
     
   });
   
   /**
-   * #/User/profile
+   * #/user/profile
    */
-  app.views.user.profile = app.base.formView.extend({
+  app.views.user.profile = app.base.pageView.extend({
     
     auto_render: true,
-    
     model: app.models.User,
-    
-    max_age: 0,
-    
     checkAllowed: isLoggedIn,
     
     load: function (callback) {
@@ -95,17 +99,27 @@ _r(function (app) {
   });
   
   /**
-   * #/User/edit_profile
+   * #/user/edit_profile
    */
   app.views.user.edit_profile = app.base.formView.extend({
     
     auto_render: true,
-    
     model: app.models.User,
-    
     max_age: 0,
     
     checkAllowed: isLoggedIn,
+    
+    load: function (callback) {
+      this.model.id = app.user_self.id;
+      this.model.fetch({
+        success: function (user, response) {
+          callback(null, user);
+        },
+        error: function (user, response) {
+          app.overlay({locals: {error: response.data}, view: 'error'});
+        }
+      });
+    },
     
     saved: function () {
       app.go('User/details/');
@@ -116,36 +130,34 @@ _r(function (app) {
   
   
   /**
-   * #/User/login or manual call
+   * #/user/login or manual call
    */
   app.views.user.login = app.base.formView.extend({
     
-    auto_render: true,
-    
-    max_age: 0,
-    
     model: app.models.Self,
     
+    auto_render: true,
+    max_age: 0,
     checkAllowed: isNotLoggedIn,
+    wait_for_user_loaded: false,
     
     /**
      * Login successful
      */
-    saved: function () {
+    saved: function (arg1, arg2, arg3) {
       $.jGrowl('Login successful');
-      app.once('login', function () {
-        app.back();
-      });
-      app.trigger('logging_in');
+      app.user_self.set(this.model.toJSON());
+      this.closeAndBack();
+      app.trigger('login');
     }
     
   });
   
   
   /**
-   * #/User/logout
+   * #/user/logout
    */
-  app.views.user.logout = app.base.pageView.extend({    
+  app.views.user.logout = app.base.pageView.extend({
     init: function () {
       if (app.user_self) {
         app.user_self.logout();
@@ -158,37 +170,18 @@ _r(function (app) {
    */
   app.views.userbox = app.base.pageView.extend({
     
-    model: app.user_self || app.models.Self,
+    model: app.user_self,
     
     module: 'user',
     action: 'userbox',
     
     $el: $('#userbox'),
-    
     auto_render: true,
-      
-    locals: {
-      test: 'asd',
-      user: app.user_self
-    },
-    
-    init: function () {
-      app.bind('logging_in', this.render);
-    },
+    reload_on_login: true,
     
     load: function (callback) {
-      app.user_self = this.model;
-      $.getJSON('/REST/User/getLoginData')
-        .success(function (result, text, something) {
-          app.user_self.set(result.data);
-          callback(null, result.data);
-          app.trigger('login');
-        })
-        .error(function (xhr, code, text) {
-          callback(text);
-        });
-    },
-    
+      callback(null, app.user_self);
+    }
   });
   
 });

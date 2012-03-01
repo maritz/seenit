@@ -4,14 +4,6 @@ _r(function (app) {
     urlRoot: '/REST/User/',
     nohmName: 'User',
     pw_repeat_set_once: false,
-    initialize: function () {
-      var self = this;
-      this.set({'creation_time': +new Date()});
-      console.log('initializing user model', self.get('creation_time'));
-      this.bind('error', function () {
-        console.log('error in user model', self.get('creation_time'));
-      });
-    },
     validations: {
       password: function () {
         var $password_repeat_el = this.view.$el.find('input[name="password_repeat"]');
@@ -45,6 +37,20 @@ _r(function (app) {
       $.get('/REST/User/logout', function () {
         window.location = '/';
       });
+    },
+    
+    load: function () {
+      var self = this;
+      $.getJSON('/REST/User/getLoginData')
+        .success(function (result) {
+          self.set(result.data);
+          self.loaded = true;
+          app.trigger('user_loaded', true);
+        })
+        .error(function () {
+          self.loaded = true;
+          app.trigger('user_loaded', false);
+        });
     }
   });
   app.user_self = new app.models.Self();

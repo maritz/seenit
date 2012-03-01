@@ -1,16 +1,28 @@
-<script type="text/x-jade-tmpl" name="register">
+<script type="text/x-jade-tmpl" name="form">
 h1!=_t('headline')
 form.form-horizontal( novalidate: true)
+  - var model = parentLocals._model;
+  fieldset
+    legend=_t('legend')
+    span.error.general_error
+    
+    !=partial('username', model.get('name'))
+    !=partial('password')
+    !=partial('password_repeat')
+    !=partial('email', model.get('email'))
+    
+    - var acl = model.get('acl')
+    if( model.get('admin') === "true" || (acl && acl.User && acl.User.indexOf('allow') !== -1))
+      | EDIT RIGHTS
+  != form('input', { type: 'submit', name: 'submit_user', value: _t('forms.submit') })
+</script>
 
-    fieldset
-      legend=_t('legend')
-      span.error.general_error
-      
-      !=partial('username')
-      !=partial('password')
-      !=partial('password_repeat')
-      !=partial('email')
-    != form('input', { type: 'submit', name: 'register', value: _t('forms.submit') })
+<script type="text/x-jade-tmpl" name="register">
+!=partial('form')
+</script>
+
+<script type="text/x-jade-tmpl" name="edit_profile">
+!=partial('form')
 </script>
 
 <script type="text/x-jade-tmpl" name="sub_navigation">
@@ -41,13 +53,13 @@ span Some stinking user details!
 <script type="text/x-jade-tmpl" name="profile">
 ui
   li ID: 
-    = loaded.data.id
+    = data.id
   li Name: 
-    = loaded.data.get('name')
+    = data.get('name')
   li E-Mail: 
-    = loaded.data.get('email')
+    = data.get('email')
   li Admin: 
-    = loaded.data.get('admin')
+    = data.get('admin')
   li
     a( href: '#user/edit_profile') Edit
 </script>
@@ -66,7 +78,7 @@ form( novalidate: true)
 
 
 <script type="text/x-jade-tmpl" name="username">
-!= form('input', { name: 'name'})
+!= form('input', { name: 'name', value: args[0] })
 </script>
 
 <script type="text/x-jade-tmpl" name="password">
@@ -78,12 +90,12 @@ form( novalidate: true)
 </script>
 
 <script type="text/x-jade-tmpl" name="email">
-!= form('input', { name: 'email'})
+!= form('input', { name: 'email', value: args[0]})
 </script>
 
 <script type="text/x-jade-tmpl" name="userbox">
-- if( loaded.success === true )
-  | logged in as #{loaded.data.name}
+- if (data.get('name'))
+  | logged in as #{data.get('name')}
 - else
   | yo, dude. need to 
   a.open_login(href:'#') log the fuck in!

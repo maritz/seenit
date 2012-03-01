@@ -3,6 +3,18 @@ _r('form_templates'); // see app.initiaize
 
 var App = Backbone.Router.extend({
   
+  models: {},
+  collections: {},
+  views: {},
+  formHandler: {},
+  current: {
+    module: null,
+    action: null,
+    view: null
+  },
+  _templates: {},
+  history: [],
+  
   initialize: function (spec) {
     var self = this;
     this.config = {
@@ -12,18 +24,7 @@ var App = Backbone.Router.extend({
     };
     _.extend(this.config, spec);
 
-    this.models = {};
-    this.collections = {};
-    this.views = {};
-    this.formHandler = {};
-    this.current = {
-      module: null,
-      action: null,
-      view: null
-    };
     this.route('*args', 'routeToView', this.router);
-    this._templates = {};
-    this.history = [];
     
     this.template('form', 'input', {}, function () {
       // make sure we have the form templates loaded so we can safely call them from other templates
@@ -142,8 +143,8 @@ var App = Backbone.Router.extend({
     this.navigate('#'+str, true);
   },
   
-  reload: function () {
-    this.router(this.history[0] || '/', true);
+  reload: function (force) {
+    this.router(this.history[0] || '/', force);
   },
   
   back: function () {
@@ -206,10 +207,14 @@ var App = Backbone.Router.extend({
     locals = locals || {};
     
     _.extend(locals, {
-      partial: function (name, locals_) {
-        locals_ = locals_ || {}
-        locals_.parentLocals = locals;
-        locals_._t = locals._t;
+      partial: function (name) {
+        var args = _.toArray(arguments);
+        args.shift();
+        var locals_ = _.extend({},{
+          parentLocals: locals,
+          _t: locals._t,
+          args: args
+        });
         return self.template(module, name, locals_);
       },
       form: function (element, params) {
