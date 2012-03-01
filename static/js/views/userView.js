@@ -122,8 +122,7 @@ _r(function (app) {
     },
     
     saved: function () {
-      app.go('User/details/');
-      this.model.unbind('saved', this.saved);
+      app.go('User/profile/');
     }
     
   });

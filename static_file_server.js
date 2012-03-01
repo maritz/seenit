@@ -60,7 +60,7 @@ exports.init = function (server) {
   server.use(Nohm.connect());
   
   
-  server.get('/', function (req, res, next) { 
+  server.get('/', function (req, res) { 
     res.render(__dirname+'/static/index.jade', {
       layout: false,
       colons: true,

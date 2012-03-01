@@ -182,18 +182,16 @@ module.exports = nohm.model('User', {
       });
     },
     
-    fill: function (data, fields, fieldCheck) {
+    fill: function (data, fieldCheck) {
       var props = {},
           self = this,
-          doFieldCheck = typeof(fieldCheck) === 'function';
-          
-      fields = Array.isArray(fields) ? fields : Object.keys(data);
+          doFieldCheck = typeof(fieldCheck) === 'function',
+          fields = Object.keys(data);
       
       fields.forEach(function (i) {
         var fieldCheckResult;
         
-        if (i === 'salt' || // make sure the salt isn't overwritten
-            ! self.properties.hasOwnProperty(i))
+        if (! self.properties.hasOwnProperty(i))
           return;
           
         if (doFieldCheck)
@@ -216,18 +214,22 @@ module.exports = nohm.model('User', {
     store: function (data, callback) {
       var self = this;
       
-      this.fill(data);
+      this.fill(data, function (field, data) {
+        switch (field) {
+          case 'salt':
+          case 'admin':
+          case 'acl':
+            return false; // make sure the salt isn't overwritten
+          case 'password':
+            if( self.id && ! data) {
+              return false;
+            }
+        }
+      });
       this.save(function () {
         delete self.errors.salt;
         callback.apply(self, Array.prototype.slice.call(arguments, 0));
       });
-    },
-    
-    checkProperties: function (data, fields, callback) {
-      callback = typeof(fields) === 'function' ? fields : callback;
-      
-      this.fill(data, fields);
-      this.valid(false, false, callback);
     },
     
     // makes sure there is no accidental exposure of the password/salt through allProperties

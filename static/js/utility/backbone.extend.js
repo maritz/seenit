@@ -213,7 +213,6 @@ _r(function (app) {
     },
     
     validation: function (attributes, callback) {
-      console.log('validating', Object.keys(attributes));
       var self = this;
       var ret = this.validateSerial(attributes);
       attributes = ret.attributes;

@@ -1,11 +1,21 @@
 _r(function (app) {
+  
+  // because we handle the pw checks differently depending on whether the user exists or not, we can't use the built-in nohmValidations
+  var pw_length = nohmValidations.models.User.password[1][1]['min'];
+  delete nohmValidations.models.User.password;
 
   app.models.User = app.base.model.extend({
     urlRoot: '/REST/User/',
     nohmName: 'User',
     pw_repeat_set_once: false,
     validations: {
-      password: function () {
+      password: function (value) {
+        if ( ! this.id && !value) {
+          return 'user.errors.notEmpty';
+        }
+        if (value && value.length < pw_length) {
+          return 'user.errors.minLength';
+        }
         var $password_repeat_el = this.view.$el.find('input[name="password_repeat"]');
         if ($password_repeat_el.length > 0 && this.pw_repeat_set_once) {
           var password_repeat = $password_repeat_el.val();
