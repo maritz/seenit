@@ -128,13 +128,15 @@ app.get('/:takeOrGive(take|give)/me/admin', auth.isLoggedIn, function (req, res,
   });
 });
 
-app.get('/take/me/admin', auth.isLoggedIn, function (req, res) {
-  req.user.p('admin', false);
-  req.user.save(function (err) {
+app.get('/send_msg/:user', function (req, res, next) {
+  var user = req.param('user');
+  var msg = req.param('msg')+' '+Math.random();
+  Registry.redis.rpush('messages:'+user, msg, function (err, amount) {
     if (err) {
       next(new Error(err));
     } else {
-      res.ok();
+      Registry.redis_pub.publish('messages:'+user, amount);
+      res.ok(amount);
     }
   });
 });
