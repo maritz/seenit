@@ -162,6 +162,7 @@ _r(function (app) {
         self.model.set(submit_attributes);
         self.model.save(undefined, {        
           error: function (model, response) {
+            response.handled = true;
             var data;
             if (response.responseText === 'Forbidden') {
               self.setError(null, 'csrf');

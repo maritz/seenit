@@ -15,6 +15,7 @@ server.use(express.session({
     client: registry.redis
   }), 
   secret: "some secret this is " 
+  // TODO: add configurable key and make sure sockets know about it
 }));
 
 server.use(express.csrf());

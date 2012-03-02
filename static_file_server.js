@@ -32,6 +32,7 @@ exports.init = function (server) {
     file_helper.getFiles(basedir, 'models/'),
     file_helper.getFiles(basedir, 'collections/'),
     file_helper.getFiles(basedir, 'views/'),
+    file_helper.getFiles(basedir, 'sockets/'),
     file_helper.getFiles(basedir, '')
   );
   

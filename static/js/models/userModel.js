@@ -33,7 +33,8 @@ _r(function (app) {
       name: function (value, callback) {
         $.get(this.urlRoot+'checkName?name='+value, function () {
           callback(undefined, true);
-        }).error(function () {
+        }).error(function (xhr) {
+          xhr.handled = true;
           callback('name_taken', true);
         });
       }
