@@ -15,42 +15,43 @@ registry.redis = redis.createClient(config.redis.port, config.redis.host, { no_r
 registry.redis.on('error', function () {
   console.log('redis error: ', arguments);
 });
+registry.redis_pub = redis.createClient(config.redis.port, config.redis.host, { no_ready_check: true });
+registry.redis_pub.on('error', function () {
+  console.log('redis error: ', arguments);
+});
+registry.redis_sub = redis.createClient(config.redis.port, config.redis.host, { no_ready_check: true });
+registry.redis_sub.on('error', function () {
+  console.log('redis error: ', arguments);
+});
 
 nohm.setPrefix(config.nohm.prefix);
 
 var noop = function () {};
 
-async.series([
-  function (cb) {
-    if (config.redis.pw) {
-      registry.redis.auth(config.redis.pw, function (err) {
+var authAndSelect = function (client, db, pw) {
+  return function (cb) {
+    if (pw) {
+      client.auth(pw, function (err) {
         if (err) {
           cb(err)
         } else {
-          registry.redis.select(config.redis.cb || 0, cb);
+          client.select(db || 0, cb);
         }
         cb = noop;
       });
     } else {
-      registry.redis.select(config.redis.cb || 0, cb);
+      client.select(db || 0, cb);
       cb = noop;
     }
-  },
-  function (cb) {
-    if (config.nohm.pw) {
-      nohm_redis_client.auth(config.nohm.pw, function (err) {
-        if (err) {
-          cb(err)
-        } else {
-          nohm_redis_client.select(config.nohm.db || 0, cb);
-          cb = noop;
-        }
-      });
-    } else {
-      nohm_redis_client.select(config.nohm.db || 0, cb);
-      cb = noop;
-    }
-  }], 
+  }
+}
+
+async.series([
+  authAndSelect(registry.redis, config.redis.db, config.redis.pw),
+  authAndSelect(registry.redis_pub, config.redis.db, config.redis.pw),
+  authAndSelect(registry.redis_sub, config.redis.db, config.redis.pw),
+  authAndSelect(nohm_redis_client, config.nohm.db, config.nohm.pw)
+  ],
   function (err) {
     if (err) {
       return console.log('Error: failed initialization while authing/selecting a redis DB ', err);
