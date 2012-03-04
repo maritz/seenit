@@ -109,7 +109,6 @@ module.exports = nohm.model('User', {
         return callback(undefined, true);
       }
       var acl = this.p('acl');
-      
       if (acl.hasOwnProperty(subject) && Array.isArray(acl[subject])) {
         if (action !== 'self' && acl[subject].indexOf(action) !== -1) {
           return callback(undefined, true);
@@ -166,7 +165,6 @@ module.exports = nohm.model('User', {
         return;
       }
       this.find({name: name}, function (err, ids) {
-        console.log('login found', err, name, ids);
         if (ids.length === 0) {
           callback(false);
         } else {

@@ -26,6 +26,8 @@ server.use(function (req, res, next) {
     res.json({result: 'success', data: data});
   };
   
+  //console.log(req.method, req.url);
+  
   req.user = nohm.factory('User');
   if ( req.session.userdata && ! isNaN(req.session.userdata.id)) {
     req.user.load(req.session.userdata.id, function (err) {

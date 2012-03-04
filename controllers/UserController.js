@@ -24,7 +24,7 @@ function loadUser (req, res, next){
   var load = function (id) {
     user.load(id, function (err) {
       if (err) {
-        next(new UserError('Did not find user with id "'+id+'".\nerror: '+err, 404));
+        next(new UserError('not_found', 404));
       } else {
         req.loaded_user = user;
         next();
@@ -36,12 +36,10 @@ function loadUser (req, res, next){
     load(id);
   } else if (id) {
     user.find({name:id}, function (err, ids) {
-      if (err) {
-        next(new UserError('Did not find user with name "'+id+'".\nerror: '+err, 404));
-      } else if (ids.length === 0) {
-        next(new UserError('Did not find user with name "'+id+'".', 404));
+      if (err || ids.length === 0) {
+        next(new UserError('not_found', 404));
       } else if (ids.length > 1) {
-        next(new UserError('Found multiple matches with name "'+id+'".', 500));
+        next(new UserError('multiple_matches', 500));
       } else {
         load(ids[0]);
       }
@@ -114,7 +112,7 @@ function updateSession (req, res, next) {
 
 app.post('/', auth.may('create', 'User'), newUser, store, updateSession, sendSessionUserdata);
 
-app.put('/:id([0-9]+)', auth.may('edit', 'User'), loadUser, store, updateSession, sendSessionUserdata);
+app.put('/:id([0-9]+)', auth.isLoggedIn, auth.may('edit', 'User'), loadUser, store, updateSession, sendSessionUserdata);
 
 app.get('/:takeOrGive(take|give)/me/admin', auth.isLoggedIn, function (req, res, next) {
   var admin = req.param('takeOrGive') === 'give';
@@ -123,25 +121,25 @@ app.get('/:takeOrGive(take|give)/me/admin', auth.isLoggedIn, function (req, res,
     if (err) {
       next(new Error(err));
     } else {
-      res.ok();
+      res.ok(req.user.allProperties());
     }
   });
 });
 
-app.get('/send_msg/:user', function (req, res, next) {
-  var user = req.param('user');
+app.get('/send_msg/:id', function (req, res, next) {
+  var id = req.param('id');
   var msg = req.param('msg')+' '+Math.random();
-  Registry.redis.rpush('messages:'+user, msg, function (err, amount) {
+  Registry.redis.rpush('messages:'+id, msg, function (err, amount) {
     if (err) {
       next(new Error(err));
     } else {
-      Registry.redis_pub.publish('messages:'+user, amount);
+      Registry.redis_pub.publish('messages:'+id, amount);
       res.ok(amount);
     }
   });
 });
 
-app.get('/:allowOrDeny(allow|deny)/:id([0-9]+)', auth.may('allow', 'User'), loadUser, function (req, res, next) {
+app.put('/:allowOrDeny(allow|deny)/:id([0-9]+)', auth.isLoggedIn, auth.may('allow', 'User'), loadUser, function (req, res, next) {
   var allowOrDeny = req.param('allowOrDeny');
   var action = req.param('action');
   var subject = req.param('subject');
@@ -184,6 +182,7 @@ app.get('/checkName', function (req, res, next) {
 
 function login (req, res, next) {
   // TODO: needs login-per-ip counter and ban.
+
   var user = new User();
   var name = req.param('name') || false;
   var password = req.param('password') || false;
@@ -214,7 +213,7 @@ app.get('/logout', function (req, res) {
   res.ok();
 });
 
-app.del('/:userId([0-9]+)', auth.may('edit', 'User'), loadUser, function (req, res, next) {
+app.del('/:id([0-9]+)', auth.isLoggedIn, auth.may('delete', 'User'), loadUser, function (req, res, next) {
   var doLogout = false;
   if (req.session.userdata.id === req.loaded_user.id) {
     doLogout = true;

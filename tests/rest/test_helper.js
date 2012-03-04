@@ -54,7 +54,7 @@ var getCsrf = module.exports.getCsrf  = function (json, callback) {
 
 var putPostDel = function (method, json, uri, data, callback) {
   getCsrf(json, function(token) {
-    data["csrf-token"] = token
+    data["_csrf"] = token
     json[method]({
         uri: json.base_url+uri,
         body: JSON.stringify(data)
@@ -117,23 +117,49 @@ var testSuccess = module.exports.testSuccess = function (t, result, data) {
 
 
 var login = module.exports.login = function (name, pw, callback) {
+  var _login = function (err, result) {
+    logout(function () {
+      post(json, '/User/login', {
+         name: name,
+         password: pw
+        }, function (err, res, body) {
+        if (body.result !== 'success') {
+          console.log('login failed', body);
+          process.exit();
+        }
+        callback(err, res, body);
+      });
+    })
+  };
+  
   if (typeof(name) === 'function') {
     callback = name;
     name = 'test_user1';
     pw = 'test_pw';
-  }
-  logout(function () {
-    post(json, '/User/login', {
-       name: name,
-       password: pw
-      }, function (err, res, body) {
-      if (body.result !== 'success') {
-        console.log('login failed', body);
-        process.exit();
-      }
-      callback(err, res, body);
+    _login();
+  } else if (typeof(pw) === 'function' && Array.isArray(name) ) {
+    callback = pw;
+    var rights = name;
+    name = 'test_user2';
+    pw = 'test_pw';
+    async.series([
+      async.apply(json.get, json.base_url+'/User/logout'),
+      async.apply(post, json, '/User/login', {
+        name: name,
+        password: pw
+      }),
+      async.apply(json.get, json.base_url+'/User/give/me/admin'),
+      async.apply(put, json, '/User/allow/'+2, {
+        subject: rights[0],
+        action: rights[1] || '*'
+      }),
+      async.apply(json.get, json.base_url+'/User/take/me/admin')
+    ], function (err, results) {
+      callback(err, results);
     });
-  });
+  } else {
+    _login();
+  }
 };
 
 var logout = module.exports.logout = function (callback) {

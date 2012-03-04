@@ -42,8 +42,8 @@ exports.may = function (action, subject, param_name) {
   var fail = new Error('Checking roles failed');
   var may_not = new AuthError('privileges_low');
   return function (req, res, next) {
-    var id = req.param(param_name);
-    var may = req.user.may(action, subject, id, function (err, may){
+    var id = parseInt(req.param(param_name), 10);
+    req.user.may(action, subject, id, function (err, may){
       if (err) {
         next(fail);
       } else if (may) {

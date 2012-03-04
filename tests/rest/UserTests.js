@@ -40,14 +40,6 @@ module.exports = {
         t.done();
       });
     },
-    "POST / empty": function (t) {
-      t.expect(1);
-      
-      json.post(url+'/User/', function (err, res, body) {
-        h.testError(t, body, 'SyntaxError', 'Unexpected end of input');
-        t.done();
-      });
-    },
     "POST / csrf missing": function (t) {
       t.expect(1);
       
@@ -55,7 +47,7 @@ module.exports = {
           uri: url+'/User/',
           body: JSON.stringify({})
         }, function (err, res, body) {
-        h.testError(t, body, 'Error', 'crsf failure (request token first)');
+        t.same(body, 'Forbidden', 'Submitting with missing CSRF did not return "Forbidden"');
         t.done();
       });
     },
@@ -69,7 +61,7 @@ module.exports = {
               "csrf-token": 'asd asd'
               })
           }, function (err, res, body) {
-          h.testError(t, body, 'Error', 'crsf failure');
+        t.same(body, 'Forbidden', 'Submitting with wrong CSRF did not return "Forbidden"');
           t.done();
         });
       });
@@ -81,7 +73,9 @@ module.exports = {
         h.testNohmError(t, body, { 
           name: [ 'notEmpty', 'length' ],
           email: [],
-          password: [ 'notEmpty', 'length' ] 
+          password: [ 'notEmpty', 'length' ],
+          acl: [],
+          admin: []
         });
         t.done();
       });
@@ -110,24 +104,23 @@ module.exports = {
           t.done();
         });
       },
-      "GET / authorized": function (t) {
+      "GET / privilieges_low": function (t) {
         t.expect(1);
-        var expected = [ 
-          { name: 'test_user1', email: '', id: 1 },
-          { name: 'test_user2', email: '', id: 2 },
-          { name: 'test_user3', email: '', id: 3 },
-          { name: 'test_user4', email: '', id: 4 },
-          { name: 'test_user5', email: '', id: 5 },
-          { name: 'test_user6', email: '', id: 6 },
-          { name: 'test_user7', email: '', id: 7 },
-          { name: 'test_user8', email: '', id: 8 },
-          { name: 'test_user9', email: '', id: 9 },
-          { name: 'test_user10', email: '', id: 10 } 
-        ];
         
         h.login(function () {
           json.get(url+'/User/', function (err, res, body) {
-            t.deepEqual(body.data, expected, 'Did not receive correct user list.');
+            h.testError(t, body, 'AuthError', 'privileges_low');
+            t.done();
+          });
+        });
+      },
+      "GET / authorized": function (t) {
+        t.expect(1);
+        
+        h.login(['User', 'list'], function () {
+          json.get(url+'/User/', function (err, res, body) {
+            // can't really check more right now because the data that is returned fluctuates too much.
+            t.deepEqual(body.data.length, 10, 'Did not receive correct user list.');
             t.done();
           });
         });
@@ -142,7 +135,9 @@ module.exports = {
           h.testNohmError(t, body, { 
             name: [ 'notUnique' ],
             email: [],
-            password: [] 
+            password: [],
+            acl: [],
+            admin: []
           });
           t.done();
         });
@@ -165,8 +160,7 @@ module.exports = {
         t.expect(4);
         
         h.put(json, '/User/10', {
-          name: 'test_user10_2',
-          password: pw
+          name: 'test_user10_2'
         }, function (err, res, body) {
           t.equal(body.result, 'success', 'Updating a user did not succeed');
           t.notEqual(body.data, undefined, 'Updating a user did not return the correct id.');
@@ -192,15 +186,18 @@ module.exports = {
         h.del(json, '/User/9', {}, function (err, res, body) {
           t.equal(body.result, 'error', 'Removing a different user worked.');
           t.equal(body.data.error.msg, 'privileges_low', 'Removing a different user did not return the correct error.');
-          t.done();
+            t.done();
         });
       },
-      "DEL /15 not in db": function (t) {
-        t.expect(1);
+      "DEL /15 other and not in db": function (t) {
+        t.expect(2);
         
-        h.del(json, '/User/15', {}, function (err, res, body) {
-          t.equal(body.result, 'error', 'Removing inexistant user didn\'t fail.');
-          t.done();
+        h.login(['User', 'delete'], function () {
+          h.del(json, '/User/15', {}, function (err, res, body) {
+            t.equal(body.result, 'error', 'Removing inexistant user didn\'t fail.');
+            t.equal(body.data.error.msg, 'not_found', 'Removing a non-existant user did not return the correct error.');
+            t.done();
+          });
         });
       },
       "DEL /10": function (t) {
