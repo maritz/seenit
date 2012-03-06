@@ -18,6 +18,8 @@ var App = Backbone.Router.extend({
   initialize: function (spec) {
     var self = this;
     this.config = {
+      default_module: 'main',
+      default_action: 'index',
       $content: $('#content'),
       $breadcrumb: $('#breadcrumb'),
       $navigation: $('#navigation')
@@ -50,8 +52,8 @@ var App = Backbone.Router.extend({
   base: {}, // backbone.extend.js
   
   router: function(route, force_rerender){
-    var module = 'main',
-        action = 'index',
+    var module = this.config.default_module,
+        action = this.config.default_action,
         parameters = [],
         previous = this.current,
         self = this,
