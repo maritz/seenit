@@ -2,7 +2,7 @@ var env = process.env.NODE_ENV || 'development';
 
 var defaults = {
   "static": {
-    port: 3003
+    port: 3002
   },
   "socket": {
     options: {
@@ -30,13 +30,13 @@ var defaults = {
   "nohm": {
     url: 'localhost',
     port: 6379,
-    db: 5,
+    db: 3,
     prefix: 'game'
   },
   "redis": {
     url: 'localhost',
     port: 6379,
-    db: 4
+    db: 2
   }
 };
 
@@ -59,7 +59,7 @@ if (env === 'production' || env === 'staging') {
 }
 
 if (env === 'staging') {
-  defaults['static'].port = 3004;
+  defaults['static'].port = 3001;
 }
 
 module.exports = defaults;

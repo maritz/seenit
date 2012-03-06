@@ -10,9 +10,10 @@ ul.breadcrumb
 <script type="text/x-jade-tmpl" name="top_navigation">
 ul.nav.tabs
   li
-    a(href: '#main') Main
-  li
-    a(href: '#user') User
+    a(href: '#shows') Shows
+  - if (app.user_self && app.user_self.get('name'))
+    li
+      a(href: '#user/profile') Profile
 ul.sub_navigation
 </script>
 
@@ -29,7 +30,7 @@ ul.sub_navigation
 | There was an error while rendering the requested page.
 br
 | You can 
-a.reload_page(href:'#asd') retry
+a.reload_page(href:'#') retry
 | , 
 a.go_back(href:'#') go back
 |  or continue browsing from here.
