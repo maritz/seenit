@@ -33,20 +33,12 @@ var App = Backbone.Router.extend({
       _r('form_templates', true);
     });
     
-    var reload_navigation = function (refresh_active) {
-      self.template('page', 'top_navigation', {}, function (html) {
-        self.config.$navigation.html(html);
-        if (refresh_active) {
-          self.navigation();
-        }
-      });
-    }
-    reload_navigation();
     this.bind('login', function () {
       if (self.current.module !== null) {
-        _.delay(reload_navigation,0,true);
+        _.delay(self.navigation,0,true);
       }
     });
+    self.navigation();
   },
   
   base: {}, // backbone.extend.js
@@ -99,7 +91,7 @@ var App = Backbone.Router.extend({
         $.jGrowl('Sorry, there was an error while trying to process your action');
         console.log('Routing error in route '+route+':');
         console.log(e.stack);
-        app.back();
+        self.back();
       } else {
         console.log('view stopped rendering');
       }
@@ -154,6 +146,14 @@ var App = Backbone.Router.extend({
   back: function () {
     this.history.shift();
     this.navigate(this.history[0] || '', true);
+    if (this.history.length > 0) {
+      this.current = {
+        module: this.config.default_module,
+        action: this.config.default_action,
+        route: '/'
+      };
+      this.navigation();
+    }
   },
   
   history_add: function (route) {
@@ -178,38 +178,43 @@ var App = Backbone.Router.extend({
   
   navigation: function  ()  {
     var self = this;
-    var $nav = this.config.$navigation.children('ul.nav');
-    $nav
-      .find('li')
-        .removeClass('active')
-    var $nav_matches = $nav
-      .children('li')
-        .has('a[href^="#'+self.current.module+'/'+self.current.action+'"]')
-          .first()
-            .addClass('active');
-    if ($nav_matches.length === 0) {
+    var $nav = this.config.$navigation;
+    self.template('page', 'top_navigation', {}, function (html) {
       $nav
-        .children('li')
-          .has('a[href^="#'+this.current.module+'"]')
-            .first()
-              .addClass('active');
-    }
-    
-    var $subnav = $nav
-      .find('ul.sub_navigation')
-        .empty();
-    this.template(this.current.module, 'sub_navigation', {
-        _t: function (name) {
-          return $.t(name, 'general', self.current.module);
-        }
-      }, function (html) {
-      $subnav
         .html(html)
         .find('li')
-          .removeClass('active')
-        .has('a[href^="#'+self.current.module+'/'+self.current.action+'"]')
-          .addClass('active');
-    }); 
+          .removeClass('active');
+      var $nav_matches = $nav
+        .find('.nav > li')
+          .has('a[href^="#'+self.current.module+'/'+self.current.action+'"]')
+            .first()
+              .addClass('active');
+      if ($nav_matches.length === 0) {
+        $nav
+          .find('.nav > li')
+            .has('a[href^="#'+self.current.module+'"]')
+              .first()
+                .addClass('active');
+      }
+      
+      var $subnav = $nav
+        .find('ul.sub_navigation')
+          .empty();
+      if (self.current.module) {
+        self.template(self.current.module, 'sub_navigation', {
+            _t: function (name) {
+              return $.t(name, 'general', self.current.module);
+            }
+          }, function (html) {
+          $subnav
+            .html(html)
+            .find('li')
+              .removeClass('active')
+            .has('a[href^="#'+self.current.module+'/'+self.current.action+'"]')
+              .addClass('active');
+        }); 
+      }
+    });
   },
   
   _templates: {},
