@@ -2,7 +2,9 @@ module.exports = {
   general: {
     forms: {
       errors: {
-        notEmpty: "Mustn't be empty"
+        name_taken: "This username is already taken. Please choose a different one.",
+        password_mismatch: "Passwords do not match.",
+        minLength: "Password is too short. Please use at least 6 characters."
       },
       labels: {
         name: "User name",

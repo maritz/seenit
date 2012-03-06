@@ -11,10 +11,10 @@ _r(function (app) {
     validations: {
       password: function (value) {
         if ( ! this.id && !value) {
-          return 'user.errors.notEmpty';
+          return 'notEmpty';
         }
         if (value && value.length < pw_length) {
-          return 'user.errors.minLength';
+          return 'minLength';
         }
         var $password_repeat_el = this.view.$el.find('input[name="password_repeat"]');
         if ($password_repeat_el.length > 0 && this.pw_repeat_set_once) {
@@ -25,7 +25,7 @@ _r(function (app) {
       password_repeat: function (value) {
         this.pw_repeat_set_once = true;
         if (value !== this.view.$el.find('input[name="password"]').val()) {
-          return 'user.errors.password_mismatch';
+          return 'password_mismatch';
         }
       }
     },
