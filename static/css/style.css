@@ -1,0 +1,66 @@
+.tabs > .active > a,
+.tabs > .active > a:hover {
+  cursor: auto;
+}
+.hidden {
+  display: none !important;
+}
+.error {
+  color: #b30000;
+}
+.fake_link {
+  cursor: pointer;
+  color: #66f;
+}
+.jGrowl-notification,
+.jGrowl-closer {
+  background-color: #333;
+  background-color: #ccf;
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ccf), to(#fff));
+  background: -moz-linear-gradient(#ccf, #fff);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ccf, endColorstr=#fff);
+  border: 1px solid #888;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  -moz-box-shadow: 3px 3px 4px 0px #333;
+  -webkit-box-shadow: 3px 3px 4px 0px #333;
+  box-shadow: 3px 3px 4px 0px #333;
+  color: #000;
+  display: none;
+  opacity: 0.9;
+  filter: alpha(opacity=90);
+  padding: 4px 8px;
+}
+.success .jGrowl-message,
+.success .jGrowl-header {
+  color: #3f3;
+}
+.jGrowl-header {
+  font-weight: 700;
+}
+.jGrowl-notification.warning {
+  color: #e8ac14;
+}
+.jGrowl-close,
+.jGrowl-closer {
+  float: right;
+  font-weight: bold;
+  cursor: pointer;
+}
+* {
+  position: relative;
+}
+#userbox {
+  border: 1px solid #555;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  -moz-box-shadow: 2px 2px 0 0px #338;
+  -webkit-box-shadow: 2px 2px 0 0px #338;
+  box-shadow: 2px 2px 0 0px #338;
+  padding: 5px 10px;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}

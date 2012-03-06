@@ -1,0 +1,36 @@
+<script type="text/x-jade-tmpl" name="input">
+- var id = 'input_'+(Math.floor(Math.random()*10))+(+new Date());
+
+.control-group
+  - if (locals.type !== 'submit')
+    
+    - if (locals.label !== false)
+      - if (locals.label && locals["data-label"])
+        label.control-label(for: id, "data-label": locals["data-label"])= label
+      - else if (locals["data-label"])
+        label.control-label(for: id, "data-label": locals["data-label"])!= $.t('forms.labels.'+locals.name)
+      - else
+        label.control-label(for: id, "data-label": locals.name)
+      
+    - if (typeof(locals.link) === 'undefined')
+      - locals.link = true
+      
+    - if (typeof(locals.validate) === 'undefined')
+      - locals.validate = true
+  
+  .controls
+    input( id: id
+      type: locals.type,
+      name: locals.name,
+      required: locals.required,
+      value: locals.value,
+      "data-link": locals.link
+      "data-validate": locals.validate
+      )
+      
+    - if (locals.type !== 'submit')
+      span.error.input_error.help-inline
+      
+    - if (locals.type !== 'submit' && locals.loading !== false)
+      .loading.help-inline.hidden!= $.t('forms.labels.checking')
+</script>

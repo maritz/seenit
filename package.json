@@ -1,0 +1,30 @@
+{
+  "name": "node-stack",
+  "version": "0.0.1-6",
+  "engines": {
+    "node": "0.6.x"
+  },
+  "author": "Moritz Peters",
+  "description": "NOPE NOPE NOPE",
+  "dependencies": {
+    "socket.io": "0.8",
+    "nohm": "0.8.0",
+    "redis": "0.7.1",
+    "express": "2.5.8",
+    "stylus": "0.20.0",
+    "jade": "0.19.0",
+    "async": "0.1.15",
+    "connect-redis": "1.2.0",
+    "connect-assetmanager": "0.0.24",
+    "connect-assetmanager-handlers": "0.0.17"
+  },
+  "dev-dependencies": {
+    "soda": "0.2.5",
+    "nodeunit": "0.6",
+    "request": "2.9"
+  },
+  "subdomain": "maritzstack",
+  "scripts": {
+    "start": "app.js"
+  }
+}

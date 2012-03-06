@@ -1,0 +1,103 @@
+<script type="text/x-jade-tmpl" name="form">
+h2!=_t('headline')
+form.form-horizontal( novalidate: true)
+  - var model = parentLocals._model;
+  fieldset
+    legend=_t('legend')
+    span.error.general_error
+    
+    !=partial('username', model.get('name'))
+    !=partial('password')
+    !=partial('password_repeat')
+    !=partial('email', model.get('email'))
+    
+    - var acl = model.get('acl')
+    if( model.get('admin') === "true" || (acl && acl.User && acl.User.indexOf('allow') !== -1))
+      | EDIT RIGHTS
+  != form('input', { type: 'submit', name: 'submit_user', value: _t('forms.submit') })
+</script>
+
+<script type="text/x-jade-tmpl" name="register">
+!=partial('form')
+</script>
+
+<script type="text/x-jade-tmpl" name="edit_profile">
+!=partial('form')
+</script>
+
+<script type="text/x-jade-tmpl" name="sub_navigation">
+ul.nav.pills
+  - if(app.user_self.get('name'))
+    each link in ['profile', 'list', 'logout']
+      li
+        a( href: '#user/'+link)= _t(link)
+  - else
+    each link in ['register', 'login']
+      li
+        a( href: '#user/'+link)= _t(link)
+</script>
+
+<script type="text/x-jade-tmpl" name="list">
+- if (data)
+  ul
+    each model in data.models
+      li!= JSON.stringify(model.toJSON())
+- else
+  | No users found
+</script>
+
+<script type="text/x-jade-tmpl" name="details">
+span Some stinking user details!
+</script>
+
+<script type="text/x-jade-tmpl" name="profile">
+ui
+  li ID: 
+    = data.id
+  li Name: 
+    = data.get('name')
+  li E-Mail: 
+    = data.get('email')
+  li Admin: 
+    = data.get('admin')
+  li
+    a( href: '#user/edit_profile') Edit
+</script>
+
+
+<script type="text/x-jade-tmpl" name="login">
+form( novalidate: true)
+  fieldset
+    span!=_t('login_legend')
+    span.error.general_error
+    !=form('input', { name: 'name', validate: false})
+    !=form('input', { type: 'password', name: 'password', validate: false})
+  != form('input', { type: 'submit', name: 'login', value: _t('forms.login') })
+</script>
+
+
+
+<script type="text/x-jade-tmpl" name="username">
+!= form('input', { name: 'name', value: args[0] })
+</script>
+
+<script type="text/x-jade-tmpl" name="password">
+!= form('input', { type: 'password', name: 'password'})
+</script>
+
+<script type="text/x-jade-tmpl" name="password_repeat">
+!= form('input', { type: 'password', name: 'password_repeat' })
+</script>
+
+<script type="text/x-jade-tmpl" name="email">
+!= form('input', { name: 'email', value: args[0]})
+</script>
+
+<script type="text/x-jade-tmpl" name="userbox">
+- if (data.get('name'))
+  | logged in as 
+  a(href: '#user/profile')= data.get('name')
+- else
+  | yo, dude. need to 
+  a.open_login(href:'#') log the fuck in!
+</script>
