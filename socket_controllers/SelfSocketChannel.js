@@ -31,7 +31,7 @@ registry.redis_sub.on('pmessage', function (pattern, channel, amount) {
   }
 });
 
-exports.connectionHandler = function (socket) {
+exports.connectionHandlerDisabled = function (socket) {
   //console.log('A logged in user "'+socket.handshake.session.userdata.name+'" connected to the self socket.');
 
   var id = socket.handshake.session.userdata.id;
@@ -43,7 +43,7 @@ exports.connectionHandler = function (socket) {
   });
 };
 
-exports.authorization = function (data, callback) {
+exports.authorizationDisabled = function (data, callback) {
   if ( ! data.session || ! data.session.logged_in) {
     callback('Needs login', false);
   } else {

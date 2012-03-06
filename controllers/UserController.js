@@ -114,30 +114,19 @@ app.post('/', auth.may('create', 'User'), newUser, store, updateSession, sendSes
 
 app.put('/:id([0-9]+)', auth.isLoggedIn, auth.may('edit', 'User'), loadUser, store, updateSession, sendSessionUserdata);
 
-app.get('/:takeOrGive(take|give)/me/admin', auth.isLoggedIn, function (req, res, next) {
-  var admin = req.param('takeOrGive') === 'give';
-  req.user.p('admin', admin);
-  req.user.save(function (err) {
-    if (err) {
-      next(new Error(err));
-    } else {
-      res.ok(req.user.allProperties());
-    }
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/:takeOrGive(take|give)/me/admin', auth.isLoggedIn, function (req, res, next) {
+    var admin = req.param('takeOrGive') === 'give';
+    req.user.p('admin', admin);
+    req.user.save(function (err) {
+      if (err) {
+        next(new Error(err));
+      } else {
+        res.ok(req.user.allProperties());
+      }
+    });
   });
-});
-
-app.get('/send_msg/:id', function (req, res, next) {
-  var id = req.param('id');
-  var msg = req.param('msg')+' '+Math.random();
-  Registry.redis.rpush('messages:'+id, msg, function (err, amount) {
-    if (err) {
-      next(new Error(err));
-    } else {
-      Registry.redis_pub.publish('messages:'+id, amount);
-      res.ok(amount);
-    }
-  });
-});
+}
 
 app.put('/:allowOrDeny(allow|deny)/:id([0-9]+)', auth.isLoggedIn, auth.may('allow', 'User'), loadUser, function (req, res, next) {
   var allowOrDeny = req.param('allowOrDeny');
