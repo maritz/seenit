@@ -178,13 +178,23 @@ var App = Backbone.Router.extend({
   
   navigation: function  ()  {
     var self = this;
-    var $nav = this.config.$navigation;
+    var $nav = this.config.$navigation.children('ul.nav');
     $nav
       .find('li')
         .removeClass('active')
-      .has('a[href^="#'+this.current.module+'"]')
-      .first()
-        .addClass('active');
+    var $nav_matches = $nav
+      .children('li')
+        .has('a[href^="#'+self.current.module+'/'+self.current.action+'"]')
+          .first()
+            .addClass('active');
+    if ($nav_matches.length === 0) {
+      $nav
+        .children('li')
+          .has('a[href^="#'+this.current.module+'"]')
+            .first()
+              .addClass('active');
+    }
+    
     var $subnav = $nav
       .find('ul.sub_navigation')
         .empty();
