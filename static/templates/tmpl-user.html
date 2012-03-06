@@ -27,14 +27,11 @@ form.form-horizontal( novalidate: true)
 
 <script type="text/x-jade-tmpl" name="sub_navigation">
 ul.nav.pills
-  - if(app.user_self.get('name'))
-    each link in ['profile', 'list', 'logout']
-      li
-        a( href: '#user/'+link)= _t(link)
-  - else
-    each link in ['register', 'login']
-      li
-        a( href: '#user/'+link)= _t(link)
+  - if (app.user_self.get('name'))
+    li
+      a( href: '#user/profile')= _t('view_profile')
+    li
+      a( href: '#user/edit_profile')= _t('edit_profile')
 </script>
 
 <script type="text/x-jade-tmpl" name="list">
@@ -60,8 +57,6 @@ ui
     = data.get('email')
   li Admin: 
     = data.get('admin')
-  li
-    a( href: '#user/edit_profile') Edit
 </script>
 
 
@@ -95,9 +90,14 @@ form( novalidate: true)
 
 <script type="text/x-jade-tmpl" name="userbox">
 - if (data.get('name'))
-  | logged in as 
+  | Logged in as 
   a(href: '#user/profile')= data.get('name')
+  br
+  a(href: '#user/logout') Logout
 - else
-  | yo, dude. need to 
-  a.open_login(href:'#') log the fuck in!
+  | You are not logged in.
+  br
+  a.open_login(href:'#') Log in
+  |  or 
+  a(href:'#user/register') Register
 </script>

@@ -1,6 +1,8 @@
 var start_time = +new Date();
 $(function () {
-  window.app = new App();
+  window.app = new App({
+    default_module: 'show'
+  });
   _.bindAll(window.app);
   _r(function () {
     

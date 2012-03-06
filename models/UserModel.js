@@ -70,7 +70,10 @@ module.exports = nohm.model('User', {
     acl: {
       type: 'json',
       defaultValue: {
-        User: ['self', 'create']
+        User: ['self', 'create'],
+        Show: ['view', 'list'],
+        Seasons: ['view', 'list'],
+        Episodes: ['view', 'list']
       }
     },
     admin: {

@@ -9,11 +9,16 @@ ul.breadcrumb
 
 <script type="text/x-jade-tmpl" name="top_navigation">
 ul.nav.tabs
-  li
-    a(href: '#shows') Shows
   - if (app.user_self && app.user_self.get('name'))
     li
-      a(href: '#user/profile') Profile
+      a(href: '#show') Shows
+    li
+      a(href: '#user/profile') User
+  - else
+    li
+      a(href: '#user/register') Register
+    li
+      a(href: '#user/login') Login
 ul.sub_navigation
 </script>
 

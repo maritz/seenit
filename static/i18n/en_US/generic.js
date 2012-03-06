@@ -12,6 +12,6 @@ module.exports = {
     }
   },
   overlays: {
-    login_needed: "Login needed for this action"
+    login_needed: "Login"
   }
 };
