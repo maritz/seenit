@@ -27,7 +27,7 @@ server.use(function (req, res, next) {
   };
   
   //console.log(req.method, req.url);
-  
+  req.loaded = {};
   req.user = nohm.factory('User');
   if ( req.session.userdata && ! isNaN(req.session.userdata.id)) {
     req.user.load(req.session.userdata.id, function (err) {
