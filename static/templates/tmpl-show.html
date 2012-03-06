@@ -1,16 +1,35 @@
-<script type="text/x-jade-tmpl" name="index">
-!= $.t('generic.greetings')
+<script type="text/x-jade-tmpl" name="form">
+form.form-horizontal( novalidate: true)
+  - var model = parentLocals._model;
+  fieldset
+    legend=_t('legend')
+    span.error.general_error
+    
+    != form('input', { name: 'name', value: model.get('name') })
+    
+  != form('input', { type: 'submit', name: 'submit', value: _t('forms.submit') })
 </script>
 
-<script type="text/x-jade-tmpl" name="details">
-| lolo
+<script type="text/x-jade-tmpl" name="create">
+!=partial('form')
+</script>
+
+
+<script type="text/x-jade-tmpl" name="index">
+- if (data && data.length)
+  ul
+    each model in data.models
+      li
+        a(href:"#show/detail/"+model.get('name'))!= model.get('name')
+- else
+  | No shows found.
 </script>
 
 
 <script type="text/x-jade-tmpl" name="sub_navigation">
 ul.nav.pills.small.smaller
   li
-    a(href: '#show/') List
+    a(href: '#show/')=_t('subnav.list')
   li
-    a(href: '#show/create') Watch new
+    a(href: '#show/create')=_t('subnav.create')
 </script>

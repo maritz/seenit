@@ -39,21 +39,27 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'Show'), function (req, res, next
   });
 });
 
-app.get('/:id([0-9]+)', auth.isLoggedIn, loadModel('Show'), function (req, res) {
+app.get('/:id([0-9]+)', auth.isLoggedIn, auth.may('list', 'Show'), loadModel('Show'), function (req, res) {
+  res.ok(req.loaded['Show'].allProperties());
+});
+
+app.get('/view/:name', auth.isLoggedIn, auth.may('list', 'Show'), loadModel('Show', 'name', true), function (req, res) {
   res.ok(req.loaded['Show'].allProperties());
 });
 
 
 function store (req, res, next) {
   var show = req.loaded['Show'];
-  var data = {
-    name: req.param('name')
-  };
-  show.p(data, function (err) {
-    if ( ! err) {
-      next();
-    } else {
+  show.p("name", req.param('name'));
+  
+  show.save(function (err) {
+    if (err === 'invalid') {
       next(new ShowError({error: err, fields: show.errors}, 400));
+    } else if (err) {
+      console.log('Uknown database error in /REST/Show/store.', err);
+      next(new ShowError('Unknown database error', 500));
+    } else {
+      res.ok();
     }
   });
 }
