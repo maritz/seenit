@@ -37,6 +37,14 @@ var defaults = {
     url: 'localhost',
     port: 6379,
     db: 2
+  },
+  "thetvdb": {
+    key: require('fs').readFileSync('thetvdb.key', 'utf8').trim(),
+    mirror_fetching_url: 'http://www.thetvdb.com/api/<apikey>/mirrors.xml',
+    refresh_timers: { // every x minutes
+      mirrors: 60*24*7, // these should change rarely and a refresh should also be triggered if one times out
+      data: 60*24
+    }
   }
 };
 

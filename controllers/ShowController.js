@@ -1,9 +1,16 @@
-var Registry = require(__dirname+'/../registry.js');
+var Registry = require(__dirname+'/../registry');
 var Show = Registry.Models.Show;
 var app = require('express').createServer();
 var auth = require(__dirname+'/../helpers/auth');
 var async = require('async');
 var loadModel = require(__dirname+'/../helpers/loadModel');
+var nohm = require('nohm').Nohm;
+
+var tvdb = nohm.factory('tvdb', 1, function (err) {
+  if (err) {
+    console.log('error while initializing tvdb model:', err);
+  }
+});
 
 function ShowError(msg, code){
   this.name = 'ShowError';
@@ -76,7 +83,18 @@ app.post('/', auth.may('create', 'Show'), newShow, store);
 app.put('/:id([0-9]+)', auth.isLoggedIn, auth.may('edit', 'Show'), loadModel('Show'), store);
 
 app.get('/checkName', function (req, res, next) {
-  
+  var name = req.param('name');
+  if (name) {
+    tvdb.searchSeries(name, function (err, result) {
+      if (err) {
+        next(new ShowError('TheTVDB query failed.'), 502);
+      } else {
+        res.ok(result);
+      }
+    });
+  } else {
+    next(new ShowError('Need name to check.', 400));
+  }
 });
 
 app.del('/:id([0-9]+)', auth.isLoggedIn, auth.may('delete', 'Show'), loadModel('Show'), function (req, res, next) {

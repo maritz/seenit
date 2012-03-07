@@ -1,9 +1,15 @@
-var file_helper = require('./helpers/file.js');
+var file_helper = require('./helpers/file');
 var express = require('express');
 var server = express.createServer();
 var nohm = require('nohm').Nohm;
-var registry = require(__dirname+'/registry.js');
+var registry = require(__dirname+'/registry');
 var RedisSessionStore = require('connect-redis')(express);
+
+// load the tvdb model for global use via the registry
+nohm.factory('tvdb', 1, function (err, model) {
+  registry.tvdb = this;
+  this.getMirrors();
+});
 
 module.exports = server;
 
