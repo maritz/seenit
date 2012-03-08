@@ -6,7 +6,7 @@ _r(function (app) {
   }
   
   /**
-   * #/show/index
+   * #show/index
    */
   app.views.show.index = app.base.listView.extend({
     
@@ -18,7 +18,7 @@ _r(function (app) {
   });
   
   /**
-   * #/show/search
+   * #show/search
    */
   app.views.show.search = app.base.formView.extend({
     
@@ -46,5 +46,9 @@ _r(function (app) {
     }
     
   });
+  
+  /**
+   * #show/import/:id
+   */
   
 });

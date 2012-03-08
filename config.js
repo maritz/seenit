@@ -31,7 +31,7 @@ var defaults = {
     url: 'localhost',
     port: 6379,
     db: 3,
-    prefix: 'game'
+    prefix: 'seenit'
   },
   "redis": {
     url: 'localhost',

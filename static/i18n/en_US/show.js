@@ -10,7 +10,7 @@ module.exports = {
     
     subnav: {
       list: "List",
-      search: "Search"
+      search: "Add Show"
     }
   },
   create: {
