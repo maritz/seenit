@@ -47,12 +47,16 @@ _r(function (app) {
     var $el = this.getInputByName(name);
     var $errSpan = $el.next('span.input_error');
     
+    if (error.indexOf(' ') === -1) {
+      error = $.t('forms.errors.'+error, this.view.i18n[1], this.view.i18n[0]);
+    }
+    
     if ($el.length === 0) {
       $errSpan = $('.general_error', this.view.$el);
     }
     
     $el.parents('.control-group').removeClass('success').addClass('error');
-    $errSpan.html($.t('forms.errors.'+error, this.view.i18n[1], this.view.i18n[0])).show();
+    $errSpan.html(error).show();
   };
   
   formHandler.prototype.clearError = function (name) {
