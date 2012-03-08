@@ -152,19 +152,38 @@ module.exports = nohm.model('tvdb', {
     },
     
     searchSeries: function (name, callback) {
-      this._tvdbRequest('/GetSeries.php?seriesname='+name, function (err, doc) {
-        if (err) {
-          callback(err);
-        } else {
-          var arr = doc.find('//Series').map(function (serie) {
-            return {
-              name: getText(serie.get('SeriesName')),
-              description: getText(serie.get('Overview')),
-              id: getText(serie.get('seriesid')),
-              first_aired: getText(serie.get('FirstAired'))
-            };
+      var self = this;
+      var set_key = 'temp_tvdb_cache:getseries:'+name;
+      var redis = require(__dirname+'/../registry.js').redis;
+      redis.smembers(set_key, function (err, series) {
+        if (err || series.length === 0) {
+          self._tvdbRequest('/GetSeries.php?seriesname='+name, function (err, doc) {
+            if (err) {
+              callback(err);
+            } else {
+              var multi = redis.multi();
+              var arr = doc.find('//Series').map(function (serie) {
+                var values = {
+                  name: getText(serie.get('SeriesName')),
+                  description: getText(serie.get('Overview')),
+                  id: getText(serie.get('seriesid')),
+                  first_aired: getText(serie.get('FirstAired'))
+                };
+                multi.sadd(set_key, JSON.stringify(values));
+                return values;
+              });
+              multi.expire(set_key, 60*60); // expire in one hour
+              multi.exec();
+              callback(null, arr);
+            }
           });
-          callback(null, arr);
+        } else {
+          callback(null, series.map(function (item) {
+            try {
+              return JSON.parse(item);
+            } catch (e) {
+            }
+          }));
         }
       });
     }

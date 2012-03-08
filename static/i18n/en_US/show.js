@@ -4,15 +4,25 @@ module.exports = {
       labels: {
         name: "Show name"
       },
-      submit: "Submit"
+      submit: "Submit",
+      search: "Search"
     },
     
     subnav: {
       list: "List",
-      create: "Create new"
+      search: "Search"
     }
   },
   create: {
     legend: 'Create a new show'
+  },
+  search: {
+    forms: {
+      errors: {
+        "length": "Search string must be at least 2 characters long."
+      }
+    },
+    button: "Search",
+    no_results: "No shows found with that name."
   }
 };

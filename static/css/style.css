@@ -1,3 +1,46 @@
+ul {
+  list-style-type: none;
+}
+#simplemodal-overlay {
+  background-color: #777;
+}
+#simplemodal-container {
+  background: #fff;
+  border: 5px solid #777;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  color: #404040;
+  display: block;
+  padding: 0 10px;
+}
+#simplemodal-container #close_modal {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+#simplemodal-container h1 {
+  margin: 5px 0 10px;
+}
+#simplemodal-container a.modalCloseImg {
+  background: url("/images/icons/close.png") no-repeat;
+  cursor: pointer;
+  display: inline;
+  height: 29px;
+  position: absolute;
+  right: -18px;
+  top: -15px;
+  width: 25px;
+  z-index: 3200;
+}
+ul.show_search li.result {
+  cursor: pointer;
+  margin: 3px 0;
+  padding: 4px;
+}
+ul.show_search li.result:hover {
+  background-color: #e1e5f2;
+}
 .tabs > .active > a,
 .tabs > .active > a:hover {
   cursor: auto;

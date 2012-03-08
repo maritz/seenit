@@ -10,10 +10,33 @@ form.form-horizontal( novalidate: true)
   != form('input', { type: 'submit', name: 'submit', value: _t('forms.submit') })
 </script>
 
-<script type="text/x-jade-tmpl" name="create">
-!=partial('form')
+<script type="text/x-jade-tmpl" name="search">
+form.form-horizontal( novalidate: true)
+  span.error.general_error
+  
+  != form('input', { name: 'name' })
+    
+  != form('input', { type: 'submit', name: 'submit', value: _t('forms.search') })
+
+ul.show_search
 </script>
 
+<script type="text/x-jade-tmpl" name="search_result_line">
+- if (collection.length === 0)
+  li
+    = _t('no_results')
+- else
+  - collection.forEach(function (item) {
+    li.result( data-id: item.get('id') )
+      b=item.get('name')
+      | (first aired: 
+      = item.get('first_aired')
+      | )
+      - if( item.get('description') )
+        |  - 
+        = item.get('description')
+  - })
+</script>
 
 <script type="text/x-jade-tmpl" name="index">
 - if (data && data.length)
@@ -31,5 +54,5 @@ ul.nav.pills.small.smaller
   li
     a(href: '#show/')=_t('subnav.list')
   li
-    a(href: '#show/create')=_t('subnav.create')
+    a(href: '#show/search')=_t('subnav.search')
 </script>
