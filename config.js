@@ -39,10 +39,12 @@ var defaults = {
     db: 2
   },
   "thetvdb": {
-    key: require('fs').readFileSync('thetvdb.key', 'utf8').trim(),
+    key: require('fs').readFileSync(__dirname+'/thetvdb.key', 'utf8').trim(),
     mirror_fetching_url: 'http://www.thetvdb.com/api/<apikey>/mirrors.xml',
-    refresh_timers: { // every x minutes
-      mirrors: 60*24*7, // these should change rarely and a refresh should also be triggered if one times out
+    tmp_path: __dirname+'/tmp/',                                  // path where zip files are temporarily stored
+    banner_path: __dirname+'/static/images/series_banners/',       // path where the banner images are stored
+    refresh_timers: {                                             // every x minutes
+      mirrors: 60*24*7,                                           // these should change rarely and a refresh should also be triggered if one times out
       data: 60*24
     }
   }

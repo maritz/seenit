@@ -1,10 +1,9 @@
 var nohm = require('nohm').Nohm;
 
-module.exports = nohm.model('Show', {
+module.exports = nohm.model('Episode', {
   properties: {
     name: {
       type: 'string',
-      unique: true,
       validations: [
         'notEmpty',
         ['length', {
@@ -20,20 +19,16 @@ module.exports = nohm.model('Show', {
       type: 'string',
       unique: true
     },
-    genre: {
-      type: 'string'
-    },
-    description: {
-      type: 'string'
-    },
-    num_seasons: {
+    season: {
       type: 'integer'
     },
-    seasons: {
-      type: 'json',
-      defaultValue: []
+    number: {
+      type: 'integer'
     },
-    banner: {
+    first_aired: {
+      type: 'timestamp'
+    },
+    plot: {
       type: 'string'
     }
   },

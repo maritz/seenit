@@ -41,6 +41,9 @@ ul.show_search li.result {
 ul.show_search li.result:hover {
   background-color: #e1e5f2;
 }
+a.season_opener {
+  cursor: pointer;
+}
 .tabs > .active > a,
 .tabs > .active > a:hover {
   cursor: auto;

@@ -46,10 +46,6 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'Show'), function (req, res, next
   });
 });
 
-app.get('/:id([0-9]+)', auth.isLoggedIn, auth.may('list', 'Show'), loadModel('Show'), function (req, res) {
-  res.ok(req.loaded['Show'].allProperties());
-});
-
 app.get('/view/:name', auth.isLoggedIn, auth.may('list', 'Show'), loadModel('Show', 'name', true), function (req, res) {
   res.ok(req.loaded['Show'].allProperties());
 });
@@ -87,9 +83,25 @@ app.get('/checkName', function (req, res, next) {
   if (name) {
     tvdb.searchSeries(name, function (err, result) {
       if (err) {
-        next(new ShowError('TheTVDB query failed.'), 502);
+        next(new ShowError('TheTVDB query failed.', 502));
       } else {
         res.ok(result);
+      }
+    });
+  } else {
+    next(new ShowError('Need name to check.', 400));
+  }
+});
+
+app.get('/import/:id', function (req, res, next) {
+  var id = req.param('id');
+  if (id) {
+    tvdb.importSeries(id, 'en', function (err, show) {
+      if (err) {
+        console.log(err);
+        next(new ShowError('TheTVDB query failed.', 502));
+      } else {
+        res.ok(show.p('name'));
       }
     });
   } else {

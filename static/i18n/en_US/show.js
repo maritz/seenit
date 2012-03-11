@@ -20,7 +20,8 @@ module.exports = {
     forms: {
       errors: {
         "length": "Search string must be at least 2 characters long."
-      }
+      },
+      legend: 'Search on TheTVDB.com for shows that can be imported.'
     },
     button: "Search",
     no_results: "No shows found with that name."

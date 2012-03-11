@@ -3,3 +3,5 @@ node_modules
 dump.rdb
 selenium-server*
 *.key
+tmp/*
+static/images/series_banners/*.*

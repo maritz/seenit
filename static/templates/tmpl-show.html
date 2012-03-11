@@ -1,8 +1,17 @@
+<script type="text/x-jade-tmpl" name="sub_navigation">
+ul.nav.pills.small.smaller
+  li
+    a(href: '#show/')=_t('subnav.list')
+  li
+    a(href: '#show/search')=_t('subnav.search')
+</script>
+
 <script type="text/x-jade-tmpl" name="form">
 form.form-horizontal( novalidate: true)
   - var model = parentLocals._model;
   fieldset
-    legend=_t('legend')
+    legend=_t('forms.legend')
+    br
     span.error.general_error
     
     != form('input', { name: 'name', value: model.get('name') })
@@ -12,11 +21,14 @@ form.form-horizontal( novalidate: true)
 
 <script type="text/x-jade-tmpl" name="search">
 form.form-horizontal( novalidate: true)
-  span.error.general_error
-  
-  != form('input', { name: 'name' })
+  fieldset
+    legend=_t('forms.legend')
+    br
+    span.error.general_error
     
-  != form('input', { type: 'submit', name: 'submit', value: _t('forms.search') })
+    != form('input', { name: 'name' })
+      
+    != form('input', { type: 'submit', name: 'submit', value: _t('forms.search') })
 
 ul.show_search
 </script>
@@ -43,16 +55,56 @@ ul.show_search
   ul
     each model in data.models
       li
-        a(href:"#show/detail/"+model.get('name'))!= model.get('name')
+        a(href:'#show/details/'+model.get('name'))
+          != model.get('name')
+          br
+          img(src:'/images/series_banners/'+model.get('banner'))
 - else
   | No shows found.
 </script>
 
+<script type="text/x-jade-tmpl" name="details">
+ul.show_details
+  li
+    img(src:'/images/series_banners/'+data.get('banner'))
+  li
+    b Name: 
+    = data.get('name')
+  li
+    - var genres = data.get('genre').replace(/(^\|)|(\|$)/g, '').split('|');
+    b 
+      - if (genres.length > 1)
+        | Genres: 
+      - else
+        | Genre:
+    = genres.join(', ')
+  li
+    b Description: 
+    = data.get('description')
+  li
+    b TheTVDB link: 
+    a(href:'http://thetvdb.com/?tab=series&id='+data.get('tvdb_id'), target: data.get('name')+' TheTVDB')= data.get('tvdb_id')
+  li
+    b IMDB link: 
+    a(href:'http://imdb.com/title/'+data.get('imdb_id'), target: data.get('name')+' IMDB')= data.get('imdb_id')
+  li
+    b Seasons:
+    ul
+      each season in data.get('seasons')
+        li
+          a.season_opener(data-num: season)
+            | Season #{season}
+          ul.episode_list
+</script>
 
-<script type="text/x-jade-tmpl" name="sub_navigation">
-ul.nav.pills.small.smaller
-  li
-    a(href: '#show/')=_t('subnav.list')
-  li
-    a(href: '#show/search')=_t('subnav.search')
+<script type="text/x-jade-tmpl" name="episode_list">
+li here goes the episode list for season #{locals.toString()}
+</script>
+
+<script type="text/x-jade-tmpl" name="import">
+| Importing from TheTVDB. Please wait...
+</script>
+
+<script type="text/x-jade-tmpl" name="import_failed">
+| Importing failed. Please contact an administrator.
 </script>
