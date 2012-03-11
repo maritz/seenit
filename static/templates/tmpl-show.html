@@ -108,7 +108,7 @@ each episode in episodes
       if parseInt(episode.season, 10) == 0
         =episode.name
       else
-        #{_t('episode')} #{episode.number} #{episode.season}
+        #{_t('episode')} #{episode.number}
     time(datetime:date.format('YYYY-MM-DD'), title:date.format('MMM Do YYYY'))
       =_t('air_date')+': '
       =date.fromNow()
