@@ -93,7 +93,10 @@ ul.show_details
       each season in data.get('seasons')
         li
           a.season_opener(data-num: season)
-            =_t('season')+' '+season
+            if parseInt(season, 10) === 0
+              =_t('special_season')
+            else
+              =_t('season')+' '+season
           ul.episode_list
 </script>
 
@@ -101,7 +104,11 @@ ul.show_details
 each episode in episodes
   - var date = moment(episode.first_aired);
   li
-    a.episode_opener #{_t('episode')} #{episode.number}
+    a.episode_opener
+      if parseInt(episode.season, 10) == 0
+        =episode.name
+      else
+        #{_t('episode')} #{episode.number} #{episode.season}
     time(datetime:date.format('YYYY-MM-DD'), title:date.format('MMM Do YYYY'))
       =_t('air_date')+': '
       =date.fromNow()

@@ -16,6 +16,7 @@ module.exports = {
     show_plural: 'Shows',
     season: 'Season',
     season_plural: 'Seasons',
+    special_season: 'Specials',
     episode: 'Episode',
     episode_plural: 'Episodes',
     plot: 'Plot',
@@ -23,8 +24,8 @@ module.exports = {
     genre_plural: 'Genres',
     air_date: 'Air date',
     tvdb_link: 'TheTVDB Link',
-    imdb_link: 'IMDB Link'
-    seen: 'Seen it?
+    imdb_link: 'IMDB Link',
+    seen: 'Seen it?'
   },
   
   
