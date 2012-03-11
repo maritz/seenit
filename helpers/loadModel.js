@@ -14,7 +14,7 @@ function loadModelError(msg, code){
 
 loadModelError.prototype.__proto__ = Error.prototype;
 
-module.exports = function loadModel(model_name, param_name, allow_string_search) {
+module.exports = function loadModel(model_name, param_name, do_string_search) {
   param_name = param_name || 'id';
   return function (req, res, next){
     var id = req.param(param_name);
@@ -33,9 +33,9 @@ module.exports = function loadModel(model_name, param_name, allow_string_search)
       });
     };
     
-    if (id && !!id.match(/^[\d]*$/)) {
+    if (id && !do_string_search) {
       _load(id);
-    } else if (id && allow_string_search) {
+    } else if (id && do_string_search) {
       model.find({name:id}, function (err, ids) {
         if (err || ids.length === 0) {
           next(new loadModelError('not_found', 404));
