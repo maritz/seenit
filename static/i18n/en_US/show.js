@@ -11,11 +11,28 @@ module.exports = {
     subnav: {
       list: "List",
       search: "Add Show"
-    }
+    },
+    show: 'Show',
+    show_plural: 'Shows',
+    season: 'Season',
+    season_plural: 'Seasons',
+    episode: 'Episode',
+    episode_plural: 'Episodes',
+    plot: 'Plot',
+    genre: 'Genre',
+    genre_plural: 'Genres',
+    air_date: 'Air date',
+    tvdb_link: 'TheTVDB Link',
+    imdb_link: 'IMDB Link'
+    seen: 'Seen it?
   },
+  
+  
   create: {
     legend: 'Create a new show'
   },
+  
+  
   search: {
     forms: {
       errors: {

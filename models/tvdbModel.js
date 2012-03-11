@@ -399,6 +399,7 @@ module.exports = nohm.model('tvdb', {
           }
         });
       } else {
+        console.log('Called tvdbModel.importSeries with invalid id', id);
         return callback('invalid id');
       }
     }

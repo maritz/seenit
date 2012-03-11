@@ -5,6 +5,25 @@ ul.show_search li.result
   
   &:hover
     background-color #e1e5f2
-    
-a.season_opener
+
+ul.show_details
+  li
+    b
+      margin-right 6px
+      &:after
+        content ':'
+
+a.season_opener, a.episode_opener
   cursor pointer
+  
+ul.episode_list 
+  dt
+    label
+      font-weight bold
+  time
+    margin-left 6px
+  span.seen
+    color green
+    font-size 110%
+    font-weight bold
+    margin-left 6px

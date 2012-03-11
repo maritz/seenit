@@ -72,8 +72,7 @@ module.exports = nohm.model('User', {
       defaultValue: {
         User: ['self', 'create'],
         Show: ['view', 'list'],
-        Seasons: ['view', 'list'],
-        Episodes: ['view', 'list']
+        Episode: ['view', 'list']
       }
     },
     admin: {

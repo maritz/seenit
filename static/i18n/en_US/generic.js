@@ -12,7 +12,9 @@ module.exports = {
       labels: {
         checking: "Checking ..."
       }
-    }
+    },
+    name: 'Name',
+    description: 'Description'
   },
   overlays: {
     login_needed: "Login"

@@ -27,7 +27,8 @@ _r(function (app) {
     required_params: 1,
     
     events: {
-      'click a.season_opener': 'toggleSeason'
+      'click a.season_opener': 'toggleSeason',
+      'click a.episode_opener': 'toggleEpisode'
     },
     
     load: function (callback) {
@@ -49,10 +50,29 @@ _r(function (app) {
       if (episode_list.children().length > 0) {
         episode_list.toggle();
       } else {
-        app.template(self.module, 'episode_list', [num], function (html) {
-          episode_list.html(html);
+        $.getJSON('/REST/Episode/byShow/'+self.model.get('id'), {
+          season: num
+        }, function (resp) {
+          var episodes = resp.data;
+          episodes.sort(function (a, b) {
+            if (a.number > b.number) {
+              return 1;
+            } else {
+              return -1;
+            }
+          });
+          var locals = _.extend({episodes: episodes}, self.locals);
+          app.template(self.module, 'episode_list', locals, function (html) {
+            episode_list.html(html);
+          });
         });
       }
+    },
+    
+    toggleEpisode: function (e) {
+      var $target = $(e.target);
+      var $ul = $target.nextAll('dl');
+      $ul.toggleClass('hidden');
     }
     
   });

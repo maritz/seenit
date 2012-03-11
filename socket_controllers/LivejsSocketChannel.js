@@ -6,7 +6,7 @@ var e = new EventEmitter();
 e.setMaxListeners(100);
 
 var file_list;
-exec('find static/', function(err, stdout, stderr) {
+exec('find static/ -path "*series_banners*" -prune -o -print', function(err, stdout, stderr) {
   file_list = stdout.split('\n');
   file_list.forEach(function (name) {
     fs.stat(name, function (err, stats) {

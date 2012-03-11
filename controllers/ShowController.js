@@ -74,8 +74,6 @@ function newShow (req, res, next) {
   next();
 }
 
-app.post('/', auth.may('create', 'Show'), newShow, store);
-
 app.put('/:id([0-9]+)', auth.isLoggedIn, auth.may('edit', 'Show'), loadModel('Show'), store);
 
 app.get('/checkName', function (req, res, next) {
@@ -110,11 +108,21 @@ app.get('/import/:id', function (req, res, next) {
 });
 
 app.del('/:id([0-9]+)', auth.isLoggedIn, auth.may('delete', 'Show'), loadModel('Show'), function (req, res, next) {
-  req.loaded['Show'].remove(function (err) {
+  req.loaded['Show'].getAll('Episode', function (err, ids) {
     if (err) {
-      next(new ShowError('Delete failed: '+err, 500));
+      console.log('Error in del(\'Show/'+req.params('id')+'\'');
+      next(new ShowError('Error getting all episodes'));
     } else {
-      res.ok();
+      ids.forEach(function (id) {
+        nohm.models.Episode.remove(id);
+      });
+      req.loaded['Show'].remove(function (err) {
+        if (err) {
+          next(new ShowError('Delete failed: '+err, 500));
+        } else {
+          res.ok();
+        }
+      });
     }
   });
 });
