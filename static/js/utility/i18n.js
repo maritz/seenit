@@ -31,6 +31,7 @@ _r("i18n");
     module = module || 'generic';
     submodule = submodule || 'general';
     var search_string = module+'.'+submodule+'.'+name;
+    //console.log('looking for', search_string);
     var t = $.jsperanto.translate(search_string);
     if (t !== search_string) {
       return t;

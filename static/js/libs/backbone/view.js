@@ -9,7 +9,7 @@ _r(function (app) {
     wait_for_user_loaded: true,
     reload_on_login: false,
     
-    initialize: function (module, action, $el) {
+    initialize: function (module, action, $el, params) {
       var self = this;
       
       _.extend(this, Backbone.Events);
@@ -20,6 +20,7 @@ _r(function (app) {
       this.action = action || this.action;
       this.i18n = [module, action];
       this.rendered = false;
+      this.params = Array.isArray(params) ? params : [];
       
       if ( ! this.checkAllowed()) {
         this.closeAndBack();
