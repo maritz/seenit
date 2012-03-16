@@ -37,10 +37,11 @@ exports.isSelfOrAdmin = function (req, res, next) {
   }
 };
 
+var fail = new Error('Checking roles failed');
+var may_not = new AuthError('privileges_low');
+
 exports.may = function (action, subject, param_name) {
   param_name = param_name || 'id';
-  var fail = new Error('Checking roles failed');
-  var may_not = new AuthError('privileges_low');
   return function (req, res, next) {
     var id = parseInt(req.param(param_name), 10);
     req.user.may(action, subject, id, function (err, may){
