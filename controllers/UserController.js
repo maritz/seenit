@@ -76,7 +76,7 @@ function sendSessionUserdata(req, res) {
 function updateSession (req, res, next) {
   if (req.loaded['User'] && req.loaded['User'] instanceof User && req.loaded['User'].__inDB) {
     req.session.logged_in = true;
-    req.session.userdata = req.loaded['User'].allProperties();
+    req.session.userdata = req.loaded['User'].allProperties(true);
     next();
   } else {
     next(new UserError('Can\'t set session because the loaded model is not a valid and loaded user model.'));
@@ -163,7 +163,10 @@ function login (req, res, next) {
 
 app.post('/login', login, updateSession, sendSessionUserdata);
 
-app.get('/getLoginData', auth.isLoggedIn, sendSessionUserdata);
+app.get('/getLoginData', auth.isLoggedIn, function (req, res, next) {
+  req.loaded['User'] = req.user;
+  next();
+}, updateSession, sendSessionUserdata);
 
 function logout (req) {
   req.session.userdata = {};

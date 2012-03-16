@@ -65,7 +65,7 @@ var App = Backbone.Router.extend({
       }
     }
     
-    var data_expired = this.current.view !== null ? this.current.view.isExpired() : false;
+    var data_expired = this.current.view ? this.current.view.isExpired() : false;
     
     if (this.current.module === module && this.current.action === action) {
       if (this.current.view !== null && ! force_rerender && ! data_expired) {
@@ -104,7 +104,7 @@ var App = Backbone.Router.extend({
     }
     var view;
     var after_render = function () {
-      if ($el.hasClass('main_content')) {
+      if ($el.hasClass('main_content') && $el[0].parentNode) {
         $el.siblings().remove();
       }
       callback(view);

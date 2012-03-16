@@ -6,25 +6,6 @@ absolute( xDir = left, yDir = top, x = 0px, y = 0px)
   position: absolute;
   {xDir}: x
   {yDir}: y
-  
-vendor(prop, args)
-  -webkit-{prop} args
-  -moz-{prop} args
-  {prop} args
-
-border-radius(radius)
-  vendor('border-radius', radius)
-
-gradient(fromColor, toColor)
-  background-color: fromColor
-  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(fromColor), to(toColor))
-  background: -moz-linear-gradient(fromColor,toColor)
-  filter: unquote('progid:DXImageTransform.Microsoft.gradient(startColorstr='+fromColor+', endColorstr='+toColor+')')
-
-box-shadow(Hoffset, Voffset, blur, color, spread = 0px)
-  -moz-box-shadow: Hoffset Voffset blur spread color
-  -webkit-box-shadow: Hoffset Voffset blur spread color
-  box-shadow: Hoffset Voffset blur spread color
 
 
 opacity(value = 1)

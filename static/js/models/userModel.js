@@ -38,6 +38,29 @@ _r(function (app) {
           callback('name_taken', true);
         });
       }
+    },
+    
+    changeAcl: function (allow_or_deny, action, subject, cb) {
+      var self = this;
+      app.getCsrf(function (csrf) {
+        $.ajax({
+          type: 'PUT',
+          url: '/REST/User/'+allow_or_deny+'/'+self.id,
+          data: {
+            action: action,
+            subject: subject,
+            _csrf: csrf
+          },
+          error: function () { cb('unknown error'); },
+          success: function (json) {
+            console.log(json);
+            self.set({
+              acl: json.data
+            });
+            cb(null); 
+          }
+        });
+      });
     }
   });
   
@@ -63,6 +86,19 @@ _r(function (app) {
           self.loaded = true;
           app.trigger('user_loaded', false);
         });
+    },
+    
+    may: function (action, subject) {
+      if (this.get('admin')) {
+        return true;
+      }
+      var acl = this.get('acl');
+      if (acl && acl.hasOwnProperty(subject) && Array.isArray(acl[subject])) {
+        if (acl[subject].indexOf(action) !== -1) {
+          return true;
+        }
+      }
+      return false;
     }
   });
   app.user_self = new app.models.Self();

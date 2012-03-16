@@ -18,5 +18,9 @@ module.exports = {
   },
   overlays: {
     login_needed: "Login"
+  },
+  errors: {
+    not_found: 'Sorry, We could not find the record you were looking for. If you got here from a link from within this page, please contact an administrator.',
+    not_found_header: 'Loading failed'
   }
 };

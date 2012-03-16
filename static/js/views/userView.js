@@ -43,9 +43,12 @@ _r(function (app) {
     },
     
     saved: function () {
-      app.go('User/details/');
-      app.user_self.set(this.model.toJSON());
-      app.trigger('login');
+      this.reload_on_login = false; // we only want to reload if the login is not from here.
+      app.once('user_loaded', function () {
+        app.go('user/profile/');
+        app.trigger('login');
+      });
+      app.user_self.load();
     }
     
   });
@@ -70,7 +73,7 @@ _r(function (app) {
   });
   
   /**
-   * #/user/edit_profile
+   * #/user/edit_profile(/:id)
    */
   app.views.user.edit_profile = app.base.formView.extend({
     
@@ -79,16 +82,76 @@ _r(function (app) {
     max_age: 0,
     
     checkAllowed: isLoggedIn,
+    edit_is_self: false,
+    
+    events: {
+      'click form.acl label a': 'markAclInputs',
+      'change :checkbox': 'changeAcl'
+    },
+    
+    init: function () {
+      var default_acl = ['view', 'list', 'create', 'edit', 'delete'];
+      this.addLocals({
+        acl: {
+          'User': ['self'].concat(default_acl.concat(['grant'])),
+          'Show': default_acl,
+          'Episode': default_acl
+        }
+      });
+    },
     
     load: function (callback) {
-      this.model.id = app.user_self.id;
+      if (this.params[0] && app.user_self.may('edit', 'User')) {
+        this.model.id = this.params[0];
+      } else {
+        this.model.id = app.user_self.id;
+        this.edit_is_self = true;
+      }
       this.model.fetch(function (user, response) {
         callback(null, user);
       });
     },
     
     saved: function () {
-      app.go('User/profile/');
+      app.go('user/profile/');
+      if (this.edit_is_self) {
+        app.user_self.set(this.model.toJSON());
+      }
+    },
+    
+    markAclInputs: function (e) {
+      debugger;
+      var $target = $(e.target);
+      var boxes = $target.closest('.control-group').find(':checkbox');
+      if ($target.hasClass('setRead')) {
+        boxes
+          .filter('[data-action="view"], [data-action="list"]')
+          .click();
+      }
+      if ($target.hasClass('setWrite')) {
+        boxes
+          .filter('[data-action="create"], [data-action="edit"], [data-action="delete"]')
+          .click();
+      }
+    },
+    
+    changeAcl: function (e) {
+      var $target = $(e.target);
+      var checked = $target.prop('checked');
+      var allow_or_deny = checked ? 'allow' : 'deny';
+      $target.attr('disabled', true);
+      this.model.changeAcl(allow_or_deny, $target.data('action'), $target.data('subject'), function (err) {
+        var class_name = 'success_blink';
+        if (err) {
+          class_name = 'error_blink';
+          $target.prop('checked', !checked);
+        }
+        var $parent = $target.parent().addClass(class_name);
+        setTimeout(function () {
+          $target.attr('disabled', false);
+          $parent.removeClass(class_name);
+        }, 500);
+      });
     }
     
   });
@@ -143,6 +206,10 @@ _r(function (app) {
     $el: $('#userbox'),
     auto_render: true,
     reload_on_login: true,
+    
+    init: function () {
+      this.model.bind('change:name', this.render);
+    },
     
     load: function (callback) {
       callback(null, app.user_self);
