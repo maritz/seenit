@@ -61,7 +61,7 @@ _r(function (app) {
       
       if (this.reload_on_login) {
         app.once('login', function () {
-          if (self.$el.parent().length !== 0 && (app.current.view === self || ! self.$el.hasClass('main_content'))) {
+          if (self.reload_on_login && self.$el.parent().length !== 0 && (app.current.view === self || ! self.$el.hasClass('main_content'))) {
             self.render();
           }
         });
@@ -134,7 +134,7 @@ _r(function (app) {
       this.load(function (err, data) {
         var locals = _.extend({
           success: !err,
-          data: err ? err : data,
+          data: data,
         }, self.locals);
         if (err) {
           self.errorRender(locals);
@@ -222,7 +222,7 @@ _r(function (app) {
         },
         error: function (collection, response) {
           var json = JSON.parse(response.responseText);
-          callback(json, null);
+          callback(json.data, null);
         }
       });
     }

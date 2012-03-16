@@ -74,7 +74,7 @@ module.exports = nohm.model('User', {
       }
     },
     admin: {
-      type: 'boolean',
+      type: 'bool',
       defaultValue: false
     }
   },
@@ -104,8 +104,7 @@ module.exports = nohm.model('User', {
     },
     
     may: function (action, subject, id, callback) {
-      var admin = this.p('admin');
-      if (admin === 'true') {
+      if (this.p('admin') === true) {
         return callback(undefined, true);
       }
       var acl = this.p('acl');

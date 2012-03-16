@@ -20,6 +20,10 @@ $(function () {
     app.once('user_loaded', function () {
       app.userbox = new app.views.userbox();
       
+      if ( ! app.user_self.get('name') && window.location.hash.length <= 1) {
+        app.go('User/register');
+      }
+      
       Backbone.history.start();
       var time = +new Date() - start_time;
       console.log('startup time', time);
@@ -41,6 +45,8 @@ $(function () {
       }
       if (error_msg === 'need_login') {
         app.overlay({view: 'login_needed'});
+      } else if (error_msg === 'not_found') {
+        app.overlay({locals: {error: error_msg}, view: 'not_found'});
       } else {
         app.overlay({locals: {error: error_msg}, view: 'error'});
       }

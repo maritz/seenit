@@ -4,7 +4,7 @@ _r(function (app) {
   var default_locals = {
     header: 'Attention',
     buttons: ['Yes']
-  }
+  };
   
   app.overlay = function (options) {
     this.closeOverlay();
@@ -22,7 +22,7 @@ _r(function (app) {
           }
         }
       });
-    }
+    };
     if (view) {
       app.template('overlays', view, locals, function (body) {
         locals.body = body;

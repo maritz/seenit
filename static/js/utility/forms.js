@@ -2,17 +2,36 @@ _r(function (app) {
   
   var csrf = null;
   
+  var getCsrf = app.getCsrf = getCsrf = function (callback) {    
+    if (csrf) {
+      if (callback) {
+        callback(csrf);
+      }
+      return csrf;
+    } else {
+      $.getJSON('/REST/Util/csrf', function (response) {
+        var token = $.cookie(response.data);
+        $.cookie(response.data, null, { path: '/' });
+        
+        csrf = token;
+        if (callback) {
+          callback(csrf);
+        }
+      });
+      return true;
+    }
+  };
+  
   var formHandler = app.formHandler = function (view, model) {
     this.view = view;
     this.model = model || view.model;
-    this.csrf = false;
     if (typeof(this.model) === 'undefined') {
       throw new Error('formHandler requires a model or the view to have a model');
     }
     this.autoLabels();
     
     if (csrf === null) {
-      this.getCsrf();
+      getCsrf();
     }
   };
   
@@ -73,7 +92,9 @@ _r(function (app) {
   formHandler.prototype.clearLoading = function (name) {
     var $el = this.getInputByName(name);
     $el.siblings('.loading').addClass('hidden');
-    $el.attr('disabled', false);
+    if ( ! this._submitting) {
+      $el.attr('disabled', false);
+    }
   };
   
   formHandler.prototype.setSuccess = function (name) {
@@ -110,29 +131,6 @@ _r(function (app) {
       self.setLoading(name);
       self.model.set(attrs, {validate: true});
     }, 200);
-  };
-  
-  formHandler.prototype.getCsrf = function (callback) {
-    if (this._submitting === true) {
-      console.log('remove check? (forms.js getCsrfl if');
-      return false;
-    }
-    
-    if (csrf) {
-      if (callback) {
-        callback();
-      }
-    } else {
-      $.getJSON('/REST/Util/csrf', function (response) {
-        var token = $.cookie(response.data);
-        $.cookie(response.data, null, { path: '/' });
-        
-        csrf = token;
-        if (callback) {
-          callback();
-        }
-      });
-    }
   };
   
   formHandler.prototype.submit = function (e) {
@@ -234,7 +232,9 @@ _r(function (app) {
     });
     
     $form.bind('submit', function (e) {
-      self.submit.call(self, e);
+      getCsrf(function () {
+        self.submit.call(self, e);
+      });
     });
     
     return this;

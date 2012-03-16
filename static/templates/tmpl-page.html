@@ -19,14 +19,33 @@ ul.sub_navigation
 <script type="text/x-jade-tmpl" name="modal">
 .modal
   .modal-header
-    a.close(data-dismiss:"modal") x
+    a.close(data-dismiss:"modal", href:"#") x
     h3=header
   .modal-body
     !=body
 </script>
 
 <script type="text/x-jade-tmpl" name="error">
-| There was an error while rendering the requested page.
+- if (data && data.error && data.error.msg === 'need_login')
+  !=partial('need_login_error')
+- else
+  !=partial('general_error')
+</script>
+
+
+<script type="text/x-jade-tmpl" name="need_login_error">
+| You need to be logged in to view this content.
+br
+| Go to 
+a.open_login(href:'#user/login') the login
+|  or - if you don't have an account yet - 
+a(href:'#user/register') sign up for free
+|  .
+</script>
+
+
+<script type="text/x-jade-tmpl" name="general_error">
+| There was a problem while rendering the requested page.
 br
 | You can 
 a.reload_page(href:'#asd') retry
@@ -34,5 +53,5 @@ a.reload_page(href:'#asd') retry
 a.go_back(href:'#') go back
 |  or continue browsing from here.
 br
-| We'd also be happy if you could contact an administrator about this so we can make sure it doesn't happen again.
+| If this seems like an error on the page we'd also be happy if you could contact an administrator about this so we can make sure it doesn't happen again.
 </script>

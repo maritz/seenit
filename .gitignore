@@ -2,3 +2,4 @@ node_modules
 .settings.xml
 dump.rdb
 selenium-server*
+static/css/style.css
