@@ -40,14 +40,20 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'User'), function (req, res, next
   });
 });
 
-app.get('/:id([0-9]+)', auth.isLoggedIn, loadModel('User'), function (req, res) {
-  var show_private = req.user.p('admin') === 'true' || req.user.id === req.loaded['User'].id;
-  res.ok(req.loaded['User'].allProperties(show_private));
+var canViewPrivate = 
+app.get('/:id([0-9]+)', auth.isLoggedIn, auth.may('view', 'user'), loadModel('User'), function (req, res) {
+  req.user.may('edit', 'User', req.loaded.User.id, function (err, may) {
+    if (err) {
+      next(new UserError('Checking permissions failed.'));
+    } else {
+      res.ok(req.loaded.User.allProperties(may));
+    }
+  });
 });
 
 
 function store (req, res, next) {
-  var user = req.loaded['User'];
+  var user = req.loaded.User;
   var data = {
     name: req.param('name'),
     password: req.param('password'),

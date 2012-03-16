@@ -21,8 +21,8 @@ form.form-horizontal( novalidate: true)
 <script type="text/x-jade-tmpl" name="edit_profile">
 !=partial('form')
 
-if( app.user_self.may('grant', 'User'))
-  - var self_acl = _model.get('acl');
+- var user_acl = _model.get('acl')
+if(app.user_self.may('grant', 'User') && acl)
   form.form-horizontal.acl
     fieldset
       legend=_t('acl.legend')
@@ -41,11 +41,14 @@ if( app.user_self.may('grant', 'User'))
                   type:'checkbox', 
                   data-action: action, 
                   data-subject: subject, 
-                  checked: self_acl[subject] && self_acl[subject].indexOf(action) !== -1)
+                  checked: user_acl[subject] && user_acl[subject].indexOf(action) !== -1)
 </script>
 
 <script type="text/x-jade-tmpl" name="sub_navigation">
 ul.nav.pills
+  - if (app.user_self.may('list', 'User')) 
+    li
+      a( href: '#user/')= _t('list')
   - if (app.user_self.get('name'))
     li
       a( href: '#user/profile')= _t('view_profile')
@@ -89,7 +92,16 @@ form( novalidate: true)
   != form('input', { type: 'submit', name: 'login', value: _t('forms.login') })
 </script>
 
-
+<script type="text/x-jade-tmpl" name="index">
+- if (data && data.length)
+  ul
+    each model in data.models
+      li
+        a(href:'#user/edit_profile/'+model.get('id'))
+          != model.get('name')
+- else
+  | No users found.
+</script>
 
 <script type="text/x-jade-tmpl" name="username">
 != form('input', { name: 'name', value: args[0] })

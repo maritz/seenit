@@ -12,9 +12,9 @@ _r(function (app) {
   }
   
   /**
-   * #/user/list
+   * #/user/index
    */
-  app.views.user.list = app.base.listView.extend({
+  app.views.user.index = app.base.listView.extend({
     
     collection: app.collections.User,
     auto_render: true,
@@ -120,7 +120,6 @@ _r(function (app) {
     },
     
     markAclInputs: function (e) {
-      debugger;
       var $target = $(e.target);
       var boxes = $target.closest('.control-group').find(':checkbox');
       if ($target.hasClass('setRead')) {
