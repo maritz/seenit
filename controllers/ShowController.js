@@ -107,14 +107,20 @@ app.get('/import/:id', function (req, res, next) {
   }
 });
 
-app.del('/:id([0-9]+)', auth.isLoggedIn, auth.may('delete', 'Show'), loadModel('Show'), function (req, res, next) {
+app.get('/del/:id', auth.isLoggedIn, auth.may('delete', 'Show'), loadModel('Show'), function (req, res, next) {
   req.loaded['Show'].getAll('Episode', function (err, ids) {
     if (err) {
       console.log('Error in del(\'Show/'+req.params('id')+'\'');
       next(new ShowError('Error getting all episodes'));
     } else {
       ids.forEach(function (id) {
-        nohm.models.Episode.remove(id);
+        var ep = nohm.factory('Episode')
+        ep.id = id;
+        ep.remove(id, function (err) {
+          if (err) {
+            console.log('There was an error while trying to remove an episode form a /Show/del:', err);
+          }
+        });
       });
       req.loaded['Show'].remove(function (err) {
         if (err) {

@@ -5,14 +5,11 @@ module.exports = nohm.model('Episode', {
     name: {
       type: 'string',
       validations: [
-        'notEmpty',
-        ['length', {
-          min: 2
-        }]
+        'notEmpty'
       ]
     },
     tvdb_id: {
-      type: 'string',
+      type: 'integer',
       unique: true
     },
     imdb_id: {

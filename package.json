@@ -8,10 +8,11 @@
   "description": "have you seen it?",
   "dependencies": {
     "socket.io": "0.8",
-    "nohm": "0.8",
+    "nohm": "0.9",
     "redis": "0.7",
     "express": "2.5",
     "stylus": "0.20",
+    "nib": "0.3.2",
     "jade": "0.19",
     "async": "0.1",
     "connect-redis": "1.2",

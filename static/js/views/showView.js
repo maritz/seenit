@@ -12,8 +12,7 @@ _r(function (app) {
     
     collection: app.collections.Show,
     auto_render: true,
-    reload_on_login: true,
-    checkAllowed: isLoggedIn
+    reload_on_login: true
     
   });
   

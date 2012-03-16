@@ -146,8 +146,17 @@ var fillShowFromDataXml = function (show, doc) {
           plot: ep.Overview,
           season: ep.SeasonNumber
         });
-        show.link(episode_model);
-        show.link(episode_model, 'season'+ep.SeasonNumber);
+        show.link(episode_model, {
+          error: function (err, errors, episode) {
+            console.log('link_error', err, errors, episode.allProperties());
+          }
+        });
+        show.link(episode_model, {
+          name: 'season'+ep.SeasonNumber,
+          error: function (err, errors, episode) {
+            console.log('season link_error', err, errors, episode.allProperties());
+          }
+        });
       }
     });
     
@@ -382,7 +391,9 @@ module.exports = nohm.model('tvdb', {
                       break;
                   }
                 });
-                show.save(function (err, linkage_error, link_name) {
+                show.save({
+                  continue_on_link_error: true
+                }, function (err, linkage_error, link_name) {
                   if (err && linkage_error) {
                     console.log('TVDB Error: while importing the linking of an episode failed for this relation:', link_name);
                   }

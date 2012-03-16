@@ -5,3 +5,4 @@ selenium-server*
 *.key
 tmp/*
 static/images/series_banners/*.*
+static/css/style.css
