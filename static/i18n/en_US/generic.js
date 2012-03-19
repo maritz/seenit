@@ -11,7 +11,8 @@ module.exports = {
       },
       labels: {
         checking: "Checking ..."
-      }
+      },
+      bold_hint: "<b>Bold</b> means a field is required."
     },
     name: 'Name',
     description: 'Description'
