@@ -6,7 +6,7 @@ var async = require('async');
 var redis;
 
 var json = request.defaults({json: true});
-var url = json.base_url = 'http://localhost:3003/REST';
+var url = json.base_url = 'http://localhost:3002/REST';
 var pw = 'test_pw';
 
 h.setJson(json);
@@ -119,8 +119,18 @@ module.exports = {
         
         h.login(['User', 'list'], function () {
           json.get(url+'/User/', function (err, res, body) {
-            // can't really check more right now because the data that is returned fluctuates too much.
-            t.deepEqual(body.data.length, 10, 'Did not receive correct user list.');
+            var expected = [ { name: 'test_user1', admin: false, id: '1' },
+                             { name: 'test_user2', admin: false, id: '2' },
+                             { name: 'test_user3', admin: false, id: '3' },
+                             { name: 'test_user4', admin: false, id: '4' },
+                             { name: 'test_user5', admin: false, id: '5' },
+                             { name: 'test_user6', admin: false, id: '6' },
+                             { name: 'test_user7', admin: false, id: '7' },
+                             { name: 'test_user8', admin: false, id: '8' },
+                             { name: 'test_user9', admin: false, id: '9' },
+                             { name: 'test_user10', admin: false, id: '10' } ];
+
+            t.deepEqual(body.data, expected, 'Did not receive correct user list.');
             t.done();
           });
         });
@@ -205,6 +215,145 @@ module.exports = {
         
         h.del(json, '/User/10', {}, function (err, res, body) {
           t.equal(body.result, 'success', 'Removing user failed.');
+          t.done();
+        });
+      },
+      "GET /loginData": function (t) {
+        t.expect(1);
+        
+        json.get(url+'/User/loginData', function (err, res, body) {
+          t.deepEqual(body.data, { name: 'test_user10', admin: false, id: 10 }, 'Did not receive correct loginData.');
+          t.done();
+        });
+      },
+      "GET /loginData - logged out": function (t) {
+        t.expect(1);
+        
+        h.logout(function () {
+          json.get(url+'/User/loginData', function (err, res, body) {
+            h.needsLogin(t, body);
+            t.done();
+          });
+        });
+      },
+      "GET /checkName": function (t) {
+        t.expect(5);
+        
+        var getCheckFunction = function (name, id, should_be_available) {
+          return function (next) {
+            json.get(url+'/User/checkName?name='+name+'&id='+id,
+              function (err, res, body) {
+                t.equal(body.result, should_be_available ? 'success' : 'error', 'Checkname didn\'t work properly for: '+name+', '+id+'.');
+                next();
+              }
+            );
+          }
+        };
+        
+        async.series([
+          getCheckFunction('test_user1', undefined, false),
+          getCheckFunction('test_user1', 1, true),
+          getCheckFunction('test_user1', 2, false),
+          getCheckFunction('test_user1asd', undefined, true),
+          getCheckFunction('test_user1asd', 1, true),
+        ], function () {
+          t.done();
+        });
+      },
+      "PUT /allow/1": function (t) {
+        t.expect(3);
+        var data = {
+          action: 'delete',
+          subject: 'User'
+        };
+        
+        async.series([function (next) {
+          h.logout(function () {
+            h.put(json, '/User/allow/1',
+              data,
+              function (err, res, body) {
+                h.needsLogin(t, body);
+                next()
+              }
+            );
+          });
+        },
+        function (next) {
+          h.login(function () {
+            h.put(json, '/User/allow/1',
+              data,
+              function (err, res, body) {
+                h.privsLow(t, body);
+                next();
+              }
+            );
+          });
+        },
+        function (next) {
+          h.login(['User', 'grant'], function () {
+            h.put(json, '/User/allow/1',
+              data,
+              function (err, res, body) {
+                var expected = [ 'self', 'create', 'delete' ];
+                t.deepEqual(body.data.User, expected, 'Granting rights did not return the expected acl');
+                next();
+              }
+            );
+          });
+        }], function () {
+          t.done();
+        });
+      },
+      "PUT /setAdmin/1": function (t) {
+        t.expect(4);
+        var data = {
+          admin: true
+        };
+        
+        async.series([function (next) {
+          h.logout(function () {
+            h.put(json, '/User/setAdmin/1',
+              data, 
+              function (err, res, body) {
+                h.needsLogin(t, body);
+                next()
+              }
+            );
+          });
+        },
+        function (next) {
+          h.login(function () {
+            h.put(json, '/User/setAdmin/1',
+              data, 
+              function (err, res, body) {
+                h.privsLow(t, body);
+                next();
+              }
+            );
+          });
+        },
+        function (next) {
+          h.login(['User', '*'], function () {
+            h.put(json, '/User/setAdmin/1',
+              data, 
+              function (err, res, body) {
+                h.privsLow(t, body);
+                next();
+              }
+            );
+          });
+        },
+        function (next) {
+          h.login(['admin'], function (takeAdminAway) {
+            h.put(json, '/User/setAdmin/1',
+              data, 
+              function (err, res, body) {
+                t.deepEqual(body, { result: 'success', data: {} }, 'Setting Admin did not work');
+                takeAdminAway(next); // not really necessary here because it's the last test, but it's less likely to be forgotten to use this if it's used everywhere
+              }
+            );
+          });
+        }], function () {
           t.done();
         });
       }

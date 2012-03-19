@@ -40,7 +40,7 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'User'), function (req, res, next
   });
 });
 
-app.get('/:id([0-9]+)', auth.isLoggedIn, auth.may('view', 'User'), loadModel('User'), function (req, res) {
+app.get('/:id([0-9]+)', auth.isLoggedIn, auth.may('view', 'User'), loadModel('User'), function (req, res, next) {
   req.user.may('edit', 'User', req.loaded.User.id, function (err, may) {
     if (err) {
       next(new UserError('Checking permissions failed.'));
@@ -62,7 +62,9 @@ function store (req, res, next) {
     if ( ! err) {
       next();
     } else {
-      next(new UserError({error: err, fields: user.errors}, 400));
+      setTimeout(function () { // brute force punishment
+        next(new UserError({error: err, fields: user.errors}, 400));
+      }, 300);
     }
   });
 }
@@ -74,15 +76,15 @@ function newUser (req, res, next) {
   next();
 }
 
-function sendSessionUserdata(req, res) {
-  res.ok(req.session.userdata);
+function sendUserdata(req, res) {
+  res.ok(req.loaded.User.allProperties());
 }
 
 function updateSession (req, res, next) {
   if (req.loaded.User && req.loaded.User instanceof User && req.loaded.User.__inDB) {
     if ( ! req.user.id || req.user.id === req.loaded.User.id) {
       req.session.logged_in = true;
-      req.session.userdata = req.loaded['User'].allProperties(true);
+      req.session.userdata = req.loaded.User.allProperties(true);
     }
     next();
   } else {
@@ -90,9 +92,9 @@ function updateSession (req, res, next) {
   }  
 }
 
-app.post('/', auth.may('create', 'User'), newUser, store, updateSession, sendSessionUserdata);
+app.post('/', auth.may('create', 'User'), newUser, store, updateSession, sendUserdata);
 
-app.put('/:id([0-9]+)', auth.isLoggedIn, auth.may('edit', 'User'), loadModel('User'), store, updateSession, sendSessionUserdata);
+app.put('/:id([0-9]+)', auth.isLoggedIn, auth.may('edit', 'User'), loadModel('User'), store, updateSession, sendUserdata);
 
 if (process.env.NODE_ENV !== 'production') {
   app.get('/:takeOrGive(take|give)/me/admin', auth.isLoggedIn, function (req, res, next) {
@@ -108,29 +110,41 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-app.put('/:allowOrDeny(allow|deny)/:id([0-9]+)', auth.isLoggedIn, auth.may('allow', 'User'), loadModel('User'), function (req, res, next) {
+app.put('/:allowOrDeny(allow|deny)/:id([0-9]+)', auth.isLoggedIn, auth.may('grant', 'User'), loadModel('User'), function (req, res, next) {
   var allowOrDeny = req.param('allowOrDeny');
   var action = req.param('action');
   var subject = req.param('subject');
   if (action && subject) {
-    var new_acl = req.loaded['User'][allowOrDeny](action, subject);
-    req.loaded['User'].save(function (err) {
+    var new_acl = req.loaded.User[allowOrDeny](action, subject);
+    req.loaded.User.save(function (err) {
       if (err) {
         next(new Error(err));
       } else {
         res.ok(new_acl);
-      };
+      }
     });
   } else {
     next(new UserError('Invalid parameters'));
   }
 });
 
+app.put('/setAdmin/:id', auth.isAdmin, loadModel('User'), function (req, res, next) {
+  var admin = req.param('admin') === "true";
+  req.loaded.User.p('admin', admin);
+  req.loaded.User.save(function (err) {
+    if (err) {
+      next(new Error(err));
+    } else {
+      res.ok(req.loaded.User.p('admin'));
+    }
+  });
+});
+
 app.get('/checkName', function (req, res, next) {
   var name = req.param('name');
   var id = req.param('id') || req.user.id;
   if (name) {
-    setTimeout(function () {
+    setTimeout(function () { // brute force punishment
       User.find({name: name}, function (err, ids) {
         if (err) {
           next(new UserError('Database error: '+err, 500));
@@ -140,7 +154,7 @@ app.get('/checkName', function (req, res, next) {
             res.ok();
         }
       });
-    }, 800);
+    }, 200);
   } else {
     next(new UserError('No name to check in parameters.'));
   }
@@ -154,7 +168,7 @@ function login (req, res, next) {
   var password = req.param('password') || false;
   user.login(name, password, function (success) {
     if (success) {
-      req.loaded['User'] = user;
+      req.loaded.User = user;
       next();
     } else {
       setTimeout(function () { // artificial delay to make bruteforcing less practical
@@ -165,12 +179,12 @@ function login (req, res, next) {
   });
 }
 
-app.post('/login', login, updateSession, sendSessionUserdata);
+app.post('/login', login, updateSession, sendUserdata);
 
-app.get('/getLoginData', auth.isLoggedIn, function (req, res, next) {
-  req.loaded['User'] = req.user;
+app.get('/loginData', auth.isLoggedIn, function (req, res, next) {
+  req.loaded.User = req.user;
   next();
-}, updateSession, sendSessionUserdata);
+}, updateSession, sendUserdata);
 
 function logout (req) {
   req.session.userdata = {};
@@ -184,10 +198,10 @@ app.get('/logout', function (req, res) {
 
 app.del('/:id([0-9]+)', auth.isLoggedIn, auth.may('delete', 'User'), loadModel('User'), function (req, res, next) {
   var doLogout = false;
-  if (req.session.userdata.id === req.loaded['User'].id) {
+  if (req.session.userdata.id === req.loaded.User.id) {
     doLogout = true;
   }
-  req.loaded['User'].remove(function (err) {
+  req.loaded.User.remove(function (err) {
     if (err) {
       next(new UserError('Delete failed: '+err, 500));
     } else {
@@ -201,7 +215,7 @@ app.del('/:id([0-9]+)', auth.isLoggedIn, auth.may('delete', 'User'), loadModel('
 });
 
 
-app.mounted(function (parent){
+app.mounted(function (){
   console.log('mounted User REST controller');
 });
 

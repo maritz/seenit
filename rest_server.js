@@ -7,6 +7,7 @@ var RedisSessionStore = require('connect-redis')(express);
 
 module.exports = server;
 
+server.use(express.responseTime());
 server.use(express.bodyParser());
 server.use(express.methodOverride());
 server.use(express.cookieParser());

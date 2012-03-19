@@ -10,16 +10,18 @@ var createDummies = module.exports.createDummies = function (json, password, cal
   var creates = [];
   var creator = function (name) {
     return function (next) {
-      post(json, '/User/', {
-        name: name,
-        password: password
-      }, function (err, res, body) {
-        var error;
-        if (body.result !== 'success') {
-          console.log(body);
-          error = new Error('failed to create dummy user');
-        }
-        next(error);
+      logout(function () {
+        post(json, '/User/', {
+          name: name,
+          password: password
+        }, function (err, res, body) {
+          var error;
+          if (body.result !== 'success') {
+            console.log(body);
+            error = new Error('failed to create dummy user');
+          }
+          next(error);
+        });
       });
     };
   };
@@ -54,7 +56,7 @@ var getCsrf = module.exports.getCsrf  = function (json, callback) {
 
 var putPostDel = function (method, json, uri, data, callback) {
   getCsrf(json, function(token) {
-    data["_csrf"] = token
+    data["_csrf"] = token;
     json[method]({
         uri: json.base_url+uri,
         body: JSON.stringify(data)
@@ -89,6 +91,10 @@ var testError = module.exports.testError = function (t, result, name, msg) {
 
 module.exports.needsLogin = function (t, result) {
   testError(t, result, 'AuthError', 'need_login');
+};
+
+module.exports.privsLow = function (t, result) {
+  testError(t, result, 'AuthError', 'privileges_low');
 };
 
 module.exports.notFound = function (t, result) {
@@ -137,7 +143,7 @@ var login = module.exports.login = function (name, pw, callback) {
     name = 'test_user1';
     pw = 'test_pw';
     _login();
-  } else if (typeof(pw) === 'function' && Array.isArray(name) ) {
+  } else if (typeof(pw) === 'function' && Array.isArray(name) && name[0] !== 'admin') {
     callback = pw;
     var rights = name;
     name = 'test_user2';
@@ -156,6 +162,23 @@ var login = module.exports.login = function (name, pw, callback) {
       async.apply(json.get, json.base_url+'/User/take/me/admin')
     ], function (err, results) {
       callback(err, results);
+    });
+  } else if (name[0] === 'admin') {
+    callback = pw;
+    var rights = name;
+    name = 'test_user2';
+    pw = 'test_pw';
+    async.series([
+      async.apply(json.get, json.base_url+'/User/logout'),
+      async.apply(post, json, '/User/login', {
+        name: name,
+        password: pw
+      }),
+      async.apply(json.get, json.base_url+'/User/give/me/admin')
+    ], function (err, results) {
+      callback(function (cb) {
+        json.get(json.base_url+'/User/take/me/admin', cb);
+      });
     });
   } else {
     _login();

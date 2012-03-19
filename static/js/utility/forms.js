@@ -214,7 +214,7 @@ _r(function (app) {
     
     this.$inputs.each(function () {
       if ($(this).attr('required')) {
-        self.model.required.push(name);
+        self.model.required.push($(this).attr('name'));
       }
     });
     
