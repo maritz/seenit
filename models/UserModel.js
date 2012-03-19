@@ -115,6 +115,7 @@ module.exports = nohm.model('User', {
           return callback(undefined, true);
         } else if (action !== 'grant' && acl[subject].indexOf('self') !== -1) {
           var subject_instance = nohm.factory(subject);
+          
           if (subject_instance.hasOwnProperty('isSelf') && typeof(subject_instance.isSelf) === 'function') {
             return subject_instance.isSelf(this, id, callback);
           }
@@ -155,7 +156,7 @@ module.exports = nohm.model('User', {
     },
     
     isSelf: function (selfUser, id, callback) {
-      callback(undefined, id === selfUser.id);
+      callback(undefined, parseInt(id, 10) === parseInt(selfUser.id, 10));
     },
     
     

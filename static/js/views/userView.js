@@ -63,7 +63,8 @@ _r(function (app) {
     
     load: function (callback) {
       var self = this;
-      this.model.set({'id': app.user_self.id});
+      var id = this.params[0] || app.user_self.id;
+      this.model.set({'id': id});
       this.model.fetch()
         .always(function (res) {
           callback(res.status >= 400, self.model);
@@ -113,10 +114,10 @@ _r(function (app) {
     },
     
     saved: function () {
-      app.go('user/profile/');
       if (this.edit_is_self) {
         app.user_self.set(this.model.toJSON());
       }
+      app.go('user/profile/'+this.model.id);
     },
     
     markAclInputs: function (e) {
@@ -165,7 +166,6 @@ _r(function (app) {
     
     auto_render: true,
     max_age: 0,
-    checkAllowed: isNotLoggedIn,
     wait_for_user_loaded: false,
     
     /**
