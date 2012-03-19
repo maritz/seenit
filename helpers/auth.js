@@ -13,32 +13,22 @@ exports.isLoggedIn = function (req, res, next) {
   if (req.session.logged_in) {
     next();
   } else {
-    throw new AuthError('need_login');
-  }
-};
-
-exports.isSelfOrAdmin = function (req, res, next) {
-  console.log('DEPRECATED? auth.isSelfOrAdmin');
-  if (req.session.logged_in && req.loaded_user) {
-    if (req.session.userdata.id === +req.loaded_user.id) {
-      // loaded user is session user
-      next();
-    } else if (req.session.admin === true) {
-      // session user is admin
-      next();
-    } else {
-      // TODO: check current admin/privilege status
-      next(new AuthError('privileges_low'));
-    }
-  } else if ( ! req.session.logged_in) {
     next(new AuthError('need_login'));
-  } else {
-    next(new AuthError('Need to load user before checking for admin/self.', 500));
   }
 };
 
 var fail = new Error('Checking roles failed');
 var may_not = new AuthError('privileges_low');
+
+exports.isAdmin = function (req, res, next) {
+  exports.isLoggedIn(req, res, function (err) {
+    if (!err && req.user.p('admin') === true) {
+      next();
+    } else {
+      next(err || may_not);
+    }
+  });
+};
 
 exports.may = function (action, subject, param_name) {
   param_name = param_name || 'id';

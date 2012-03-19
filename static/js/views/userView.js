@@ -87,7 +87,8 @@ _r(function (app) {
     
     events: {
       'click form.acl label a': 'markAclInputs',
-      'change :checkbox': 'changeAcl'
+      'change .acl :checkbox': 'changeAcl',
+      'change .admin :checkbox': 'changeAdmin'
     },
     
     init: function () {
@@ -135,12 +136,8 @@ _r(function (app) {
       }
     },
     
-    changeAcl: function (e) {
-      var $target = $(e.target);
-      var checked = $target.prop('checked');
-      var allow_or_deny = checked ? 'allow' : 'deny';
-      $target.attr('disabled', true);
-      this.model.changeAcl(allow_or_deny, $target.data('action'), $target.data('subject'), function (err) {
+    getChangeCallback: function ($target, checked) {
+      return function (err) {
         var class_name = 'success_blink';
         if (err) {
           class_name = 'error_blink';
@@ -151,7 +148,22 @@ _r(function (app) {
           $target.attr('disabled', false);
           $parent.removeClass(class_name);
         }, 500);
-      });
+      };
+    },
+    
+    changeAcl: function (e) {
+      var $target = $(e.target);
+      var checked = $target.prop('checked');
+      var allow_or_deny = checked ? 'allow' : 'deny';
+      $target.attr('disabled', true);
+      this.model.changeAcl(allow_or_deny, $target.data('action'), $target.data('subject'), this.getChangeCallback($target, checked));
+    },
+    
+    changeAdmin: function (e) {
+      var $target = $(e.target);
+      var checked = $target.prop('checked');
+      $target.attr('disabled', true);
+      this.model.changeAdmin(checked, this.getChangeCallback($target, checked));
     }
     
   });

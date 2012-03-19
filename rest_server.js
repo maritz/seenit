@@ -13,6 +13,7 @@ nohm.factory('tvdb', 1, function (err, model) {
 
 module.exports = server;
 
+server.use(express.responseTime());
 server.use(express.bodyParser());
 server.use(express.methodOverride());
 server.use(express.cookieParser());

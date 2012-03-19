@@ -77,8 +77,7 @@ exports.init = function (server) {
         cache: true,
         cacheTimestamp: assetManagerMiddleware.cacheTimestamps || {js: 0},
         i18n_hashes: JSON.stringify(i18n.getHashes()),
-        js_files: server.set('env') !== 'production' ? files : false,
-        socket_url: config.socket.url
+        js_files: server.set('env') !== 'production' ? files : false
       }
     });
   });

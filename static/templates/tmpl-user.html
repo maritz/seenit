@@ -9,7 +9,7 @@ form.form-horizontal( novalidate: true)
     !=partial('username', model.get('name'))
     !=partial('password')
     !=partial('password_repeat')
-    !=partial('email', model.get('email'))          
+    !=partial('email', model.get('email'))
         
   != form('input', { type: 'submit', name: 'submit_user', value: _t('forms.submit') })
 </script>
@@ -20,6 +20,17 @@ form.form-horizontal( novalidate: true)
 
 <script type="text/x-jade-tmpl" name="edit_profile">
 !=partial('form')
+
+if(app.user_self.get('admin'))
+  form.form-horizontal.admin
+    fieldset
+      legend=_t('admin.legend')
+        .control-group
+          label.control-label(for: 'setAdminCheckbox')= _t('admin.label')
+          .controls
+            input#setAdminCheckbox(type:'checkbox',
+                  checked: !!_model.get('admin'))
+
 
 - var user_acl = _model.get('acl')
 if(app.user_self.may('grant', 'User') && acl)

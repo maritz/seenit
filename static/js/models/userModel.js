@@ -43,27 +43,51 @@ _r(function (app) {
       }
     },
     
-    changeAcl: function (allow_or_deny, action, subject, cb) {
+    putProp: function (action, data, cb) {
       var self = this;
       app.getCsrf(function (csrf) {
+        data._csrf = csrf;
         $.ajax({
           type: 'PUT',
-          url: '/REST/User/'+allow_or_deny+'/'+self.id,
-          data: {
-            action: action,
-            subject: subject,
-            _csrf: csrf
-          },
+          url: '/REST/User/'+action+'/'+self.id,
+          data: data,
           error: function () { cb('unknown error'); },
           success: function (json) {
-            console.log(json);
-            self.set({
-              acl: json.data
-            });
-            cb(null); 
+            cb(null, json); 
           }
         });
       });
+    },
+    
+    changeAcl: function (allow_or_deny, action, subject, cb) {
+      var self = this;
+      this.putProp(allow_or_deny, {
+          action: action,
+          subject: subject
+        }, function (err, json) {
+          if ( ! err) {
+            self.set({
+              acl: json.data
+            });
+          }
+          cb(err);
+        }
+      );
+    },
+    
+    changeAdmin: function (admin, cb) {
+      var self = this;
+      this.putProp('setAdmin', {
+          admin: admin
+        }, function (err, json) {
+          if ( ! err) {
+            self.set({
+              admin: admin
+            });
+          }
+          cb(err);
+        }
+      );
     }
   });
   
@@ -78,7 +102,7 @@ _r(function (app) {
     
     load: function () {
       var self = this;
-      $.getJSON('/REST/User/getLoginData')
+      $.getJSON('/REST/User/loginData')
         .success(function (result) {
           self.set(result.data);
           self.loaded = true;
