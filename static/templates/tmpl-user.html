@@ -4,33 +4,25 @@ form.form-horizontal( novalidate: true)
   - var model = parentLocals._model;
   fieldset
     legend=_t('legend')
-    span.error.general_error
+    p!=_t('forms.bold_hint')
+    p 
+      span.error.general_error
+    
     
     !=partial('username', model.get('name'))
-    !=partial('password')
-    !=partial('password_repeat')
+    !=partial('password', args[0])
+    !=partial('password_repeat', args[0])
     !=partial('email', model.get('email'))
         
   != form('input', { type: 'submit', name: 'submit_user', value: _t('forms.submit') })
 </script>
 
 <script type="text/x-jade-tmpl" name="register">
-!=partial('form')
+!=partial('form', true)
 </script>
 
 <script type="text/x-jade-tmpl" name="edit_profile">
-!=partial('form')
-
-if(app.user_self.get('admin'))
-  form.form-horizontal.admin
-    fieldset
-      legend=_t('admin.legend')
-        .control-group
-          label.control-label(for: 'setAdminCheckbox')= _t('admin.label')
-          .controls
-            input#setAdminCheckbox(type:'checkbox',
-                  checked: !!_model.get('admin'))
-
+!=partial('form', false)
 
 - var user_acl = _model.get('acl')
 if(app.user_self.may('grant', 'User') && acl)
@@ -53,6 +45,18 @@ if(app.user_self.may('grant', 'User') && acl)
                   data-action: action, 
                   data-subject: subject, 
                   checked: user_acl[subject] && user_acl[subject].indexOf(action) !== -1)
+
+
+
+if(app.user_self.get('admin'))
+  form.form-horizontal.admin
+    fieldset
+      legend=_t('admin.legend')
+        .control-group
+          label.control-label(for: 'setAdminCheckbox')= _t('admin.label')
+          .controls
+            input#setAdminCheckbox(type:'checkbox',
+                  checked: !!_model.get('admin'))
 </script>
 
 <script type="text/x-jade-tmpl" name="sub_navigation">
@@ -113,15 +117,15 @@ form( novalidate: true)
 </script>
 
 <script type="text/x-jade-tmpl" name="username">
-!= form('input', { name: 'name', value: args[0] })
+!= form('input', { name: 'name', value: args[0], required: true })
 </script>
 
 <script type="text/x-jade-tmpl" name="password">
-!= form('input', { type: 'password', name: 'password'})
+!= form('input', { type: 'password', name: 'password', required: args[0] })
 </script>
 
 <script type="text/x-jade-tmpl" name="password_repeat">
-!= form('input', { type: 'password', name: 'password_repeat' })
+!= form('input', { type: 'password', name: 'password_repeat', required: args[0] })
 </script>
 
 <script type="text/x-jade-tmpl" name="email">

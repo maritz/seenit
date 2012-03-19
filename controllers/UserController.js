@@ -40,15 +40,21 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'User'), function (req, res, next
   });
 });
 
-app.get('/:id([0-9]+)', auth.isLoggedIn, auth.may('view', 'User'), loadModel('User'), function (req, res, next) {
+
+function sendUserdata(req, res, next) {
+  console.log('checkeing before sending', req.url, req.loaded.User.id, req.user.allProperties(true));
   req.user.may('edit', 'User', req.loaded.User.id, function (err, may) {
+    console.log('checked', err, may);
     if (err) {
       next(new UserError('Checking permissions failed.'));
     } else {
       res.ok(req.loaded.User.allProperties(may));
     }
   });
-});
+}
+
+
+app.get('/:id([0-9]+)', auth.isLoggedIn, auth.may('view', 'User'), loadModel('User'), sendUserdata);
 
 
 function store (req, res, next) {
@@ -76,15 +82,12 @@ function newUser (req, res, next) {
   next();
 }
 
-function sendUserdata(req, res) {
-  res.ok(req.loaded.User.allProperties());
-}
-
 function updateSession (req, res, next) {
   if (req.loaded.User && req.loaded.User instanceof User && req.loaded.User.__inDB) {
     if ( ! req.user.id || req.user.id === req.loaded.User.id) {
       req.session.logged_in = true;
       req.session.userdata = req.loaded.User.allProperties(true);
+      req.user = req.loaded.User;
     }
     next();
   } else {

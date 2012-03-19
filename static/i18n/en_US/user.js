@@ -20,7 +20,8 @@ module.exports = {
       '<br/>If you do not have an account yet, you may <a href="#user/register" onclick="app.closeOverlay()">create one here</a>.',
       
     register: "Sign Up",
-    profile: "Profile",
+    view_profile: "View Profile",
+    edit_profile: "Update profile",
     list: "Index",
     login: "Log in",
     logout: "Log out"
@@ -34,6 +35,25 @@ module.exports = {
   },
   edit_profile: {
     headline: "Edit profile",
-    legend: "Your basic information"
+    legend: "Your basic information",
+    admin: {
+      legend: "Administrator",
+      label: "Administrator - BE&nbsp;CAREFUL"
+    },
+    acl: {
+      legend: 'Access List',
+      User: 'User Management',
+      
+      read: 'Toggle read rights',
+      write: 'Toggle write rights',
+      
+      self: 'May view/edit/delete himself and contents defined as his contents',
+      view: 'May view any',
+      list: 'May request a list of all',
+      create: 'May create new',
+      edit: 'May edit any',
+      'delete': 'May delete any',
+      grant: 'May grant others any right (careful!)'
+    }
   }
 };
