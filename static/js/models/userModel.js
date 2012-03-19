@@ -31,7 +31,10 @@ _r(function (app) {
     },
     asyncValidations: {
       name: function (value, callback) {
-        $.get(this.urlRoot+'checkName?name='+value, function () {
+        $.get(this.urlRoot+'checkName', {
+          name: value,
+          id: this.id
+        }, function () {
           callback(undefined, true);
         }).error(function (xhr) {
           xhr.handled = true;

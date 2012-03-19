@@ -67,7 +67,7 @@ var App = Backbone.Router.extend({
     
     var data_expired = this.current.view ? this.current.view.isExpired() : false;
     
-    if (this.current.module === module && this.current.action === action) {
+    if (this.current.orig_route === orig_route) {
       if (this.current.view !== null && ! force_rerender && ! data_expired) {
         console.log('data not stale, not reloading view');
         return false;

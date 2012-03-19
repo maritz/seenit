@@ -40,8 +40,7 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'User'), function (req, res, next
   });
 });
 
-var canViewPrivate = 
-app.get('/:id([0-9]+)', auth.isLoggedIn, auth.may('view', 'user'), loadModel('User'), function (req, res) {
+app.get('/:id([0-9]+)', auth.isLoggedIn, auth.may('view', 'User'), loadModel('User'), function (req, res) {
   req.user.may('edit', 'User', req.loaded.User.id, function (err, may) {
     if (err) {
       next(new UserError('Checking permissions failed.'));
@@ -80,9 +79,11 @@ function sendSessionUserdata(req, res) {
 }
 
 function updateSession (req, res, next) {
-  if (req.loaded['User'] && req.loaded['User'] instanceof User && req.loaded['User'].__inDB) {
-    req.session.logged_in = true;
-    req.session.userdata = req.loaded['User'].allProperties(true);
+  if (req.loaded.User && req.loaded.User instanceof User && req.loaded.User.__inDB) {
+    if ( ! req.user.id || req.user.id === req.loaded.User.id) {
+      req.session.logged_in = true;
+      req.session.userdata = req.loaded['User'].allProperties(true);
+    }
     next();
   } else {
     next(new UserError('Can\'t set session because the loaded model is not a valid and loaded user model.'));
@@ -127,22 +128,19 @@ app.put('/:allowOrDeny(allow|deny)/:id([0-9]+)', auth.isLoggedIn, auth.may('allo
 
 app.get('/checkName', function (req, res, next) {
   var name = req.param('name');
+  var id = req.param('id') || req.user.id;
   if (name) {
-    if (name === req.user.p('name')) {
-      res.ok('That is your name.');
-    } else {
-      setTimeout(function () {
-        User.find({name: name}, function (err, ids) {
-          if (err) {
-            next(new UserError('Database error: '+err, 500));
-          } else if (ids.length > 0) {
-            next(new UserError('Name taken.', 400));
-          } else {
-              res.ok();
-          }
-        });
-      }, 800);
-    }
+    setTimeout(function () {
+      User.find({name: name}, function (err, ids) {
+        if (err) {
+          next(new UserError('Database error: '+err, 500));
+        } else if (ids.length > 0 && ids[0] !== id) {
+          next(new UserError('Name taken.', 400));
+        } else {
+            res.ok();
+        }
+      });
+    }, 800);
   } else {
     next(new UserError('No name to check in parameters.'));
   }
