@@ -4,10 +4,7 @@ var async = require('async');
 module.exports = nohm.model('Episode', {
   properties: {
     name: {
-      type: 'string',
-      validations: [
-        'notEmpty'
-      ]
+      type: 'string'
     },
     tvdb_id: {
       type: 'integer',

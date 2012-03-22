@@ -23,10 +23,10 @@ _r(function (app) {
     auto_render: true,
     model: app.models.Show,
     required_params: 1,
+    seasons: {},
     
     events: {
-      'click a.episode_opener': 'toggleEpisode',
-      'show a[data-toggle="tab"]': 'toggleSeason'
+      'show a[data-toggle="tab"]': 'loadSeason'
     },
     
     init: function () {
@@ -36,6 +36,9 @@ _r(function (app) {
           var $season_opener = self.$el.find('a.season_opener[data-num="'+self.params[1]+'"]');
           if ($season_opener) {
             $season_opener.click();
+            $('html, body').animate({
+              scrollTop: $season_opener.offset().top
+            }, 300);
           }
         });
       }
@@ -44,49 +47,79 @@ _r(function (app) {
     load: function (callback) {
       var model = this.model;
       $.getJSON('/REST/Show/view/'+this.params[0], function (data) {
+        
+        data.data.seasons = _.sortBy(data.data.seasons, function (season) { return parseInt(season, 10); });
         model.set(data.data);
+        
         callback(null, model);
       }).error(function () {
         callback('not_found');
       });
     },
     
-    toggleSeason: function (e) {
+    loadSeason: function (e) {
       e.preventDefault();
       var self = this;
       var $target = $(e.target);
       var num = $target.data('num');
-      var episode_list = $('#season_contents div.tab-pane[data-num="'+num+'"]');
+      var $episode_list = $('#season_contents div.tab-pane[data-num="'+num+'"]');
       app.navigate('#show/details/'+this.model.get('name')+'/'+num);
       
-      if (episode_list.children().length === 0) {
-        $.getJSON('/REST/Episode/byShow/'+self.model.get('id'), {
-          season: num
-        }, function (resp) {
-          var episodes = resp.data;
-          episodes.sort(function (a, b) {
-            if (a.number > b.number) {
-              return 1;
-            } else {
-              return -1;
-            }
-          });
-          var locals = _.extend({episodes: episodes}, self.locals);
-          app.template(self.module, 'episode_list', locals, function (html) {
-            episode_list.html(html);
-          });
-        });
+      if ($episode_list.children().length === 0) {
+        this.seasons[num] = new episode_list_view(
+          'show', 
+          'episode_list', 
+          $episode_list, 
+          [self.model.get('id'), num]);
+        return true;
       }
+    }
+    
+  });
+  
+  var episode_list_view = app.base.listView.extend({
+    
+    collection: app.collections.Episode,
+    auto_render: true,
+    
+    events: {
+      'click a.episode_opener': 'toggleEpisode',
+      'click a.set_seen, a.set_not_seen': 'toggleSeen'
+    },
+    
+    init: function() {
+      this.collection.url += 'byShow/'+this.params[0]+'?season='+this.params[1];
+      this.bind('rendered', function () {
+        
+      });
     },
     
     toggleEpisode: function (e) {
       e.preventDefault();
       var $target = $(e.target);
-      var $ul = $target.nextAll('.episode_details');
-      $ul.toggleClass('hidden');
+      var $toggle_content = $target.nextAll('.episode_details');
+      var text = $toggle_content.hasClass('hidden') ? 'less' : 'more';
+      $target.text(this._t(text));
+      $toggle_content.toggleClass('hidden');
+    },
+    
+    toggleSeen: function (e) {
+      e.preventDefault();
+      var $target = $(e.target);
+      var id = $target.closest('li.episode_detail').data('id');
+      var episode = this.collection.get(id);
+      var locals = _.extend({}, this.locals, {
+        episode: episode
+      });
+      episode.toggleSeen(function () {
+        app.template('show', 'seen_button', locals, function (html) {
+          $target.closest('div.seen_container').html(html);
+        });
+      });
     }
     
   });
+  
   
   /**
    * #show/search

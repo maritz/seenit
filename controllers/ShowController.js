@@ -27,7 +27,9 @@ ShowError.prototype.__proto__ = Error.prototype;
 
 
 app.get('/', auth.isLoggedIn, auth.may('list', 'Show'), function (req, res, next) {
-  Show.find(function (err, ids) {
+  Show.sort({
+    field: 'name'
+  }, function (err, ids) {
     if (err) {
       next(new ShowError('Fetching the ids failed: '+err));
     } else {

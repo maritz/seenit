@@ -45,13 +45,15 @@ module.exports = {
     no_results: "No shows found with that name."
   },
   
-  details:  {
+  episode_list:  {
     more: "more",
+    less: "less",
     has_seen: "You've seen this one",
     has_not_seen: "Not seen yet",
     not_released: "Hasn't aired yet",
     set_seen: "I've seen it",
     set_not_seen: "I've NOT seen it",
-    wanna_see: "I want to see it"
+    wanna_see: "I want to see it",
+    none_found: "There are no episodes in our database for this season."
   }
 };
