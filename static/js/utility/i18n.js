@@ -30,11 +30,16 @@ _r("i18n");
   jQuery.t = function(name, submodule, module) {
     module = module || 'generic';
     submodule = submodule || 'general';
+    var values = [];
+    if (_.isArray(name)) {
+      values = name.slice(1);
+      name = name[0];
+    }
     var search_string = module+'.'+submodule+'.'+name;
     //console.log('looking for', search_string);
     var t = $.jsperanto.translate(search_string);
     if (t !== search_string) {
-      return t;
+      return vsprintf(t, values);
     } else {
       if (submodule !== 'general') {
         return arguments.callee(name, 'general', module);

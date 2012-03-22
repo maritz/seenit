@@ -224,6 +224,7 @@ var App = Backbone.Router.extend({
     var self = this;
     var tmpl_module;
     var original_arguments_arr = Array.prototype.slice.call(arguments);
+    var filename = module+'/'+name+'.jade';
     
     locals = locals || {};
     
@@ -258,7 +259,7 @@ var App = Backbone.Router.extend({
           return html;
         }
       } catch (e) {
-        console.log('Error while rendering '+module+'/'+name+'.jade', locals, e.stack);
+        console.log('Error while rendering a template:'+filename, locals, e.message);
       }
     } else if ( ! this._templates.hasOwnProperty(module)) {
       if (typeof(callback) !== 'function') {
