@@ -164,13 +164,30 @@ _r(function (app) {
       var self = this;
       var $target = $(e.target);
       var checked = $target.prop('checked');
-      var name = this.$el.find(':text[name="name"]').val();
+      var name = this.model.get('name');
       var done = self.getChangeCallback($target, checked);
+      var cancel = function () {
+        $target.prop('checked', !checked);
+        $target.attr('disabled', true);
+      }
       
       $target.attr('disabled', true);
       
       if ( ! checked) {
-        self.model.changeAdmin(false, done);
+        if (this.model.id === app.user_self.id) {
+          app.overlay({
+            view: 'confirm_take_self_admin',
+            locals: {
+              text: this._t(['admin_self_warning', name])
+            },
+            confirm: function () {
+              self.model.changeAdmin(false, done);
+            },
+            cancel: cancel
+          });
+        } else {
+          self.model.changeAdmin(false, done);
+        }
       } else {
         app.overlay({
           view: 'confirm_grant_admin',
@@ -180,10 +197,7 @@ _r(function (app) {
           confirm: function () {
             self.model.changeAdmin(true, done);
           },
-          cancel: function () {
-            $target.prop('checked', !checked);
-            $target.attr('disabled', false);
-          }
+          cancel: cancel
         });
       }
     }

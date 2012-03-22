@@ -21,12 +21,18 @@ pre=$.t(locals.error, 'errors');
 =$.t('not_found', 'errors');
 </script>
 
-<script type="text/x-jade-tmpl" name="confirm_grant_admin">
-- locals.header = $.t('confirm_header');
-- console.log(locals);
+<script type="text/x-jade-tmpl" name="confirm">
+- locals.header = $.t('confirm_header', 'overlays');
+- console.log('confirm modal locals', locals);
 </script>
 
 <script type="text/x-jade-tmpl" name="confirm_grant_admin">
+- locals.header = $.t('confirm_header', 'overlays');
+=text
+- locals.footer = partial('confirm_footer_danger', 'yes', 'no')
+</script>
+
+<script type="text/x-jade-tmpl" name="confirm_take_self_admin">
 - locals.header = $.t('confirm_header', 'overlays');
 =text
 - locals.footer = partial('confirm_footer_danger', 'yes', 'no')

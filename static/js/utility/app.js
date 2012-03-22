@@ -218,10 +218,12 @@ var App = Backbone.Router.extend({
   },
   
   _templates: {},
+  _templates_loading: {},
   jade: require('jade'),
   template: function (module, name, locals, callback) {
-    var self = this,
-    tmpl_module;
+    var self = this;
+    var tmpl_module;
+    var original_arguments_arr = Array.prototype.slice.call(arguments);
     
     locals = locals || {};
     
@@ -247,19 +249,30 @@ var App = Backbone.Router.extend({
       colons: true
     };
     
-    // TODO: cache templates in localStorage
     if (this._templates.hasOwnProperty(module) && this._templates[module].hasOwnProperty(name)) {
-      var html = this._templates[module][name](locals);
-      if (typeof(callback) === 'function') {
-        callback(html);
-      } else {
-        return html;
+      try {
+        var html = this._templates[module][name](locals);
+        if (typeof(callback) === 'function') {
+          callback(html);
+        } else {
+          return html;
+        }
+      } catch (e) {
+        console.log('Error while rendering '+module+'/'+name+'.jade', locals, e.stack);
       }
     } else if ( ! this._templates.hasOwnProperty(module)) {
       if (typeof(callback) !== 'function') {
         console.dir(this._templates);
         console.dir(arguments);
         throw new Error('Can\'t call _template without a callback if the template module was not loaded yet! (might be an invalid template call)');
+      }
+      if (this._templates_loading[module]) {
+        this._templates_loading[module].once('loaded', function () {
+          self.template.apply(self, original_arguments_arr);
+        });
+        return false;
+      } else {
+        this._templates_loading[module] = _.extend({}, Backbone.Events);
       }
       tmpl_module = $('<div id="tmpl_'+module+'"></div>').appendTo('#templates');
       if (module === null) {
@@ -281,11 +294,15 @@ var App = Backbone.Router.extend({
             found = tmpl;
           }
         }).end().remove();
+        
+        self._templates_loading[module].trigger('loaded');
+        delete self._templates_loading[module];
+        
         if (!found) {
           console.log('Template view "'+name+'" not found in module "'+module+'"');
           callback(false);
         } else {
-          callback(found(locals));
+          self.template.apply(self, original_arguments_arr);
         }
       }, 'html');
     } else {
