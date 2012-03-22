@@ -12,10 +12,13 @@ module.exports = {
       bold_hint: "<b>Bold</b> means a field is required."
     },
     name: 'Name',
-    description: 'Description'
+    description: 'Description',
+    yes: "Yes",
+    no: "No"
   },
   overlays: {
-    login_needed: "Login"
+    login_needed: "Login",
+    confirm_header: "Please confirm"
   },
   errors: {
     not_found: 'Sorry, We could not find the record you were looking for. If you got here from a link from within this page, please contact an administrator.',

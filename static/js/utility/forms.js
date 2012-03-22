@@ -74,7 +74,9 @@ _r(function (app) {
       $errSpan = $('.general_error', this.view.$el);
     }
     
-    $el.parents('.control-group').removeClass('success').addClass('error');
+    if ( ! $el.data('no_form_class')) {
+      $el.parents('.control-group').removeClass('success').addClass('error');
+    }
     $errSpan.html(error).show();
   };
   
@@ -100,7 +102,7 @@ _r(function (app) {
   formHandler.prototype.setSuccess = function (name) {
     var $el = this.getInputByName(name);
     var $parent = $el.parents('.control-group').removeClass('error');
-    if ($el.val().length > 0) {
+    if ($el.val().length > 0 && ! $el.data('no_form_class')) {
       $parent.addClass('success');
     }
     this.clearLoading(name);
@@ -163,6 +165,7 @@ _r(function (app) {
       } else {        
         self.model.set(submit_attributes);
         self.model.save(undefined, {        
+          
           error: function (model, response) {
             response.handled = true;
             var data;
@@ -232,6 +235,7 @@ _r(function (app) {
     });
     
     $form.bind('submit', function (e) {
+      e.preventDefault();
       getCsrf(function () {
         self.submit.call(self, e);
       });

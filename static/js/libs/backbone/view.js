@@ -7,7 +7,7 @@ _r(function (app) {
     max_age: 10000,
     $el: window.app.config.$content,
     wait_for_user_loaded: true,
-    reload_on_login: false,
+    reload_on_login: true,
     
     initialize: function (module, action, $el, params) {
       var self = this;
@@ -22,7 +22,7 @@ _r(function (app) {
       this.rendered = false;
       this.params = Array.isArray(params) ? params : [];
       
-      if ( ! this.checkAllowed()) {
+      if ( ! this.checkAllowed.call(this)) {
         this.closeAndBack();
         return false;
       }
@@ -39,10 +39,7 @@ _r(function (app) {
       _.bindAll(this);
       
       this.addLocals({
-        _t: function (name, submodule) {
-          submodule = submodule || self.action;
-          return $.t(name, submodule, self.module);
-        },
+        _t: this._t,
         _view: this
       });
       if (this.init && typeof(this.init) === 'function') {
@@ -165,6 +162,11 @@ _r(function (app) {
       if (this.$el.parent()[0] === app.config.$content[0]) {
         app.back();
       }
+    },
+    
+    _t: function (name, submodule) {
+      submodule = submodule || this.action;
+      return $.t(name, submodule, this.module);
     }
     
   });

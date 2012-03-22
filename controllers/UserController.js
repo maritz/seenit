@@ -42,9 +42,7 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'User'), function (req, res, next
 
 
 function sendUserdata(req, res, next) {
-  console.log('checkeing before sending', req.url, req.loaded.User.id, req.user.allProperties(true));
   req.user.may('edit', 'User', req.loaded.User.id, function (err, may) {
-    console.log('checked', err, may);
     if (err) {
       next(new UserError('Checking permissions failed.'));
     } else {
