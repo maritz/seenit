@@ -40,7 +40,9 @@ module.exports = {
     admin: {
       legend: "Administrator",
       label: "Administrator - BE&nbsp;CAREFUL",
-      label_info: "Be careful who you give this to, admins can edit everything"
+      label_info: "Be careful who you give this to, admins can edit everything",
+      grant_warning: "You're about to give the user \"%s\" admin rights.<br/>He will have the rights to change every data that is changable over the API, including taking away or giving admin to other users (including you!).<br/><br/>Are you sure?",
+      self_warning: "You're about to take your own admin privileges. You will not be able to regain these by yourself!<br/><br/>Are you sure?"
     },
     acl: {
       legend: 'Access List',

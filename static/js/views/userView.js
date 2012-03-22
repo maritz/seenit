@@ -169,7 +169,7 @@ _r(function (app) {
       var cancel = function () {
         $target.prop('checked', !checked);
         $target.attr('disabled', true);
-      }
+      };
       
       $target.attr('disabled', true);
       
@@ -178,7 +178,7 @@ _r(function (app) {
           app.overlay({
             view: 'confirm_take_self_admin',
             locals: {
-              text: this._t(['admin_self_warning', name])
+              text: this._t('admin.self_warning')
             },
             confirm: function () {
               self.model.changeAdmin(false, done);
@@ -192,7 +192,7 @@ _r(function (app) {
         app.overlay({
           view: 'confirm_grant_admin',
           locals: {
-            text: this._t(['admin_warning', name])
+            text: this._t(['admin.grant_warning', name])
           },
           confirm: function () {
             self.model.changeAdmin(true, done);
