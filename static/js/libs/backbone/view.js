@@ -101,9 +101,9 @@ _r(function (app) {
           self.errorRender(locals);
         } else {
           if (self.afterRender.call(self, html) !== false) {
-            self.trigger('rendered');
-            self.rendered = true;
             self.delegateEvents();
+            self.rendered = true;
+            self.trigger('rendered');
           }
         }
       });
