@@ -1,5 +1,5 @@
 <script type="text/x-jade-tmpl" name="sub_navigation">
-ul.nav.pills.small.smaller
+ul.nav.nav-pills.small
   li
     a(href: '#show/')=_t('subnav.list')
   li
@@ -26,7 +26,7 @@ form.form-horizontal( novalidate: true)
     br
     span.error.general_error
     
-    != form('input', { name: 'name' })
+    != form('input', { name: 'name', no_form_class: true })
       
     != form('input', { type: 'submit', name: 'submit', value: _t('forms.search') })
 
@@ -41,7 +41,7 @@ ul.show_search
   - collection.forEach(function (item) {
     li.result( data-id: item.get('id') )
       b=item.get('name')
-      | (first aired: 
+      |  (first aired: 
       = item.get('first_aired')
       | )
       - if( item.get('description') )
@@ -52,13 +52,12 @@ ul.show_search
 
 <script type="text/x-jade-tmpl" name="index">
 - if (data && data.length)
-  ul
+  ul.thumbnails
     each model in data.models
       li
-        a(href:'#show/details/'+model.get('name'))
-          != model.get('name')
-          br
-          img(src:'/images/series_banners/'+model.get('banner'))
+        a.thumbnail.span10(href:'#show/details/'+model.get('name'))
+          =model.get('name')
+          img(src:'/images/series_banners/'+model.get('banner'), title: model.get('name'), alt: model.get('name'))
 - else
   | No shows found.
 </script>
@@ -108,7 +107,7 @@ each episode in episodes
       if parseInt(episode.season, 10) == 0
         =episode.name
       else
-        #{_t('episode')} #{episode.number}
+        =_t('episode')+' '+episode.number
     time(datetime:date.format('YYYY-MM-DD'), title:date.format('MMM Do YYYY'))
       =_t('air_date')+': '
       =date.fromNow()

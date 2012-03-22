@@ -59,12 +59,28 @@ app.get('/byShow/:id', auth.isLoggedIn, auth.may('list', 'Episode'), loadModel('
 });
 
 app.get('/seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Episode'), function (req, res, next) {
-  req.user.link(req.loaded.Episode, 'seen');
-  req.user.save(function (err) {
+  var episode = req.loaded.Episode;
+  
+  var resultHandler = function (err, seen) {
     if (err) {
-      next(new EpisodeError('Failed to set Episode as seen.'));
+      if ( ! err instanceof Error) {
+        err = new EpisodeError(err);
+      }
+      next(err);
     } else {
-      res.ok();
+      res.ok(seen);
+    }
+  };
+      
+  req.user.belongsTo(episode, 'seen', function (err, seen) {
+    if (err) {
+      resultHandler('Failed to determine original seen relation.');
+    } else {
+      if (seen) {
+        episode.setUnseen(req.user, resultHandler);
+      } else {
+        episode.setSeen(req.user, resultHandler);
+      }
     }
   });
 });

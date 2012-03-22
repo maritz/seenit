@@ -20,6 +20,9 @@ _r(function (app) {
         url: this.url(),
         success: function () {
           self.trigger('success', self, collection);
+          if (typeof(options.success) === 'function') {
+            options.success(self);
+          }
         },
         error: function (model, resp, options) {
           resp.handled = true;
@@ -28,6 +31,9 @@ _r(function (app) {
             self.trigger('error', model, {
               general: json.data.error.msg
             });
+            if (typeof(options.error) === 'function') {
+              options.error(self, resp);
+            }
           } catch(e) {
             self.trigger('error', model, {
               general: resp.status+': '+resp.statusText

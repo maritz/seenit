@@ -11,8 +11,7 @@ _r(function (app) {
   app.views.show.index = app.base.listView.extend({
     
     collection: app.collections.Show,
-    auto_render: true,
-    reload_on_login: true
+    auto_render: true
     
   });
   
@@ -84,51 +83,54 @@ _r(function (app) {
     auto_render: true,
     model: app.models.ShowSearch,
     checkAllowed: isLoggedIn,
-    reload_on_login: true,
     
     events: {
-      'click ul.show_search li.result': 'goToImport'
+      'click ul.show_search li.result': 'doImport'
     },
     
     init: function () {
       var self = this;
+      
+      
+      this.once('rendered', function () {
+        this.$search_name = this.$el.find('input[name="name"]');
+        if (this.params[0]) {
+          this.$search_name.val(this.params[0]);
+          this.$el.find('form').submit();
+        }
+      });
+      
       this.model.bind('success', function (model, collection) {
-        self.addLocals({collection: collection});
-        app.template(self.module, 'search_result_line', self.locals, function (html) {
-          self.$el.find('ul').html(html);
-        });
+        self.showResults(collection);
+        app.navigate('#show/search/'+model.get('name'));
       });
     },
     
-    goToImport: function (e) {
+    showResults: function (collection) {
+      var self = this;
+      self.addLocals({collection: collection});
+      app.template(self.module, 'search_result_line', self.locals, function (html) {
+        self.$el.find('ul').html(html);
+      });
+    },
+    
+    doImport: function (e) {
       var id = $(e.target).data('id');
-      app.go('show/import/'+id);
+      var self = this;
+      app.template(self.module, 'import', {name: this.$search_name.val()}, function (html) {
+        self.$el.html(html);
+        $.getJSON('/REST/Show/import/' + id, function(resp) {
+          app.go('show/details/'+resp.data);
+        }).error(function () {
+          app.template(self.module, 'import_failed', {}, function (html) {
+            self.$el.html(html);
+          });
+        });
+      });
     },
     
     error: function (arg1, arg2) {
       console.log('error', arg1, arg2);
-    }
-    
-  });
-  
-  /**
-   * #show/import/:id
-   */
-  app.views.show["import"] = app.base.pageView.extend({
-     
-    auto_render: true,
-    checkAllowed: isLoggedIn,
-    reload_on_login: true,
-    
-    init: function() {
-      var self = this;
-      $.getJSON('/REST/Show/import/' + this.params[0], function(resp) {
-        app.go('show/details/'+resp.data);
-      }).error(function () {
-        app.template(self.module, 'import_failed', {}, function (html) {
-          self.$el.html(html);
-        });
-      });
     }
     
   });
