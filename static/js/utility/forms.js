@@ -102,7 +102,8 @@ _r(function (app) {
   formHandler.prototype.setSuccess = function (name) {
     var $el = this.getInputByName(name);
     var $parent = $el.parents('.control-group').removeClass('error');
-    if ($el.val().length > 0 && ! $el.data('no_form_class')) {
+    var val = $el.val();
+    if (val && val.length > 0 && ! $el.data('no_form_class')) {
       $parent.addClass('success');
     }
     this.clearLoading(name);
