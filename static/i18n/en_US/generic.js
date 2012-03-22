@@ -24,7 +24,10 @@ module.exports = {
     confirm_header: "Please confirm"
   },
   errors: {
+    general_error: 'We encountered an error while trying to process your request:',
+    general_error_header: 'General error',
     not_found: 'Sorry, We could not find the record you were looking for. If you got here from a link from within this page, please contact an administrator.',
-    not_found_header: 'Loading failed'
+    not_found_header: 'Loading failed',
+    privileges_low: 'You lack the necessary privileges to perform this action.'
   }
 };

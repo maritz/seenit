@@ -39,7 +39,11 @@ _r("i18n");
     //console.log('looking for', search_string);
     var t = $.jsperanto.translate(search_string);
     if (t !== search_string) {
-      return vsprintf(t, values);
+      if (values.length > 0) {
+        return vsprintf(t, values);
+      } else {
+        return t;
+      }
     } else {
       if (submodule !== 'general') {
         return arguments.callee(name, 'general', module);

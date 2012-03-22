@@ -10,10 +10,9 @@ script
 </script>
 
 <script type="text/x-jade-tmpl" name="error">
-- locals.header = 'General Error'
-p Sadly there was an unknown error. Please contact an administrator.
-| Error message:
-pre=$.t(locals.error, 'errors');
+- locals.header= $.t('general_error_header', 'errors')
+p= $.t('general_error', 'errors')
+pre=$.t(locals.error, 'errors')
 </script>
 
 <script type="text/x-jade-tmpl" name="not_found">

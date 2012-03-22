@@ -168,7 +168,7 @@ _r(function (app) {
       var done = self.getChangeCallback($target, checked);
       var cancel = function () {
         $target.prop('checked', !checked);
-        $target.attr('disabled', true);
+        $target.attr('disabled', false);
       };
       
       $target.attr('disabled', true);
