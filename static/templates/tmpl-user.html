@@ -1,3 +1,15 @@
+<script type="text/x-jade-tmpl" name="sub_navigation">
+ul.nav.nav-pills.small
+  - if (app.user_self.may('list', 'User')) 
+    li
+      a( href: '#user/')= _t('list')
+  - if (app.user_self.get('name'))
+    li
+      a( href: '#user/profile')= _t('view_profile')
+    li
+      a( href: '#user/edit_profile')= _t('edit_profile')
+</script>
+
 <script type="text/x-jade-tmpl" name="form">
 h2!=_t('headline')
 form.form-horizontal( novalidate: true)
@@ -55,20 +67,9 @@ if(app.user_self.get('admin'))
         .control-group
           label.control-label(for: 'setAdminCheckbox')= _t('admin.label')
           .controls
-            input#setAdminCheckbox(type:'checkbox',
-                  checked: !!_model.get('admin'))
-</script>
-
-<script type="text/x-jade-tmpl" name="sub_navigation">
-ul.nav.pills
-  - if (app.user_self.may('list', 'User')) 
-    li
-      a( href: '#user/')= _t('list')
-  - if (app.user_self.get('name'))
-    li
-      a( href: '#user/profile')= _t('view_profile')
-    li
-      a( href: '#user/edit_profile')= _t('edit_profile')
+            label.checkbox= _t('admin.label_info')
+              input#setAdminCheckbox(type:'checkbox',
+                    checked: !!_model.get('admin'))
 </script>
 
 <script type="text/x-jade-tmpl" name="list">

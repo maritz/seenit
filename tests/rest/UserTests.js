@@ -222,7 +222,18 @@ module.exports = {
         t.expect(1);
         
         json.get(url+'/User/loginData', function (err, res, body) {
-          t.deepEqual(body.data, { name: 'test_user10', admin: false, id: 10 }, 'Did not receive correct loginData.');
+          var expected = {
+            name: 'test_user10',
+            email: '',
+            acl: { 
+              User: [ 'self', 'create' ],
+              Show: [ 'view', 'list' ],
+              Episode: [ 'view', 'list' ] 
+            },
+            admin: false,
+            id: 10 
+          };
+          t.deepEqual(body.data, expected, 'Did not receive correct loginData.');
           t.done();
         });
       },

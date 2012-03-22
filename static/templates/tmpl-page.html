@@ -8,7 +8,7 @@ ul.breadcrumb
 </script>
 
 <script type="text/x-jade-tmpl" name="top_navigation">
-ul.nav.tabs
+ul.nav.nav-tabs
   - if (app.user_self && app.user_self.get('name'))
     li
       a(href: '#show') Shows
@@ -29,6 +29,9 @@ ul.sub_navigation
     h3=header
   .modal-body
     !=body
+  if (footer)
+    .modal-footer
+      !=footer
 </script>
 
 <script type="text/x-jade-tmpl" name="error">

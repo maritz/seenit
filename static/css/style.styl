@@ -56,24 +56,24 @@
   top 10px
   
 @keyframes blink_success
-   0%
-     background-color 0
+  0%
+    background-color 0
+  
+  50%
+    background-color #7ebf88
    
-   50%
-     background-color #7ebf88
-   
-   100%
-     background-color 0
+  100%
+    background-color 0
   
 @keyframes blink_error
-   0%
-     background-color 0
-   
-   50%
-      background-color #de4545
-   
-   100%
-     background-color 0
+  0%
+    background-color 0
+  
+  50%
+    background-color #de4545
+  
+  100%
+    background-color 0
 
 .success_blink
   animation-name blink_success
@@ -83,11 +83,10 @@
   animation-duration 0.5s
 
 
-
 form
   label.required
     font-weight bold
   
-  &.acl
+  &.acl, &.admin
     .controls
       width 300px

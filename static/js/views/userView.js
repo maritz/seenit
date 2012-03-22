@@ -4,7 +4,10 @@ _r(function (app) {
   }
   
   var isNotLoggedIn = function () {
-    return ! isLoggedIn();
+    if ( this.action === 'login' && ! this.$el.hasClass('main_content')) {
+      return true; // this is a popup and probably results from a 401 ajax response
+    }
+    return ! isLoggedIn.call(this);
   }
   
   var isLoggedIn = function () {
@@ -17,8 +20,7 @@ _r(function (app) {
   app.views.user.index = app.base.listView.extend({
     
     collection: app.collections.User,
-    auto_render: true,
-    reload_on_login: true
+    auto_render: true
     
   });
   
@@ -32,7 +34,6 @@ _r(function (app) {
     max_age: 0,
     checkAllowed: isNotLoggedIn,
     wait_for_user_loaded: false,
-    reload_on_login: true,
     
     render: function () {
       if (app.user_self.get('name')) {
@@ -160,10 +161,31 @@ _r(function (app) {
     },
     
     changeAdmin: function (e) {
+      var self = this;
       var $target = $(e.target);
       var checked = $target.prop('checked');
+      var name = this.$el.find(':text[name="name"]').val();
+      var done = self.getChangeCallback($target, checked);
+      
       $target.attr('disabled', true);
-      this.model.changeAdmin(checked, this.getChangeCallback($target, checked));
+      
+      if ( ! checked) {
+        self.model.changeAdmin(false, done);
+      } else {
+        app.overlay({
+          view: 'confirm_grant_admin',
+          locals: {
+            text: this._t(['admin_warning', name])
+          },
+          confirm: function () {
+            self.model.changeAdmin(true, done);
+          },
+          cancel: function () {
+            $target.prop('checked', !checked);
+            $target.attr('disabled', false);
+          }
+        });
+      }
     }
     
   });
@@ -179,11 +201,13 @@ _r(function (app) {
     auto_render: true,
     max_age: 0,
     wait_for_user_loaded: false,
+    checkAllowed: isNotLoggedIn,
+    reload_on_login: false,
     
     /**
      * Login successful
      */
-    saved: function (arg1, arg2, arg3) {
+    saved: function () {
       $.jGrowl('Login successful');
       app.user_self.set(this.model.toJSON());
       this.closeAndBack();
@@ -216,7 +240,6 @@ _r(function (app) {
     
     $el: $('#userbox'),
     auto_render: true,
-    reload_on_login: true,
     
     init: function () {
       this.model.bind('change:name', this.render);

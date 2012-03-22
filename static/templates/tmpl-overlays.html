@@ -20,3 +20,24 @@ pre=$.t(locals.error, 'errors');
 - locals.header = $.t('not_found_header', 'errors');
 =$.t('not_found', 'errors');
 </script>
+
+<script type="text/x-jade-tmpl" name="confirm_grant_admin">
+- locals.header = $.t('confirm_header');
+- console.log(locals);
+</script>
+
+<script type="text/x-jade-tmpl" name="confirm_grant_admin">
+- locals.header = $.t('confirm_header', 'overlays');
+=text
+- locals.footer = partial('confirm_footer_danger', 'yes', 'no')
+</script>
+
+<script type="text/x-jade-tmpl" name="confirm_footer">
+button.btn.btn-primary.confirm= _t(args[0])
+button.btn(data-dismiss: "modal")= $.t(args[1])
+</script>
+
+<script type="text/x-jade-tmpl" name="confirm_footer_danger">
+button.btn.btn-danger.confirm= $.t(args[0])
+button.btn(data-dismiss: "modal")= $.t(args[1])
+</script>

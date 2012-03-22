@@ -4,7 +4,8 @@ module.exports = {
       errors: {
         name_taken: "This username is already taken. Please choose a different one.",
         password_mismatch: "Passwords do not match.",
-        minLength: "Password is too short. Please use at least 6 characters."
+        minLength: "Password is too short. Please use at least 6 characters.",
+        wrong_login: "These login credentials are incorrect."
       },
       labels: {
         name: "User name",
@@ -38,11 +39,14 @@ module.exports = {
     legend: "Your basic information",
     admin: {
       legend: "Administrator",
-      label: "Administrator - BE&nbsp;CAREFUL"
+      label: "Administrator - BE&nbsp;CAREFUL",
+      label_info: "Be careful who you give this to, admins can edit everything"
     },
     acl: {
       legend: 'Access List',
       User: 'User Management',
+      Show: 'Show Management',
+      Episode: 'Episode Management',
       
       read: 'Toggle read rights',
       write: 'Toggle write rights',

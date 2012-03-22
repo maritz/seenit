@@ -3,7 +3,7 @@ _r(function (app) {
   var $modal = $('#modal');
   var default_locals = {
     header: 'Attention',
-    buttons: ['Yes']
+    buttons: ['Yes', 'No']
   };
   
   app.overlay = function (options) {
@@ -11,6 +11,18 @@ _r(function (app) {
     options = options || {};
     var view = options.view || null;
     var locals = _.extend({}, default_locals, options.locals);
+    
+    if (options.confirm) {
+      $modal.one('click', 'button.confirm', function () {
+        $modal.off('hide', options.cancel);
+        options.confirm();
+        app.closeOverlay();
+      });
+    }
+    if (options.cancel) {
+      $modal.one('hide', options.cancel);
+    }
+    
     var renderModal = function () {
       app.template('page', 'modal', locals, function (modal_html) {
         if (typeof(modal_html) === 'string') {
@@ -35,6 +47,8 @@ _r(function (app) {
   
   app.closeOverlay = function () {
     $modal.modal('hide');
+    $modal.off('click', 'button.confirm');
+    $modal.off('click', 'button.cancel');
   };
   
   _.bindAll(app, 'overlay', 'closeOverlay');
