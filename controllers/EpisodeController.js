@@ -91,10 +91,10 @@ function store (req, res, next) {
   
   show.save(function (err) {
     if (err === 'invalid') {
-      next(new ShowError({error: err, fields: show.errors}, 400));
+      next(new EpisodeError({error: err, fields: show.errors}, 400));
     } else if (err) {
       console.log('Uknown database error in /REST/Show/store.', err);
-      next(new ShowError('Unknown database error', 500));
+      next(new EpisodeError('Unknown database error', 500));
     } else {
       res.ok();
     }
@@ -106,7 +106,7 @@ app.put('/:id([0-9]+)', auth.isLoggedIn, auth.may('edit', 'Episode'), loadModel(
 app.del('/:id([0-9]+)', auth.isLoggedIn, auth.may('delete', 'Episode'), loadModel('Episode'), function (req, res, next) {
   req.loaded['Show'].remove(function (err) {
     if (err) {
-      next(new ShowError('Delete failed: '+err, 500));
+      next(new EpisodeError('Delete failed: '+err, 500));
     } else {
       res.ok();
     }
@@ -114,8 +114,8 @@ app.del('/:id([0-9]+)', auth.isLoggedIn, auth.may('delete', 'Episode'), loadMode
 });
 
 
-app.mounted(function (parent){
-  console.log('mounted Show REST controller');
+app.mounted(function (){
+  console.log('mounted Episode REST controller');
 });
 
 module.exports = app;
