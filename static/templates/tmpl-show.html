@@ -65,77 +65,118 @@ ul.show_search
 <script type="text/x-jade-tmpl" name="details">
 ul.show_details
   li
-    img(src:'/images/series_banners/'+data.get('banner'))
+    img.thumbnail(src:'/images/series_banners/'+data.get('banner'))
   li
-    b=_t('name')
+    label=_t('name')
     = data.get('name')
   li
     - var genres = data.get('genre').replace(/(^\|)|(\|$)/g, '').split('|');
-    b
+    label
       - if (genres.length > 1)
         = _t('genre')
       - else
         = _t('genre_plural')
     = genres.join(', ')
   li
-    b=_t('description')
+    label=_t('description')
     = data.get('description')
   li
-    b=_t('tvdb_link')
+    label=_t('tvdb_link')
     a(href:'http://thetvdb.com/?tab=series&id='+data.get('tvdb_id'), target: data.get('name')+' TheTVDB')= data.get('tvdb_id')
   li
-    b=_t('imdb_link')
+    label=_t('imdb_link')
     a(href:'http://imdb.com/title/'+data.get('imdb_id'), target: data.get('name')+' IMDB')= data.get('imdb_id')
   li
-    b=_t('season_plural')
-    ul
+    br
+    label=_t('season_plural')
+    br
+    ul.seasons.nav.nav-pills
       each season in data.get('seasons')
-        li
-          a.season_opener(data-num: season)
+        li.nav-pill
+          a.season_opener( 
+            data-toggle="tab",  
+            data-num: season, 
+            data-target='#season_contents div.tab-pane[data-num="'+season+'"]' 
+          )
             if parseInt(season, 10) === 0
               =_t('special_season')
             else
               =_t('season')+' '+season
-          ul.episode_list
+              
+    #season_contents.tab-content.thumbnails
+      each season in data.get('seasons')
+        .tab-pane(data-num: season)
+          !=partial('loading_episode_list')
+</script>
+
+<script type="text/x-jade-tmpl" name="loading_episode_list">
+| Loading
 </script>
 
 <script type="text/x-jade-tmpl" name="episode_list">
-each episode in episodes
-  - var date = moment(episode.first_aired);
-  li
-    a.episode_opener
+ul.episode_list
+  each episode in episodes
+    li.well.span3
+      
       if parseInt(episode.season, 10) == 0
         =episode.name
       else
         =_t('episode')+' '+episode.number
-    time(datetime:date.format('YYYY-MM-DD'), title:date.format('MMM Do YYYY'))
-      =_t('air_date')+': '
-      =date.fromNow()
-    - if (episode.seen)
-      span.seen &#x2713;
-    dl.episode_details.hidden
-      dt
-        label(for: episode.id+'_seen')
-          = _t('seen')
-      dd
-        input.seen_checker(type:'checkbox', checked:episode.seen, id: episode.id+'_seen')
         
-      dt
+      br
+      label
         = _t('name')
-      dd
-        = episode.name
+      span.one_line= episode.name
       
-      if episode.plot
-        dt
+      br
+      - var date = moment(episode.first_aired);
+      time(datetime:date.format('YYYY-MM-DD'), title:date.format('MMM Do YYYY'))
+        label
+          =_t('air_date')
+        =date.fromNow()
+
+      br
+      !=partial('seen_button', episode)
+      
+      br
+      a.episode_opener(href: '#')
+        =_t('more')
+      
+      .episode_details.hidden          
+        
+        label
           = _t('plot')
-        dd
-          = episode.plot
-      
-      if episode.imdb_link
-        dt
-          =_t('imdb_link')+':'
-        dd
+        = episode.plot
+        
+        br
+        if episode.imdb_link
+          label
+            =_t('imdb_link')+':'
           a(href:'http://imdb.com/title/'+episode.imdb_id, target: episode.name+' IMDB')= episode.imdb_id
+</script>
+
+<script type="text/x-jade-tmpl" name="seen_button">
+- var episode = args[0]
+- var seen = episode.seen; var in_future = moment().add('d', 1) > moment(episode.first_aired);
+- var class_name = seen ? 'btn-success' : 'btn-info';
+.btn-group.dropdown
+  a.btn.dropdown-toggle("class":class_name, data-toggle: "dropdown")
+    if seen
+      =_t('has_seen')
+    else if in_future
+      =_t('has_not_seen')
+    else
+      =_t('not_released')
+    span.caret
+  ul.dropdown-menu
+    if seen
+      li
+        a.set_not_seen(href: '#')= _t('set_not_seen')
+    else
+      li
+        a.set_seen(href: '#')= _t('set_seen')
+    li
+      a.get_links(href: '#')= _t('wanna_see')
 </script>
 
 <script type="text/x-jade-tmpl" name="import">

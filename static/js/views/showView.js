@@ -25,8 +25,20 @@ _r(function (app) {
     required_params: 1,
     
     events: {
-      'click a.season_opener': 'toggleSeason',
-      'click a.episode_opener': 'toggleEpisode'
+      'click a.episode_opener': 'toggleEpisode',
+      'show a[data-toggle="tab"]': 'toggleSeason'
+    },
+    
+    init: function () {
+      var self = this;
+      if (this.params[1]) {
+        this.once('rendered', function () {
+          var $season_opener = self.$el.find('a.season_opener[data-num="'+self.params[1]+'"]');
+          if ($season_opener) {
+            $season_opener.click();
+          }
+        });
+      }
     },
     
     load: function (callback) {
@@ -40,14 +52,14 @@ _r(function (app) {
     },
     
     toggleSeason: function (e) {
+      e.preventDefault();
       var self = this;
       var $target = $(e.target);
-      var episode_list = $target.siblings('ul.episode_list');
       var num = $target.data('num');
+      var episode_list = $('#season_contents div.tab-pane[data-num="'+num+'"]');
+      app.navigate('#show/details/'+this.model.get('name')+'/'+num);
       
-      if (episode_list.children().length > 0) {
-        episode_list.toggle();
-      } else {
+      if (episode_list.children().length === 0) {
         $.getJSON('/REST/Episode/byShow/'+self.model.get('id'), {
           season: num
         }, function (resp) {
@@ -68,8 +80,9 @@ _r(function (app) {
     },
     
     toggleEpisode: function (e) {
+      e.preventDefault();
       var $target = $(e.target);
-      var $ul = $target.nextAll('dl');
+      var $ul = $target.nextAll('.episode_details');
       $ul.toggleClass('hidden');
     }
     
