@@ -161,7 +161,7 @@ _r(function (app) {
     },
     
     doImport: function (e) {
-      var id = $(e.target).data('id');
+      var id = $(e.target).closest('li.result').data('id');
       var self = this;
       app.template(self.module, 'import', {name: this.$search_name.val()}, function (html) {
         self.$el.html(html);
