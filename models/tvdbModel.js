@@ -332,7 +332,7 @@ module.exports = nohm.model('tvdb', {
       var redis = require(__dirname+'/../registry.js').redis;
       redis.lrange(set_key, 0, -1, function (err, series) {
         if (err || series.length === 0) {
-          self._tvdbRequest('/GetSeries.php?seriesname='+name, function (err, doc) {
+          self._tvdbRequest('/GetSeries.php?seriesname='+encodeURIComponent(name), function (err, doc) {
             if (err) {
               callback(err);
             } else {

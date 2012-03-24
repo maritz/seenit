@@ -101,7 +101,6 @@ module.exports = nohm.model('Episode', {
     },
     
     getSeasonEpisodes: function (callback) {
-      var self = this;
       var season = this.p('season');
       this.getShow(function (err, show) {
         if (err) {
@@ -109,6 +108,36 @@ module.exports = nohm.model('Episode', {
         } else {
           show.getAll('Episode', 'season'+season, function(err, ids) {
             callback(err, ids, show);
+          });
+        }
+      });
+    },
+    
+    toggleSeasonSeen: function (user, callback) {
+      var season_rel = 'seen_season_'+this.p('season');
+      this.getSeasonEpisodes(function (err, ids, show) {
+        if (err) {
+          callback(err);
+        } else {
+          user.belongsTo(show, season_rel, function (err, seen) {
+            if (err) {
+              callback('Failed to toggle Season seen/unseen.');
+            } else {
+              var action = seen ? 'unlink' : 'link';
+              ids.forEach(function (id) {
+                var episode = nohm.factory('Episode');
+                episode.id = id;
+                user[action](episode, 'seen');
+              });
+              user[action](show, season_rel);
+              user.save(function (err) {
+                if (err) {
+                  callback('Failed to set Season as '+(seen?'':'un')+'seen.');
+                } else {
+                  callback(null, !seen);
+                }
+              });
+            }
           });
         }
       });

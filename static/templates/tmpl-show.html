@@ -58,14 +58,16 @@ ul.show_search
         a.thumbnail.span10(href:'#show/details/'+model.get('name'))
           span
             =model.get('name')
-          img(src:'/images/series_banners/'+model.get('banner'), title: model.get('name'), alt: model.get('name'))
+          if (model.get('banner'))
+            img(src:'/images/series_banners/'+model.get('banner'), title: model.get('name'), alt: model.get('name'))
 - else
   | No shows found.
 </script>
 
 <script type="text/x-jade-tmpl" name="details">
 
-img.thumbnail(src:'/images/series_banners/'+data.get('banner'))
+if (data.get('banner'))
+  img.thumbnail(src:'/images/series_banners/'+data.get('banner'))
 
 h2
   = data.get('name')
@@ -112,13 +114,16 @@ ul.show_details
 </script>
 
 <script type="text/x-jade-tmpl" name="loading_episode_list">
-| Loading
+.loading Loading
 </script>
 
 <script type="text/x-jade-tmpl" name="episode_list">
 if (data.models.length === 0)
   =_t('none_found')
 else
+  .season_seen_container
+    !=partial('season_seen_button', data)
+  
   ul.episode_list
     each episode in data.models
       li.well.span3.episode_detail(data-id: episode.id)
@@ -140,8 +145,8 @@ else
           =date.fromNow()
   
         br
-        .seen_container
-          !=partial('seen_button', episode)
+        .episode_seen_container
+          !=partial('episode_seen_button', episode)
         
         a.episode_opener(href: '#')
           =_t('more')
@@ -159,11 +164,11 @@ else
             a(href:'http://imdb.com/title/'+episode.get('imdb_id'), target: episode.get('name')+' IMDB')= episode.get('imdb_id')
 </script>
 
-<script type="text/x-jade-tmpl" name="seen_button">
+<script type="text/x-jade-tmpl" name="episode_seen_button">
 - var episode = locals.episode ? episode : args[0]
 - var seen = episode.get('seen'); var in_future = moment().add('d', 1) > moment(episode.get('first_aired'));
 - var class_name = seen ? 'btn-success' : 'btn-info';
-.btn-group.dropdown.seen_button
+.btn-group.dropdown.episode_seen_button
   a.btn.dropdown-toggle("class":class_name, data-toggle: "dropdown")
     if seen
       =_t('has_seen')
@@ -180,6 +185,31 @@ else
       a.set_seen(href: '#')= _t('set_seen')
     li
       a.get_links(href: '#')= _t('wanna_see')
+</script>
+
+<script type="text/x-jade-tmpl" name="season_seen_button">
+- var season = locals.collection ? collection : args[0];
+- var seen = _.all(season.models, function (ep) { return ep.get('seen'); });
+- var last_air_date = _.last(season.models).get('first_aired')
+- var in_future = moment().add('d', 1) > moment(last_air_date);
+- var class_name = seen ? 'btn-success' : 'btn-info';
+.btn-group.dropdown.season_seen_button
+  a.btn.dropdown-toggle("class":class_name, data-toggle: "dropdown")
+    if seen
+      =_t('has_seen_season')
+    else if in_future
+      =_t('has_not_seen_season')
+    else
+      =_t('not_released_season')
+    span.caret
+  ul.dropdown-menu
+    li( "class": seen ? '' : 'hidden' )
+      a.set_not_seen(href: '#')= _t('set_not_seen_season')
+    
+    li( "class": seen ? 'hidden' : '' )
+      a.set_seen(href: '#')= _t('set_seen_season')
+    li
+      a.get_links(href: '#')= _t('wanna_see_season')
 </script>
 
 <script type="text/x-jade-tmpl" name="import">

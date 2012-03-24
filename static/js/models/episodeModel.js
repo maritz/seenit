@@ -4,13 +4,12 @@ _r(function (app) {
     urlRoot: '/REST/Episode/',
     nohmName: 'Episode',
     
-    toggleSeen: function (callback) {
+    toggleSeen: function () {
       var self = this;
-      $.getJSON(this.urlRoot+'seen/'+this.id, function (res, result) {
+      $.getJSON(this.urlRoot+'seen/'+this.id, function (res) {
         self.set({
           seen: res.data.episode
         });
-        callback();
       });
     }
   });

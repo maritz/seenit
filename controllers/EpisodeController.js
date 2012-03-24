@@ -20,14 +20,20 @@ function EpisodeError(msg, code){
 EpisodeError.prototype.__proto__ = Error.prototype;
 
 
+var profiler = require('v8-profiler');
+
 app.get('/byShow/:id', auth.isLoggedIn, auth.may('list', 'Episode'), loadModel('Show'), function (req, res, next) {
   var season = req.param('season');
+  console.time('getting ids');
+  profiler.startProfiling('startup');
   var cb = function (err, ids) {
+    console.timeEnd('getting ids');
     if (err) {
       next(new EpisodeError('Error while retreiving the episode ids.'));
     } else {
+      console.time('loading all');
       async.map(ids, function (id, cb) {
-        nohm.factory('Episode').load(id, function (err, data) {
+        nohm.factory('Episode', id, function (err, data) {
           if (err) {
             cb(err);
           } else {
@@ -42,6 +48,8 @@ app.get('/byShow/:id', auth.isLoggedIn, auth.may('list', 'Episode'), loadModel('
           }
         });
       }, function (err, episodes) {
+        console.timeEnd('loading all');
+        profiler.stopProfiling('startup');
         if (err) {
           console.log(err);
           next(new EpisodeError('Error while loading the episodes.'));
@@ -56,6 +64,19 @@ app.get('/byShow/:id', auth.isLoggedIn, auth.may('list', 'Episode'), loadModel('
   } else {
     req.loaded.Show.getAll('Episode', cb);
   }
+});
+
+app.get('/season_seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Episode'), function (req, res, next) {
+  req.loaded.Episode.toggleSeasonSeen(req.user, function (err, seen) {
+    if (err) {
+      if ( ! err instanceof Error) {
+        err = new EpisodeError(err);
+      }
+      next(err);
+    } else {
+      res.ok({seen: seen});
+    }
+  });
 });
 
 app.get('/seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Episode'), function (req, res, next) {
