@@ -1,5 +1,7 @@
 _r(function (app) {
   
+  _.extend(Backbone.View.prototype, Backbone.Events);
+  
   app.base.pageView = Backbone.View.extend({
     
     auto_render: false,
@@ -128,6 +130,7 @@ _r(function (app) {
     
     render: function () {
       var self = this;
+      this.rendered = false;
       this.load(function (err, data) {
         var locals = _.extend({
           success: !err,
@@ -196,14 +199,37 @@ _r(function (app) {
       
   app.base.listView = app.base.pageView.extend({
     
+    pagination_pager_selector: '.pagination',
+    pagination_content_selector: '.pagination_content',
+    current_page: 1,
+    
     initialize: function () {
+      var self = this;
+      
       if (this.collection) {
         if ( ! this.collection.getByCid || typeof(this.collection.getByCid) !== 'function') {
           this.collection = new this.collection();
           this.collection_generated = true;
         }
-        this.addLocals({collection: this.collection});
+        this.addLocals({collcetion: this.collection});
       }
+      
+      this.$el.delegate(this.pagination_pager_selector+' a', 'click', function (e) {
+        e.preventDefault();
+        var $target = $(e.target);
+        var $li = $target.closest('li');
+        if ($li.hasClass('disabled') || $li.hasClass('active')) {
+          return false;
+        } else {
+          self.paginator($target.data('page'));
+        }
+      });
+      
+      this.bind('rendered', function () {
+        if (self.collection.paginated) {
+          self.renderPagination();
+        }
+      });
       
       if ( ! app.base.pageView.prototype.initialize.apply(this, arguments)) {
         return false;
@@ -226,6 +252,48 @@ _r(function (app) {
           var json = JSON.parse(response.responseText);
           callback(json.data, null);
         }
+      });
+    },
+    
+    renderPagination: function () {
+      var $pagination = this.$el.find(this.pagination_pager_selector);
+      
+      if ($pagination.length === 0) {
+        console.log('Collection is paginated but no pagination element found with this selector:', this.pagination_pager_selector);
+        return false;
+      }
+      
+      var locals = _.extend({}, this.locals, {
+        current: parseInt(this.current_page, 10),
+        num_pages: Math.ceil(this.collection.total / this.collection.per_page)
+      });
+      app.template('page', 'pagination', locals, function (html) {
+        $pagination.html(html);
+      });
+    },
+    
+    paginator: function (page) {
+      var self = this;
+      var new_page = parseInt(page, 10);
+      
+      if (isNaN(new_page)) {
+        return false;
+      }
+      
+      if (window.location.hash.indexOf('page=') === -1) { 
+        app.navigate(window.location.hash+'/?page='+new_page);
+      } else {
+        app.navigate(window.location.hash.replace(/page=[\d]*/, 'page='+new_page));
+      }
+      
+      this.collection.getPage(new_page, function (collection, page) {
+        self.current_page = page;
+        self.locals.data = {
+          paginated: true,
+          models: collection
+        };
+        self.successRender(self.locals);
+        self.renderPagination();
       });
     }
     

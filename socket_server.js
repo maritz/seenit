@@ -60,7 +60,7 @@ exports.init = function (server) {
       }
       channels[name].on('connection', connectionHandler);
     } else {
-      console.log('Warning: Found socket controller without connection Handler export.');
+      console.log('Warning: Found socket controller without connection Handler export:', name);
     }
   });
 };

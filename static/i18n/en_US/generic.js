@@ -17,7 +17,11 @@ module.exports = {
     name: 'Name',
     description: 'Description',
     yes: "Yes",
-    no: "No"
+    no: "No",
+    pagination: {
+      previous: '<<',
+      next: '>>'
+    }
   },
   overlays: {
     login_needed: "Login",

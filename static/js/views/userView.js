@@ -34,6 +34,7 @@ _r(function (app) {
     max_age: 0,
     checkAllowed: isNotLoggedIn,
     wait_for_user_loaded: false,
+    reload_on_login: true,
     
     render: function () {
       if (app.user_self.get('name')) {
