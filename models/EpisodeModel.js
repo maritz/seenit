@@ -18,7 +18,8 @@ module.exports = nohm.model('Episode', {
       type: 'integer'
     },
     number: {
-      type: 'integer'
+      type: 'integer',
+      index: true
     },
     first_aired: {
       type: 'timestamp'

@@ -71,7 +71,7 @@ if (data.get('banner'))
 
 h2
   = data.get('name')
-  
+
 ul.show_details
   li
     - var genres = data.get('genre').replace(/(^\|)|(\|$)/g, '').split('|');
@@ -124,44 +124,51 @@ else
   .season_seen_container
     !=partial('season_seen_button', data)
   
-  ul.episode_list
-    each episode in data.models
-      li.well.span3.episode_detail(data-id: episode.id)
-        h3
-          if parseInt(episode.get('season'), 10) == 0
-            =episode.get('name')
-          else
-            =_t('episode')+' '+episode.get('number')
-          
+  if data.paginated
+    .pagination.pagination-centered
+
+  ul.episode_list.pagination_content
+    !=partial('episode_details', data.models)
+</script>
+
+<script type="text/x-jade-tmpl" name="episode_details">
+each episode in args[0]
+  li.well.span3.episode_detail(data-id: episode.id)
+    h3
+      if parseInt(episode.get('season'), 10) == 0
+        =episode.get('name')
+      else
+        =_t('episode')+' '+episode.get('number')
+      
+    label
+      = _t('name')
+    span.one_line= episode.get('name')
+    
+    br
+    - var date = moment(episode.get('first_aired'));
+    time(datetime:date.format('YYYY-MM-DD'), title:date.format('MMM Do YYYY'))
+      label
+        =_t('air_date')
+      =date.fromNow()
+
+    br
+    .episode_seen_container
+      !=partial('episode_seen_button', episode)
+    
+    a.episode_opener(href: '#')
+      =_t('more')
+    
+    .episode_details.hidden          
+      
+      label
+        = _t('plot')
+      = episode.get('plot')
+      
+      br
+      if episode.get('imdb_link')
         label
-          = _t('name')
-        span.one_line= episode.get('name')
-        
-        br
-        - var date = moment(episode.get('first_aired'));
-        time(datetime:date.format('YYYY-MM-DD'), title:date.format('MMM Do YYYY'))
-          label
-            =_t('air_date')
-          =date.fromNow()
-  
-        br
-        .episode_seen_container
-          !=partial('episode_seen_button', episode)
-        
-        a.episode_opener(href: '#')
-          =_t('more')
-        
-        .episode_details.hidden          
-          
-          label
-            = _t('plot')
-          = episode.get('plot')
-          
-          br
-          if episode.get('imdb_link')
-            label
-              =_t('imdb_link')+':'
-            a(href:'http://imdb.com/title/'+episode.get('imdb_id'), target: episode.get('name')+' IMDB')= episode.get('imdb_id')
+          =_t('imdb_link')+':'
+        a(href:'http://imdb.com/title/'+episode.get('imdb_id'), target: episode.get('name')+' IMDB')= episode.get('imdb_id')
 </script>
 
 <script type="text/x-jade-tmpl" name="episode_seen_button">

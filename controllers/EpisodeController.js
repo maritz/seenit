@@ -20,49 +20,71 @@ function EpisodeError(msg, code){
 EpisodeError.prototype.__proto__ = Error.prototype;
 
 
-var profiler = require('v8-profiler');
 
 app.get('/byShow/:id', auth.isLoggedIn, auth.may('list', 'Episode'), loadModel('Show'), function (req, res, next) {
   var season = req.param('season');
-  console.time('getting ids');
-  profiler.startProfiling('startup');
-  var cb = function (err, ids) {
-    console.timeEnd('getting ids');
+  var start = parseInt(req.param('offset'), 10) || 0;
+  var max = 30;
+  var more_after_max = false;
+  var total = 0;
+  
+  var loadEpisodes = function (ids) {
+    async.map(ids, function (id, cb) {
+      nohm.factory('Episode', id, function (err, data) {
+        if (err) {
+          cb(err);
+        } else {
+          req.user.belongsTo(this, 'seen', function (err, belongs) {
+            if (err) {
+              cb(err);
+            }
+            data.seen = belongs;
+            data.id = id;
+            cb(null, data);
+          });
+        }
+      });
+    }, function (err, episodes) {
+      if (err) {
+        console.log(err);
+        next(new EpisodeError('Error while loading the episodes.'));
+      } else {
+        res.ok({
+          total: total,
+          per_page: max,
+          collection: episodes
+        });
+      }
+    });
+  };
+  
+  var getAllCallback = function (err, ids) {
     if (err) {
       next(new EpisodeError('Error while retreiving the episode ids.'));
     } else {
-      console.time('loading all');
-      async.map(ids, function (id, cb) {
-        nohm.factory('Episode', id, function (err, data) {
+      total = ids.length;
+      if (total > max) {
+        more_after_max = (start+max > total);
+        Episode.sort({
+          field: 'number',
+          limit: [start, max]
+        }, ids,
+        function (err, ids) {
           if (err) {
-            cb(err);
+            next(new EpisodeError('Error while sorting the episode ids.'));
           } else {
-            req.user.belongsTo(this, 'seen', function (err, belongs) {
-              if (err) {
-                cb(err);
-              }
-              data.seen = belongs;
-              data.id = id;
-              cb(null, data);
-            });
+            loadEpisodes(ids);
           }
         });
-      }, function (err, episodes) {
-        console.timeEnd('loading all');
-        profiler.stopProfiling('startup');
-        if (err) {
-          console.log(err);
-          next(new EpisodeError('Error while loading the episodes.'));
-        } else {
-          res.ok(episodes);
-        }
-      });
+      } else {
+        loadEpisodes(ids);
+      }
     }
   };
   if (season) {
-    req.loaded.Show.getAll('Episode', 'season'+season, cb);
+    req.loaded.Show.getAll('Episode', 'season'+season, getAllCallback);
   } else {
-    req.loaded.Show.getAll('Episode', cb);
+    req.loaded.Show.getAll('Episode', getAllCallback);
   }
 });
 

@@ -4,6 +4,8 @@ _r(function (app) {
     model: app.models.Episode,
     url: '/REST/Episode/',
     
+    pagination_by_field: 'number',
+    
     comparator: function (episode) {
       return episode.get('number');
     },
