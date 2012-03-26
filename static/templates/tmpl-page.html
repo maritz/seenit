@@ -28,6 +28,51 @@ ul.sub_navigation
       !=footer
 </script>
 
+<script type="text/x-jade-tmpl" name="pagination">
+ul
+  li("class": (current === 1 ? 'disabled': ''))
+    a(href: '#', data-page: current-1)
+      =_t('pagination.previous')
+      
+  
+  if (num_pages > 10)
+    
+    if (current > 4)
+      - var middle_start = current-2
+      li
+        a(href: '#', data-page: 1) 1
+      li.disabled
+        a(href: '#') ...
+    else
+      - var middle_start = 1
+      
+    if (num_pages-current > 4)
+      - var middle_end = current+2
+    else
+      - var middle_end = num_pages
+    
+    - for (var i = middle_start; i <= middle_end; i++)
+      li("class": (current === i ? 'active': ''))
+        a(href: '#', data-page: i)
+          =i
+  
+    if (num_pages-current > 4)
+      li.disabled
+        a(href: '#') ...
+      li
+        a(href: '#', data-page: num_pages)= num_pages
+        
+  else
+    - for (var i = 1; i <= num_pages; i++)
+      li("class": (current === i ? 'active': ''))
+        a(href: '#', data-page: i)
+          =i
+        
+  li("class": (current === num_pages ? 'disabled': ''))
+    a(href: '#', data-page: current+1)
+      =_t('pagination.next')
+</script>
+
 <script type="text/x-jade-tmpl" name="error">
 - if (data && data.error && data.error.msg === 'need_login')
   !=partial('need_login_error')
