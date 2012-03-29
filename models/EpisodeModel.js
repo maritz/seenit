@@ -50,6 +50,10 @@ module.exports = nohm.model('Episode', {
       });
     },
     
+    getSeen: function (user, callback) {
+      user.belongsTo(this, 'seen', callback);
+    },
+    
     setUnseen: function (user, callback) {
       var self = this;
       this.getShow(function (err, show) {
@@ -80,7 +84,7 @@ module.exports = nohm.model('Episode', {
             } else {
               var episode = nohm.factory('Episode');
               episode.id = id;
-              user.belongsTo(episode, 'seen', function (err, seen) {
+              episode.getSeen(user, function (err, seen) {
                 next(!err && seen);
               });
             }
@@ -140,6 +144,22 @@ module.exports = nohm.model('Episode', {
               });
             }
           });
+        }
+      });
+    },
+    
+    getSeasonSeen: function (user, callback) {
+      var season_rel = 'seen_season_'+this.p('season');
+      async.waterfall([
+        async.apply(this.getShow),
+        function (show, done) {
+          user.belongsTo(show, season_rel, done);
+        }
+      ], function (err, seen) {
+        if (err) {
+          callback('Failed to get Season seen/unseen.');
+        } else {
+          callback(null, seen);
         }
       });
     }

@@ -20,72 +20,79 @@ function EpisodeError(msg, code){
 EpisodeError.prototype.__proto__ = Error.prototype;
 
 
-
-app.get('/byShow/:id', auth.isLoggedIn, auth.may('list', 'Episode'), loadModel('Show'), function (req, res, next) {
+app.get('/byShow/:id/:season', auth.isLoggedIn, auth.may('list', 'Episode'), loadModel('Show'), function (req, res, next) {
   var season = req.param('season');
   var start = parseInt(req.param('offset'), 10) || 0;
   var max = 30;
-  var more_after_max = false;
-  var total = 0;
+  var none_found_error = 'no ids found'
   
-  var loadEpisodes = function (ids) {
-    async.map(ids, function (id, cb) {
-      nohm.factory('Episode', id, function (err, data) {
-        if (err) {
-          cb(err);
+  var data = {
+    total: 0,
+    per_page: max,
+    collection: []
+  };
+  
+  async.auto({
+    all_ids: function(done) {
+      req.loaded.Show.getAll('Episode', 'season'+season, function (err, ids) {
+        if (ids.length === 0) {
+          done(none_found_error);
         } else {
-          req.user.belongsTo(this, 'seen', function (err, belongs) {
-            if (err) {
-              cb(err);
-            }
-            data.seen = belongs;
-            data.id = id;
-            cb(null, data);
-          });
+          done(err, ids);
         }
       });
-    }, function (err, episodes) {
-      if (err) {
-        console.log(err);
-        next(new EpisodeError('Error while loading the episodes.'));
-      } else {
-        res.ok({
-          total: total,
-          per_page: max,
-          collection: episodes
+    },
+    first_episode: ['all_ids', function (done, results) {
+      nohm.factory('Episode', results.all_ids[0], function () {
+        done(null, this);
+      });
+    }],
+    season_seen: ['first_episode', function (done, results) {
+      results.first_episode.getSeasonSeen(req.user, done);
+    }],
+    sort_all_ids: ['all_ids', function (done, results) {
+      Episode.sort({
+        field: 'number',
+        limit: [start, max]
+      }, results.all_ids, done);
+    }],
+    load_all_episodes: ['sort_all_ids', function (done, results) {
+      async.map(results.sort_all_ids, function (id, cb) {
+        nohm.factory('Episode', id, function (err) {
+          cb(err, this);
         });
-      }
-    });
-  };
-  
-  var getAllCallback = function (err, ids) {
-    if (err) {
-      next(new EpisodeError('Error while retreiving the episode ids.'));
-    } else {
-      total = ids.length;
-      if (total > max) {
-        more_after_max = (start+max > total);
-        Episode.sort({
-          field: 'number',
-          limit: [start, max]
-        }, ids,
-        function (err, ids) {
-          if (err) {
-            next(new EpisodeError('Error while sorting the episode ids.'));
-          } else {
-            loadEpisodes(ids);
-          }
-        });
-      } else {
-        loadEpisodes(ids);
-      }
+      }, done);
+    }],
+    load_episodes_seen: ['season_seen', 'load_all_episodes', function (done, results) {
+      async.map(results.load_all_episodes, function (episode, callback) {
+        if (results.season_seen) {
+          episode.seen = true;
+          callback(null, episode);
+        } else {
+          episode.getSeen(req.user, function (err, seen) {
+            episode.seen = seen;
+            callback(err, episode);
+          });
+        }
+      }, done);
+    }],
+    get_properties: ['load_episodes_seen', function (done, results) {
+      async.map(results.load_episodes_seen, function (episode, callback) {
+        var props = episode.allProperties();
+        props.seen = episode.seen;
+        callback(null, props);
+      }, done);
+    }]
+  }, function (err, results) {
+    if (err && err !== none_found_error) {
+      console.log('Error in Episode /byShow/'+req.param('id')+'/'+req.param('season'), err, results);
+      next(new EpisodeError('Failed to get episode list.'));
+    } else if (err !== none_found_error) {
+      data.total = results.all_ids.length;
+      data.collection = results.get_properties
     }
-  };
-  if (season) {
-    req.loaded.Show.getAll('Episode', 'season'+season, getAllCallback);
-  } else {
-    req.loaded.Show.getAll('Episode', getAllCallback);
-  }
+    res.ok(data);
+  });
 });
 
 app.get('/season_seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Episode'), function (req, res, next) {
@@ -124,34 +131,6 @@ app.get('/seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Ep
       } else {
         episode.setSeen(req.user, resultHandler);
       }
-    }
-  });
-});
-
-function store (req, res, next) {
-  var show = req.loaded.Show;
-  show.p("name", req.param('name'));
-  
-  show.save(function (err) {
-    if (err === 'invalid') {
-      next(new EpisodeError({error: err, fields: show.errors}, 400));
-    } else if (err) {
-      console.log('Uknown database error in /REST/Show/store.', err);
-      next(new EpisodeError('Unknown database error', 500));
-    } else {
-      res.ok();
-    }
-  });
-}
-
-app.put('/:id([0-9]+)', auth.isLoggedIn, auth.may('edit', 'Episode'), loadModel('Episode'), store);
-
-app.del('/:id([0-9]+)', auth.isLoggedIn, auth.may('delete', 'Episode'), loadModel('Episode'), function (req, res, next) {
-  req.loaded['Show'].remove(function (err) {
-    if (err) {
-      next(new EpisodeError('Delete failed: '+err, 500));
-    } else {
-      res.ok();
     }
   });
 });

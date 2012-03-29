@@ -1,8 +1,14 @@
 _r(function (app) {
 
-  app.collections.Season = app.base.collection.extend({
+  app.collections.Season = app.base.paginatedCollection.extend({
     model: app.models.Episode,
-    url: '/REST/Episode/',
+    urlRoot: '/REST/Episode/byShow/',
+    
+    season: 1,
+    
+    url: function () {
+      return this.urlRoot+this.id+'/'+this.season;
+    },
     
     pagination_by_field: 'number',
     

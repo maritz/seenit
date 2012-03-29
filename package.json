@@ -20,7 +20,9 @@
     "connect-assetmanager-handlers": "0.0.17",
     "request": "2.9",
     "libxmljs": "0.5",
-    "rimraf": "2"
+    "underscore": "1.3"
+    , "rimraf": "2"
+    , "reds": "0.1.3"
   },
   "dev-dependencies": {
     "soda": "0.2",

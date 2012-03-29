@@ -46,3 +46,9 @@ button.btn(data-dismiss: "modal")= $.t(args[1])
 button.btn.btn-danger.confirm= $.t(args[0])
 button.btn(data-dismiss: "modal")= $.t(args[1])
 </script>
+
+<script type="text/x-jade-tmpl" name="confirm_import">
+- locals.header = $.t('confirm_header', 'import', 'show');
+=$.t(['confirm_question', show.get('name')], 'import', 'show');
+- locals.footer = partial('confirm_footer', 'yes', 'no')
+</script>

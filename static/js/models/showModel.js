@@ -2,16 +2,50 @@ _r(function (app) {
   
   app.models.Show = app.base.model.extend({
     urlRoot: '/REST/Show/',
-    nohmName: 'Show'
+    nohmName: 'Show',
+    
+    _followRequest: function (bool) {
+      var self = this;
+      var action = bool ? 'follow' : 'unfollow';
+      app.getCsrf(function (csrf) {
+        $.ajax(self.urlRoot+action+'/'+self.id, {
+          type: 'PUT',
+          dataType: 'json',
+          data: {
+            _csrf: csrf
+          }
+        }).success(function () {
+          self.set({
+            following: bool
+          });
+        });
+      });
+    },
+    
+    setFollow: function () {
+      this._followRequest(true);
+    },
+    
+    unsetFollow: function () {
+      this._followRequest(false);
+    }
   });
   
   app.models.ShowSearch = app.base.model.extend({
-    urlRoot: '/REST/Show/checkname?name=',
+    urlRoot: '/REST/Show/search/',
     url: function () {
       return this.urlRoot+this.get('name');
     },
     
     nohmName: 'Show',
+    
+    setOwn: function () {
+      this.urlRoot = '/REST/Show/search/';
+    },
+    
+    setTVDB: function () {
+      this.urlRoot = '/REST/Show/searchTVDB/';
+    },
     
     save: function (attrs, options) {
       var self = this;

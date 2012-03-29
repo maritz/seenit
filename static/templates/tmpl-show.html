@@ -6,18 +6,6 @@ ul.nav.nav-pills.small
     a(href: '#show/search')=_t('subnav.search')
 </script>
 
-<script type="text/x-jade-tmpl" name="form">
-form.form-horizontal( novalidate: true)
-  - var model = parentLocals._model;
-  fieldset
-    legend=_t('forms.legend')
-    br
-    span.error.general_error
-    
-    != form('input', { name: 'name', value: model.get('name') })
-    
-  != form('input', { type: 'submit', name: 'submit', value: _t('forms.submit') })
-</script>
 
 <script type="text/x-jade-tmpl" name="search">
 form.form-horizontal( novalidate: true)
@@ -27,42 +15,90 @@ form.form-horizontal( novalidate: true)
     span.error.general_error
     
     != form('input', { name: 'name', no_form_class: true })
-      
-    != form('input', { type: 'submit', name: 'submit', value: _t('forms.search') })
+    
+    .button-row.offset2
+      button.btn( type: 'submit', data-form: 'submit' )=_t('forms.search')
+
+if typeof(args) === 'undefined'
+  !=partial('cant_find_show')
+  
+#no_results_import
 
 ul.show_search
 </script>
 
-<script type="text/x-jade-tmpl" name="search_result_line">
-- if (collection.length === 0)
-  li
-    = _t('no_results')
-- else
-  - collection.forEach(function (item) {
-    li.result( data-id: item.get('id') )
-      b=item.get('name')
-      |  (first aired: 
-      = item.get('first_aired')
-      | )
-      - if( item.get('description') )
-        |  - 
-        = item.get('description')
-  - })
+
+<script type="text/x-jade-tmpl" name="search_tvdb">
+!=partial('search', true)
 </script>
 
+
+<script type="text/x-jade-tmpl" name="cant_find_show">
+.tvdb_import_controls
+  a#cant_find_show.hidden.fake_link( data-toggle: "collapse", data-target: "#cant_find_show_content" )
+   =_t('cant_find_show')
+   
+  #cant_find_show_content.collapse
+    p!=_t('not_found_import_question')
+    
+    button!=_t('start_import')
+</script>
+
+
+<script type="text/x-jade-tmpl" name="no_results_import">
+!=_t(['no_results_import', search || ''])
+
+h2
+  !=_t('thetvdb_results')
+</script>
+
+
+<script type="text/x-jade-tmpl" name="search_result">
+if (collection.length === 0)
+  li
+    = _t('no_results')
+else
+  each model in collection.models
+    if model.get('banner')
+      !=partial('list_item', model)
+    else
+      li.import( data-id: model.get('id') )
+        b=model.get('name')
+        |  (first aired: 
+        = model.get('first_aired')
+        | )
+        - if( model.get('description') )
+          |  - 
+          = model.get('description')
+</script>
+
+
 <script type="text/x-jade-tmpl" name="index">
-- if (data && data.length)
+- if (data && data.models.length)
+
+  if data.paginated
+    .pagination.pagination-centered
+    
   ul.thumbnails.show_index
     each model in data.models
-      li
-        a.thumbnail.span10(href:'#show/details/'+model.get('name'))
-          span
-            =model.get('name')
-          if (model.get('banner'))
-            img(src:'/images/series_banners/'+model.get('banner'), title: model.get('name'), alt: model.get('name'))
+      !=partial('list_item', model)
 - else
   | No shows found.
 </script>
+
+<script type="text/x-jade-tmpl" name="list_item">
+- var model = args[0]
+li
+  a.thumbnail.span10(href:'#show/details/'+model.get('name'))
+    span
+      =model.get('name') 
+      if model.get('following')
+        |  - 
+        =_t('youre_following')
+    if model.get('banner')
+      img(src:'/images/series_banners/'+model.get('banner'), title: model.get('name'), alt: model.get('name'))
+</script>
+
 
 <script type="text/x-jade-tmpl" name="details">
 
@@ -90,6 +126,8 @@ ul.show_details
   li
     label=_t('imdb_link')
     a(href:'http://imdb.com/title/'+data.get('imdb_id'), target: data.get('name')+' IMDB')= data.get('imdb_id')
+  li.following
+    !=partial('follow_button', data)
   li
     br
     label=_t('season_plural')
@@ -106,16 +144,41 @@ ul.show_details
               =_t('special_season')
             else
               =_t('season')+' '+season
-              
+    
     #season_contents.tab-content.thumbnails
       each season in data.get('seasons')
         .tab-pane(data-num: season)
           !=partial('loading_episode_list')
 </script>
 
+
+<script type="text/x-jade-tmpl" name="follow_button">
+- var show = locals.show ? show : args[0];
+- var following = show.get('following');
+- var class_name = following ? 'btn-success' : 'btn-info';
+.btn-group.dropdown.following_button
+  a.btn.dropdown-toggle("class":class_name, data-toggle: "dropdown")
+    if following
+      =_t('youre_following')
+    else
+      =_t('not_following')
+    span.caret
+  ul.dropdown-menu
+    li
+      if following
+        a.unset_follow(href: '#')= _t('stop_follow')
+      else
+        a.set_follow(href: '#')= _t('start_follow')
+      
+    li
+      a.explain(href: '#')= _t('what_means_follow')
+</script>
+
+
 <script type="text/x-jade-tmpl" name="loading_episode_list">
 .loading Loading
 </script>
+
 
 <script type="text/x-jade-tmpl" name="episode_list">
 if (data.models.length === 0)
@@ -130,6 +193,7 @@ else
   ul.episode_list.pagination_content
     !=partial('episode_details', data.models)
 </script>
+
 
 <script type="text/x-jade-tmpl" name="episode_details">
 each episode in args[0]
@@ -171,9 +235,11 @@ each episode in args[0]
         a(href:'http://imdb.com/title/'+episode.get('imdb_id'), target: episode.get('name')+' IMDB')= episode.get('imdb_id')
 </script>
 
+
 <script type="text/x-jade-tmpl" name="episode_seen_button">
 - var episode = locals.episode ? episode : args[0]
-- var seen = episode.get('seen'); var in_future = moment().add('d', 1) > moment(episode.get('first_aired'));
+- var seen = episode.get('seen');
+- var in_future = moment().add('d', 1) > moment(episode.get('first_aired'));
 - var class_name = seen ? 'btn-success' : 'btn-info';
 .btn-group.dropdown.episode_seen_button
   a.btn.dropdown-toggle("class":class_name, data-toggle: "dropdown")
@@ -190,21 +256,23 @@ each episode in args[0]
     
     li( "class": seen ? 'hidden' : '' )
       a.set_seen(href: '#')= _t('set_seen')
+      
     li
       a.get_links(href: '#')= _t('wanna_see')
 </script>
+
 
 <script type="text/x-jade-tmpl" name="season_seen_button">
 - var season = locals.collection ? collection : args[0];
 - var seen = _.all(season.models, function (ep) { return ep.get('seen'); });
 - var last_air_date = _.last(season.models).get('first_aired')
-- var in_future = moment().add('d', 1) > moment(last_air_date);
+- var in_future = moment().add('d', 1).valueOf() < last_air_date;
 - var class_name = seen ? 'btn-success' : 'btn-info';
 .btn-group.dropdown.season_seen_button
   a.btn.dropdown-toggle("class":class_name, data-toggle: "dropdown")
     if seen
       =_t('has_seen_season')
-    else if in_future
+    else if ! in_future
       =_t('has_not_seen_season')
     else
       =_t('not_released_season')
@@ -214,14 +282,21 @@ each episode in args[0]
       a.set_not_seen(href: '#')= _t('set_not_seen_season')
     
     li( "class": seen ? 'hidden' : '' )
-      a.set_seen(href: '#')= _t('set_seen_season')
+      a.set_seen(href: '#')
+        if in_future
+          = _t('set_seen_season_available')
+        else
+          = _t('set_seen_season')
+          
     li
       a.get_links(href: '#')= _t('wanna_see_season')
 </script>
 
+
 <script type="text/x-jade-tmpl" name="import">
 | Importing from TheTVDB. Please wait...
 </script>
+
 
 <script type="text/x-jade-tmpl" name="import_failed">
 | Importing failed. Please contact an administrator.
