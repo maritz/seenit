@@ -64,6 +64,12 @@ var App = Backbone.Router.extend({
         parameters = route;
       }
     }
+    if ( ! module.match(/^[\w]+$/i) ) {
+      module = this.config.default_module;
+    }
+    if ( ! action.match(/^[\w]+$/i) ) {
+      action = this.config.default_action;
+    }
     
     var data_expired = this.current.view ? this.current.view.isExpired() : false;
     
@@ -113,7 +119,7 @@ var App = Backbone.Router.extend({
     if (!$el) {
       $el = $('<div></div>')
               .appendTo('#content')
-              .addClass('main_content');
+              .addClass('main_content '+module+' '+action);
     }
     $el.data('module', module);
     $el.data('action', action);

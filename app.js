@@ -2,6 +2,7 @@ var config = require(__dirname+'/config.js');
 var express = require('express');
 var async = require('async');
 var registry = require(__dirname+'/registry.js');
+var file_helper = require('./helpers/file.js');
 
 var nohm = require('nohm').Nohm;
 var redis = require('redis');
@@ -58,6 +59,13 @@ async.series([
     }
     
     nohm.setClient(nohm_redis_client);
+    
+    var model_files = file_helper.getFiles(__dirname, '/models/', ['validations.js']);
+      
+    model_files.forEach(function (val) {
+      var name = val.match(/^\/models\/([\w]*)Model.js$/)[1];
+      registry.Models[name] = require('.'+val);
+    });
     
     var server = express.createServer();
     

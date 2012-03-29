@@ -235,6 +235,12 @@ _r(function (app) {
       });
     });
     
+    $form.delegate('button', 'click', function (e) {
+      if ($(e.target).data('form') !== 'submit') {
+        e.preventDefault();
+      }
+    });
+    
     $form.bind('submit', function (e) {
       e.preventDefault();
       getCsrf(function () {

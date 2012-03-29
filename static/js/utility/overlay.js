@@ -1,6 +1,7 @@
 _r(function (app) {
   
   var $modal = $('#modal');
+  $modal.modal({show: false});
   var default_locals = {
     header: 'Attention',
     buttons: ['Yes', 'No']
@@ -32,6 +33,8 @@ _r(function (app) {
             this.overlay = false;
             app.overlay({view: 'error', locals: {error: 'Overlay view does not exist.'}});
           }
+          console.log('error');
+          app.closeOverlay();
         }
       });
     };
