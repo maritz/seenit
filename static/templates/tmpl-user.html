@@ -72,15 +72,6 @@ if(app.user_self.get('admin'))
                     checked: !!_model.get('admin'))
 </script>
 
-<script type="text/x-jade-tmpl" name="list">
-- if (data)
-  ul
-    each model in data.models
-      li!= JSON.stringify(model.toJSON())
-- else
-  | No users found
-</script>
-
 <script type="text/x-jade-tmpl" name="profile">
 ui
   li ID: 
@@ -105,6 +96,7 @@ form( novalidate: true)
 </script>
 
 <script type="text/x-jade-tmpl" name="index">
+- console.log(locals);
 - if (data && data.length)
   ul
     each model in data.models

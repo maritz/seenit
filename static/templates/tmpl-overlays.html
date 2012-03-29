@@ -22,7 +22,6 @@ pre=$.t(locals.error, 'errors')
 
 <script type="text/x-jade-tmpl" name="confirm">
 - locals.header = $.t('confirm_header', 'overlays');
-- console.log('confirm modal locals', locals);
 </script>
 
 <script type="text/x-jade-tmpl" name="confirm_grant_admin">
@@ -38,7 +37,7 @@ pre=$.t(locals.error, 'errors')
 </script>
 
 <script type="text/x-jade-tmpl" name="confirm_footer">
-button.btn.btn-primary.confirm= _t(args[0])
+button.btn.btn-primary.confirm= $.t(args[0])
 button.btn(data-dismiss: "modal")= $.t(args[1])
 </script>
 

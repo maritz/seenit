@@ -35,7 +35,7 @@ _r(function (app) {
           this.model_generated = true;
         }
         this.addLocals({_model: this.model});
-        this.model.view = this;
+        //this.model.view = this;
       }
       
       _.bindAll(this);
@@ -102,7 +102,7 @@ _r(function (app) {
         if (html === false) {
           self.errorRender(locals);
         } else {
-          if (self.afterRender.call(self, html) !== false) {
+          if (self.afterRender(html) !== false) {
             self.delegateEvents();
             self.rendered = true;
             self.trigger('rendered');
@@ -148,18 +148,32 @@ _r(function (app) {
       callback();
     },
     
+    /**
+     * Called after the rendering of this view has produced some html.
+     * Used for putting the html in an element or handling errors.
+     */
     afterRender: function (html, error) {
       this.$el.html(html);
     },
     
+    /**
+     * If the page is reloaded without the force flag, this check is invoked to see if the page data has expired.
+     * Compares the current time with this._expiration.
+     */
     isExpired: function () {
       return +new Date() > this._expiration;
     },
     
+    /**
+     * Check if the user is allowed to call this view
+     */
     checkAllowed: function () {
       return true;
     },
     
+    /**
+     *  Closes the current overlay and goes back in the application history if this is a main content.
+     */
     closeAndBack: function () {
       app.closeOverlay();
       if (this.$el.parent()[0] === app.config.$content[0]) {
@@ -167,6 +181,9 @@ _r(function (app) {
       }
     },
     
+    /**
+     * i18n based on the current module/action.
+     */
     _t: function (name, submodule) {
       submodule = submodule || this.action;
       return $.t(name, submodule, this.module);
@@ -189,6 +206,9 @@ _r(function (app) {
       }
     },
     
+    /**
+     * Initialize and link the formHandler
+     */
     afterRender: function (html) {
       this.$el.html(html);
       this.handler = new app.formHandler(this);
@@ -199,10 +219,6 @@ _r(function (app) {
       
   app.base.listView = app.base.pageView.extend({
     
-    pagination_pager_selector: '.pagination',
-    pagination_content_selector: '.pagination_content',
-    current_page: 1,
-    
     initialize: function () {
       var self = this;
       
@@ -211,8 +227,61 @@ _r(function (app) {
           this.collection = new this.collection();
           this.collection_generated = true;
         }
-        this.addLocals({collcetion: this.collection});
+        this.addLocals({collection: this.collection});
       }
+      
+      return app.base.pageView.prototype.initialize.apply(this, arguments);
+    },
+    
+    /**
+     * Make sure the collection doesn't have event listeners to improve gc
+     */
+    _unload: function () {
+      this.collection.unbind();
+      app.base.pageView.prototype._unload.apply(this, arguments);
+    },
+    
+    /**
+     * Overwrite load to fetch a collection instead of the model
+     */
+    load: function (callback) {
+      this.collection.fetch({
+        success: function (collection) {
+          callback(null, collection);
+        },
+        error: function (collection, response) {
+          var json = JSON.parse(response.responseText);
+          callback(json.data, null);
+        }
+      });
+    }
+    
+  });
+  
+  app.base.paginatedListView = app.base.listView.extend({
+    
+    pagination_pager_selector: '.pagination',
+    
+    initialize: function () {
+      var self = this;
+      var do_auto_render = this.auto_render;
+      
+      if (do_auto_render) {
+        this.auto_render = false;
+      }
+      this.current_page = 1;
+      
+      if ( ! app.base.listView.prototype.initialize.apply(this, arguments)) {
+        return false;
+      }
+      
+      this.collection.getPage(1, function () {
+        if (do_auto_render) {
+          self.render();
+        }
+      });
+      
+      this.bind('rendered', self.renderPagination, this);
       
       this.$el.delegate(this.pagination_pager_selector+' a', 'click', function (e) {
         e.preventDefault();
@@ -224,39 +293,28 @@ _r(function (app) {
           self.paginator($target.data('page'));
         }
       });
-      
-      this.bind('rendered', function () {
-        if (self.collection.paginated) {
-          self.renderPagination();
-        }
-      });
-      
-      if ( ! app.base.pageView.prototype.initialize.apply(this, arguments)) {
-        return false;
-      }
     },
     
-    _unload: function () {
-      this.collection.unbind();
-      app.base.pageView.prototype._unload.apply(this, arguments);
+    /**
+     * Overwrite the default rendering to render the page that is currently selected
+     */
+    render: function () {
+      this.current_page = this.getPageFromHash();
+      this.paginator(this.current_page);
     },
     
-    load: function (callback) {
-      var self = this;
-      
-      this.collection.fetch({
-        success: function (collection) {
-          callback(null, collection);
-        },
-        error: function (collection, response) {
-          var json = JSON.parse(response.responseText);
-          callback(json.data, null);
-        }
-      });
-    },
-    
+    /**
+     * Render the pagination into an element specified by this.pagination_pager_selector
+     */
     renderPagination: function () {
       var $pagination = this.$el.find(this.pagination_pager_selector);
+      
+      if (this.collection.total <= this.collection.per_page) {
+        // no pagination needed
+        $pagination.hide();
+        return false;
+      }
+      
       
       if ($pagination.length === 0) {
         console.log('Collection is paginated but no pagination element found with this selector:', this.pagination_pager_selector);
@@ -272,6 +330,47 @@ _r(function (app) {
       });
     },
     
+    /**
+     * Checks if there is a page=[\d] in the hash. If so, returns the [\d] otherwise 1.
+     */
+    getPageFromHash: function () {
+      var page = 1;
+      window.location.hash
+        .split('/')
+          .forEach(
+            function (part) {
+              var match = part.match(/^page=([\d]+)$/i);
+              if (match) {
+                page = match[1];
+              }
+            }
+          );
+      return parseInt(page, 10);
+    },
+    
+    /**
+     * If the current window.location.hash does not have the current page numer in it the hash is changed.
+     */
+    setPageHash: function () {
+      var current_hash = window.location.hash;
+      var current_hash_page = current_hash.match(/\/page=([\d]+)/);
+      if ( ! current_hash_page && this.current_page === 1) {
+        return false;
+      }
+      var new_hash_page = this.current_page === 1 ? '' : '/page='+this.current_page;
+      var new_hash = '';
+      
+      if (current_hash_page) {
+        new_hash = current_hash.replace(/\/page=([\d]+)/, new_hash_page);
+      } else {
+        new_hash = current_hash+new_hash_page;
+      }
+      app.navigate(new_hash);
+    },
+    
+    /**
+     * Renders and sets a page.
+     */
     paginator: function (page) {
       var self = this;
       var new_page = parseInt(page, 10);
@@ -280,23 +379,12 @@ _r(function (app) {
         return false;
       }
       
-      if (window.location.hash.indexOf('page=') === -1) { 
-        app.navigate(window.location.hash+'/?page='+new_page);
-      } else {
-        app.navigate(window.location.hash.replace(/page=[\d]*/, 'page='+new_page));
-      }
-      
       this.collection.getPage(new_page, function (collection, page) {
         self.current_page = page;
-        self.locals.data = {
-          paginated: true,
-          models: collection
-        };
+        self.setPageHash();
+        self.locals.data = collection;
         self.successRender(self.locals);
-        self.renderPagination();
       });
     }
-    
   });
-  
 });
