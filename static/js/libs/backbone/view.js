@@ -35,7 +35,7 @@ _r(function (app) {
           this.model_generated = true;
         }
         this.addLocals({_model: this.model});
-        //this.model.view = this;
+        this.model.view = this;
       }
       
       _.bindAll(this);
