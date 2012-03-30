@@ -12,7 +12,7 @@ var tvdb = nohm.factory('tvdb', 1, function (err) {
   }
 });
 
-function ShowError(msg, code){
+function ShowError(msg, code, err){
   this.name = 'ShowError';
   if (typeof(msg) === 'string') {
     this.message = msg;
@@ -22,6 +22,7 @@ function ShowError(msg, code){
   }
   this.code = code || 500;
   Error.call(this, msg);
+  console.log(this, err);
 }
 ShowError.prototype.__proto__ = Error.prototype;
 
@@ -31,7 +32,7 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'Show'), function (req, res, next
     field: 'name'
   }, function (err, ids) {
     if (err) {
-      next(new ShowError('Fetching the ids failed: '+err));
+      next(new ShowError('Fetching the ids failed.', 500, err));
     } else {
       async.map(ids, function loadById(id, callback) {
         async.auto({
@@ -54,7 +55,7 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'Show'), function (req, res, next
         });
       }, function doneMapping (err, shows) {
         if (err) {
-          next(new ShowError('Fetching the list failed: '+err));
+          next(new ShowError('Fetching the list failed.', 500, err));
         } else {
           res.ok({
             total: shows.length,
@@ -78,7 +79,7 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'Show'), function (req, res, next
 app.get('/view/:name', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Show', 'name', true), function (req, res, next) {
   req.loaded.Show.getUserIsFollowing(req.user, function (err, is_following) {
     if (err) {
-      next(new ShowError('Failed to determine if user is following show'));
+      next(new ShowError('Failed to determine if user is following show', 500, err));
     } else {
       var props = req.loaded.Show.allProperties();
       props.following = is_following;
@@ -90,7 +91,7 @@ app.get('/view/:name', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Sho
 app.put('/follow/:id', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Show'), function (req, res, next) {
   req.loaded.Show.setFollow(req.user, true, function (err, following) {
     if (err) {
-      next(new ShowError('Failed to follow the show.'));
+      next(new ShowError('Failed to follow the show.', 500, err));
     } else {
       res.ok(following);
     }
@@ -100,7 +101,7 @@ app.put('/follow/:id', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Sho
 app.put('/unfollow/:id', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Show'), function (req, res, next) {
   req.loaded.Show.setFollow(req.user, false, function (err, following) {
     if (err) {
-      next(new ShowError('Failed to unfollow the show.'));
+      next(new ShowError('Failed to unfollow the show.', 500, err));
     } else {
       res.ok(following);
     }
@@ -113,7 +114,7 @@ app.get('/search/:name', function (req, res, next) {
   
   show.search(name, function (err, shows) {
     if (err) {
-      next(new ShowError('Search failed.', 500));
+      next(new ShowError('Search failed.', 500, err));
     } else {
       res.ok(shows);
     }
@@ -124,7 +125,7 @@ app.get('/searchTVDB/:name', function (req, res, next) {
   var name = req.param('name');
   tvdb.searchSeries(name, function (err, result) {
     if (err) {
-      next(new ShowError('TheTVDB query failed.', 502));
+      next(new ShowError('TheTVDB query failed.', 502, err));
     } else {
       res.ok(result);
     }
@@ -137,13 +138,13 @@ app.get('/import/:id', function (req, res, next) {
     tvdb.importSeries(id, 'en', function (err, show) {
       if (err) {
         console.log(err);
-        next(new ShowError('TheTVDB query failed.', 502));
+        next(new ShowError('TheTVDB query failed.', 502, err));
       } else {
         res.ok(show.p('name'));
       }
     });
   } else {
-    next(new ShowError('Need name to check.', 400));
+    next(new ShowError('Need name to check.', 400, id));
   }
 });
 
@@ -151,7 +152,7 @@ app.get('/del/:id', auth.isLoggedIn, auth.may('delete', 'Show'), loadModel('Show
   req.loaded.Show.getAll('Episode', function (err, ids) {
     if (err) {
       console.log('Error in del(\'Show/'+req.params('id')+'\'');
-      next(new ShowError('Error getting all episodes'));
+      next(new ShowError('Error getting all episodes', 500, err));
     } else {
       ids.forEach(function (id) {
         var ep = nohm.factory('Episode');
@@ -164,7 +165,7 @@ app.get('/del/:id', auth.isLoggedIn, auth.may('delete', 'Show'), loadModel('Show
       });
       req.loaded.Show.remove(function (err) {
         if (err) {
-          next(new ShowError('Delete failed: '+err, 500));
+          next(new ShowError('Delete failed.', 500, err));
         } else {
           res.ok();
         }

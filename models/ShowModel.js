@@ -60,8 +60,19 @@ module.exports = nohm.model('Show', {
         function loadFn (ids, next) {
           ids = _.union.apply(null, ids);
           async.map(ids, function (id, cb) {
-            nohm.factory('Show', id, cb);
+            nohm.factory('Show', id, function (err, data) {
+              if (err === 'not found') {
+                cb(null);
+              } else {
+                cb(err, data);
+              }
+            });
           }, next);
+        },
+        function filterEmpty (shows, next) {
+          next(null, shows.filter(function (item) {
+            return item !== undefined;
+          }));
         }
       ], callback);
     },
