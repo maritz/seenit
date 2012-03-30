@@ -227,6 +227,9 @@ _r(function (app) {
       app.user_self.set(this.model.toJSON());
       this.closeAndBack();
       app.trigger('login');
+      if (app.current.view instanceof app.views.user.login) {
+        app.back();
+      }
     }
     
   });
