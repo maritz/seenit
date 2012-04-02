@@ -95,6 +95,7 @@ app.get('/byShow/:id/:season', auth.isLoggedIn, auth.may('list', 'Episode'), loa
   });
 });
 
+
 app.get('/season_seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Episode'), function (req, res, next) {
   req.loaded.Episode.toggleSeasonSeen(req.user, function (err, seen) {
     if (err) {
@@ -107,6 +108,7 @@ app.get('/season_seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadMo
     }
   });
 });
+
 
 app.get('/seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Episode'), function (req, res, next) {
   var episode = req.loaded.Episode;
