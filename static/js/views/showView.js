@@ -214,11 +214,15 @@ _r(function (app) {
     showResults: function (collection) {
       var self = this;
       
-      this.$el.find('#cant_find_show').removeClass('hidden');
-      this.addLocals({collection: collection});
-      app.template(this.module, 'search_result', this.locals, function (html) {
-        self.$el.find('ul').html(html);
-      });
+      if (collection.length === 0) {
+        this.$el.find('.tvdb_import_controls button').click();
+      } else {
+        this.$el.find('#cant_find_show').removeClass('hidden');
+        this.addLocals({collection: collection});
+        app.template(this.module, 'search_result', this.locals, function (html) {
+          self.$el.find('ul').html(html);
+        });
+      }
     },
     
     searchImport: function (e) {

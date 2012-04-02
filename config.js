@@ -2,7 +2,7 @@ var env = process.env.NODE_ENV || 'development';
 
 var defaults = {
   "static": {
-    port: 3002
+    port: 3003
   },
   "socket": {
     options: {
