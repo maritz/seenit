@@ -76,6 +76,7 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'Show'), function (req, res, next
   });
 });
 
+
 app.get('/view/:name', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Show', 'name', true), function (req, res, next) {
   req.loaded.Show.getUserIsFollowing(req.user, function (err, is_following) {
     if (err) {
@@ -88,6 +89,7 @@ app.get('/view/:name', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Sho
   });
 });
 
+
 app.put('/follow/:id', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Show'), function (req, res, next) {
   req.loaded.Show.setFollow(req.user, true, function (err, following) {
     if (err) {
@@ -98,6 +100,7 @@ app.put('/follow/:id', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Sho
   });
 });
 
+
 app.put('/unfollow/:id', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Show'), function (req, res, next) {
   req.loaded.Show.setFollow(req.user, false, function (err, following) {
     if (err) {
@@ -107,6 +110,7 @@ app.put('/unfollow/:id', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('S
     }
   });
 });
+
 
 app.get('/search/:name', function (req, res, next) {
   var name = req.param('name');
@@ -121,6 +125,7 @@ app.get('/search/:name', function (req, res, next) {
   });
 });
 
+
 app.get('/searchTVDB/:name', function (req, res, next) {
   var name = req.param('name');
   tvdb.searchSeries(name, function (err, result) {
@@ -132,26 +137,33 @@ app.get('/searchTVDB/:name', function (req, res, next) {
   });
 });
 
+
 app.get('/import/:id', function (req, res, next) {
   var id = req.param('id');
-  if (id) {
-    tvdb.importSeries(id, 'en', function (err, show) {
+  async.waterfall([
+    function (cb) {
+      tvdb.importSeries(id, 'en', cb);
+    },
+    function (show, cb) {
+      show.link(req.user, 'imported_by');
+      show.save(function (err) {
+        cb(err, show);
+      });
+    },
+  ], function (err, show) {
       if (err) {
-        console.log(err);
-        next(new ShowError('TheTVDB query failed.', 502, err));
+        next(new ShowError('Importing the show failed.', 502, err));
       } else {
         res.ok(show.p('name'));
       }
-    });
-  } else {
-    next(new ShowError('Need name to check.', 400, id));
-  }
+    }
+  );
 });
+
 
 app.get('/del/:id', auth.isLoggedIn, auth.may('delete', 'Show'), loadModel('Show'), function (req, res, next) {
   req.loaded.Show.getAll('Episode', function (err, ids) {
     if (err) {
-      console.log('Error in del(\'Show/'+req.params('id')+'\'');
       next(new ShowError('Error getting all episodes', 500, err));
     } else {
       ids.forEach(function (id) {
@@ -159,7 +171,7 @@ app.get('/del/:id', auth.isLoggedIn, auth.may('delete', 'Show'), loadModel('Show
         ep.id = id;
         ep.remove(id, function (err) {
           if (err) {
-            console.log('There was an error while trying to remove an episode form a /Show/del:', err);
+            console.log('There was an error while trying to remove an episode form a /Show/del/'+req.param('id'), err);
           }
         });
       });
