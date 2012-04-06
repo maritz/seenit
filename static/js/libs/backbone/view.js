@@ -10,6 +10,7 @@ _r(function (app) {
     $el: window.app.config.$content,
     wait_for_user_loaded: true,
     reload_on_login: true,
+    requires_login: true,
     
     initialize: function (module, action, $el, params) {
       var self = this;
@@ -24,38 +25,10 @@ _r(function (app) {
       this.rendered = false;
       this.params = Array.isArray(params) ? params : [];
       
-      if ( ! this.checkAllowed.call(this)) {
-        this.closeAndBack();
-        return false;
-      }
-      
-      if (this.model) {
-        if ( ! this.model.get || ! typeof(this.model.get) === 'function') {
-          this.model = new this.model();
-          this.model_generated = true;
-        }
-        this.addLocals({_model: this.model});
-        this.model.view = this;
-      }
-      
       _.bindAll(this);
       
-      this.addLocals({
-        _t: this._t,
-        _view: this
-      });
-      if (this.init && typeof(this.init) === 'function') {
-        this.init();
-      }
-      
-      if (this.auto_render) {
-        if (this.wait_for_user_loaded && ! app.user_self.loaded) {
-          app.once('user_loaded', function () {
-            self.render();
-          });
-        } else {
-          this.render();
-        }
+      if ( ! this.checkAllowed.call(this)) {
+        return false;
       }
       
       if (this.reload_on_login) {
@@ -65,6 +38,42 @@ _r(function (app) {
             self.render();
           }
         });
+      }
+      
+      this.addLocals({
+        _t: this._t,
+        _view: this
+      });
+      if (this.init && typeof(this.init) === 'function') {
+        this.init();
+      }
+      
+      if ( this.requires_login && ! app.user_self.get('name')) {
+        app.template('page', 'need_login_error', this.locals, function (html) {
+          self.$el.html(html);
+          self.trigger('rendered');
+        });
+        return false;
+      }
+      
+      if (this.model) {
+        if ( ! this.model.get || typeof(this.model.get) !== 'function') {
+          this.model = new this.model();
+          this.model_generated = true;
+        }
+        this.addLocals({_model: this.model});
+        this.model.view = this;
+      }
+      
+      
+      if (this.auto_render) {
+        if (this.wait_for_user_loaded && ! app.user_self.loaded) {
+          app.once('user_loaded', function () {
+            self.render();
+          });
+        } else {
+          this.render();
+        }
       }
       
       this._gc_interval = setInterval(function () {

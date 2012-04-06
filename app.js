@@ -1,6 +1,5 @@
 var config = require(__dirname+'/config.js');
 var express = require('express');
-var async = require('async');
 var registry = require(__dirname+'/registry.js');
 var file_helper = require('./helpers/file.js');
 

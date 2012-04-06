@@ -216,7 +216,7 @@ _r(function (app) {
     auto_render: true,
     max_age: 0,
     wait_for_user_loaded: false,
-    checkAllowed: isNotLoggedIn,
+    requires_login: false,
     reload_on_login: false,
     
     /**
@@ -225,10 +225,10 @@ _r(function (app) {
     saved: function () {
       $.jGrowl('Login successful');
       app.user_self.set(this.model.toJSON());
-      this.closeAndBack();
       app.trigger('login');
+      
       if (app.current.view instanceof app.views.user.login) {
-        app.back();
+        app.go('#');
       }
     }
     
@@ -250,6 +250,8 @@ _r(function (app) {
    * Userbox
    */
   app.views.userbox = app.base.pageView.extend({
+    
+    requires_login: false,
     
     model: app.user_self,
     

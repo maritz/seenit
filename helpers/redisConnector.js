@@ -57,6 +57,7 @@ exports.connect = function (cb) {
       }
       
       nohm.setClient(nohm_redis_client);
+      nohm.setPrefix(config.nohm.prefix);
       
       cb();
     }
