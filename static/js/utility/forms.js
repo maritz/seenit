@@ -88,14 +88,14 @@ _r(function (app) {
   formHandler.prototype.setLoading = function (name) {
     var $el = this.getInputByName(name);
     $el.siblings('.loading').removeClass('hidden');
-    $el.attr('disabled', true);
+    $el.attr('readOnly', true);
   };
   
   formHandler.prototype.clearLoading = function (name) {
     var $el = this.getInputByName(name);
     $el.siblings('.loading').addClass('hidden');
     if ( ! this._submitting) {
-      $el.attr('disabled', false);
+      $el.attr('readOnly', false);
     }
   };
   
@@ -142,7 +142,7 @@ _r(function (app) {
     
     this._submitting = true;
     
-    this.$inputs.prop('disabled', true);
+    this.$inputs.prop('readOnly', true);
     
     var attributes =  {};
     var submit_attributes = {
@@ -161,7 +161,7 @@ _r(function (app) {
     self.model.validation(attributes, function (valid) {
       
       if ( ! valid) {
-        self.$inputs.prop('disabled', false);
+        self.$inputs.prop('readOnly', false);
         self._submitting = false;
       } else {        
         self.model.set(submit_attributes);
@@ -176,7 +176,7 @@ _r(function (app) {
             } else {
               data = JSON.parse(response.responseText).data;
             }
-            self.$inputs.prop('disabled', false);
+            self.$inputs.prop('readOnly', false);
             var fields = data.fields;
             _.each(fields, function (val, key) {
               if (_.isArray(val) && val.length > 0) {
@@ -189,7 +189,7 @@ _r(function (app) {
           },
           
           success: function (model) {
-            self.$inputs.prop('disabled', false);
+            self.$inputs.prop('readOnly', false);
             self._submitting = false;
             self.model.trigger('saved', model);
           }

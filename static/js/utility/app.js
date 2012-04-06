@@ -260,7 +260,9 @@ var App = Backbone.Router.extend({
       try {
         var html = this._templates[module][name](locals);
         if (typeof(callback) === 'function') {
-          callback(html);
+          setTimeout(function () {
+            callback(html);
+          }, 1);
         } else {
           return html;
         }

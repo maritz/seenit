@@ -82,10 +82,10 @@ ul
 
 
 <script type="text/x-jade-tmpl" name="need_login_error">
-| You need to be logged in to view this content.
+=$.t('explanation', 'login_required')
 br
-| Go to 
-a.open_login(href:'#user/login') the login
+=$.t(['login_or_register', 'a.open_login(href:\'#user/login\')'], 'login_required')
+ Go to the login
 |  or - if you don't have an account yet - 
 a(href:'#user/register') sign up for free
 |  .
