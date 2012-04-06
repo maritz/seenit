@@ -63,7 +63,8 @@ module.exports = {
         "length": "Search string must be at least 2 characters long."
       },
       legend: "Search in the TheTVDB.com database for shows you can import"
-    }
+    },
+    no_results: "No shows found with that name.",
   },
   
   "import": {
