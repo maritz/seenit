@@ -32,8 +32,8 @@ module.exports = {
     privileges_low: 'You lack the necessary privileges to perform this action.'
   },
   login_required: {
-    explanation: 'You need to be logged in to view this content.',
-    login_or_register: '%1',
+    explanation: 'To view this content you need to be logged in.',
+    login_or_register: 'You can either %slog in</a> or %screate a new account</a>.',
     login_link: '',
     registration_link: ''
   }

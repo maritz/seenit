@@ -44,6 +44,16 @@ _r(function (app) {
         _t: this._t,
         _view: this
       });
+      
+      if (this.model) {
+        if ( ! this.model.get || typeof(this.model.get) !== 'function') {
+          this.model = new this.model();
+          this.model_generated = true;
+        }
+        this.addLocals({_model: this.model});
+        this.model.view = this;
+      }
+      
       if (this.init && typeof(this.init) === 'function') {
         this.init();
       }
@@ -55,16 +65,6 @@ _r(function (app) {
         });
         return false;
       }
-      
-      if (this.model) {
-        if ( ! this.model.get || typeof(this.model.get) !== 'function') {
-          this.model = new this.model();
-          this.model_generated = true;
-        }
-        this.addLocals({_model: this.model});
-        this.model.view = this;
-      }
-      
       
       if (this.auto_render) {
         if (this.wait_for_user_loaded && ! app.user_self.loaded) {
