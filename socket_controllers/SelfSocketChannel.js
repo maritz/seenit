@@ -31,14 +31,14 @@ registry.redis_sub.on('pmessage', function (pattern, channel, amount) {
   }
 });
 
-exports.connectionHandlerDisabled = function (socket) {
-  //console.log('A logged in user "'+socket.handshake.session.userdata.name+'" connected to the self socket.');
+exports.connectionHandlerDiabled = function (socket) {
+  console.log('A logged in user "'+socket.handshake.session.userdata.name+'" connected to the self socket.');
 
   var id = socket.handshake.session.userdata.id;
   sockets[id] = socket;
   
   socket.on('disconnect', function () {
-    //console.log('BYE BYE', id);
+    console.log('BYE BYE', id);
     delete sockets[id];
   });
 };

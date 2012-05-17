@@ -37,6 +37,10 @@ var defaults = {
     url: 'localhost',
     port: 6379,
     db: 4
+  },
+  "sessions": {
+    secret: "super secret cat",
+    db: 1
   }
 };
 

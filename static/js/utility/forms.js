@@ -1,9 +1,12 @@
 _r(function (app) {
   
   var csrf = null;
+  var csrf_time = null;
+  var max_csrf_age = 1000 * 60 * 10 // 10 minutes
   
-  var getCsrf = app.getCsrf = getCsrf = function (callback) {    
-    if (csrf) {
+  var getCsrf = app.getCsrf = getCsrf = function (callback) {
+    var csrf_age = +new Date() - csrf_time;
+    if (csrf && csrf_age < max_csrf_age) {
       if (callback) {
         callback(csrf);
       }
@@ -14,6 +17,7 @@ _r(function (app) {
         $.cookie(response.data, null, { path: '/' });
         
         csrf = token;
+        csrf_time = + new Date();
         if (callback) {
           callback(csrf);
         }
@@ -30,9 +34,7 @@ _r(function (app) {
     }
     this.autoLabels();
     
-    if (csrf === null) {
-      getCsrf();
-    }
+    getCsrf();
   };
   
   formHandler.prototype.autoLabels = function () {
