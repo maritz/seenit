@@ -119,10 +119,9 @@ _r(function (app) {
     
     auto_render: true,
     model: app.models.ShowSearch,
-    checkAllowed: isLoggedIn,
     
     events: {
-      'click #cant_find_show_content button': 'searchImport',
+      'click #cant_find_show_content button': 'searchImport'
     },
     
     init: function () {
@@ -175,7 +174,6 @@ _r(function (app) {
     
     auto_render: true,
     model: app.models.ShowSearch,
-    checkAllowed: isLoggedIn,
     
     events: {
       'click ul.show_search li.import': 'doImport'

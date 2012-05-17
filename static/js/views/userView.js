@@ -32,9 +32,9 @@ _r(function (app) {
     auto_render: true,
     model: app.models.User,
     max_age: 0,
-    checkAllowed: isNotLoggedIn,
     wait_for_user_loaded: false,
     reload_on_login: true,
+    requires_login: false,
     
     render: function () {
       if (app.user_self.get('name')) {
@@ -84,7 +84,6 @@ _r(function (app) {
     model: app.models.User,
     max_age: 0,
     
-    checkAllowed: isLoggedIn,
     edit_is_self: false,
     
     events: {
