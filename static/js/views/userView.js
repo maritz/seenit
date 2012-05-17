@@ -3,17 +3,6 @@ _r(function (app) {
     app.views.user = {};
   }
   
-  var isNotLoggedIn = function () {
-    if ( this.action === 'login' && ! this.$el.hasClass('main_content')) {
-      return true; // this is a popup and probably results from a 401 ajax response
-    }
-    return ! isLoggedIn.call(this);
-  }
-  
-  var isLoggedIn = function () {
-    return app.user_self.get('name');
-  }
-  
   /**
    * #/user/index
    */
@@ -228,6 +217,8 @@ _r(function (app) {
       
       if (app.current.view instanceof app.views.user.login) {
         app.go('#');
+      } else {
+        app.closeOverlay();
       }
     }
     
