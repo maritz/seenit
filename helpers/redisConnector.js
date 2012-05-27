@@ -11,6 +11,10 @@ exports.connect = function (cb) {
     console.log('nohm redis error: ', arguments);
   });
   
+  registry.redis_sessions = redis.createClient(config.redis.port, config.redis.host, { no_ready_check: true });
+  registry.redis_sessions.on('error', function () {
+    console.log('redis error: ', arguments);
+  });
   
   registry.redis = redis.createClient(config.redis.port, config.redis.host, { no_ready_check: true });
   registry.redis.on('error', function () {
@@ -46,6 +50,7 @@ exports.connect = function (cb) {
   }
   
   async.series([
+    authAndSelect(registry.redis_sessions, config.sessions.db, config.redis.pw),
     authAndSelect(registry.redis, config.redis.db, config.redis.pw),
     authAndSelect(registry.redis_pub, config.redis.db, config.redis.pw),
     authAndSelect(registry.redis_sub, config.redis.db, config.redis.pw),

@@ -20,10 +20,9 @@ server.use(express.methodOverride());
 server.use(express.cookieParser());
 server.use(express.session({
   store: new RedisSessionStore({
-    client: registry.redis
-  }), 
-  secret: "some secret this is " 
-  // TODO: add configurable key and make sure sockets know about it
+    client: registry.redis_sessions
+  }),
+  secret: registry.config.sessions.secret
 }));
 
 server.use(express.csrf());

@@ -1,5 +1,6 @@
 var Registry = {
-  Models: {}
+  Models: {},
+  config: require(__dirname+'/config.js')
 };
 
 

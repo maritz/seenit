@@ -12,7 +12,7 @@ exports.init = function (server) {
   io = io.listen(server, config.socket.options);
   
   var redisStore = new RedisSessionStore({
-    client: registry.redis
+    client: registry.redis_sessions
   });
   
   io.configure(function (){
