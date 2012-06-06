@@ -3,17 +3,6 @@ _r(function (app) {
     app.views.user = {};
   }
   
-  var isNotLoggedIn = function () {
-    if ( this.action === 'login' && ! this.$el.hasClass('main_content')) {
-      return true; // this is a popup and probably results from a 401 ajax response
-    }
-    return ! isLoggedIn.call(this);
-  }
-  
-  var isLoggedIn = function () {
-    return app.user_self.get('name');
-  }
-  
   /**
    * #/user/index
    */
@@ -32,9 +21,9 @@ _r(function (app) {
     auto_render: true,
     model: app.models.User,
     max_age: 0,
-    checkAllowed: isNotLoggedIn,
     wait_for_user_loaded: false,
     reload_on_login: true,
+    requires_login: false,
     
     render: function () {
       if (app.user_self.get('name')) {
@@ -84,7 +73,6 @@ _r(function (app) {
     model: app.models.User,
     max_age: 0,
     
-    checkAllowed: isLoggedIn,
     edit_is_self: false,
     
     events: {
