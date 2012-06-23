@@ -3,3 +3,6 @@ node_modules
 dump.rdb
 selenium-server*
 static/css/style.css
+.settings
+.c9revisions
+log
