@@ -85,9 +85,7 @@ _r(function (app) {
       var default_acl = ['view', 'list', 'create', 'edit', 'delete'];
       this.addLocals({
         acl: {
-          'User': ['self'].concat(default_acl.concat(['grant'])),
-          'Show': default_acl,
-          'Episode': default_acl
+          'User': ['self'].concat(default_acl.concat(['grant']))
         }
       });
     },

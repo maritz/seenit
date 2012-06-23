@@ -219,7 +219,7 @@ module.exports = nohm.model('User', {
             return false; // make sure these aren't set via store. use the special methods or .p() directly.
           case 'password':
             if( self.id && ! data) {
-              return false;
+              return false; // creating a user without a password is not allowed
             }
         }
       });
