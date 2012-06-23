@@ -4,7 +4,7 @@ module.exports = {
     forms: {
       errors: {
         csrf: "CSRF Check failed. You might be the victim of an attempted hack, but we foiled it for now. Please check your computer for viruses and worms.",
-        notEmpty: "testasd"
+        notEmpty: "This field is required."
       },
       labels: {
         checking: "Checking ..."
