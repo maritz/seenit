@@ -129,6 +129,8 @@ form( novalidate: true)
 - if (data.get('name'))
   | logged in as 
   a(href: '#user/profile')= data.get('name')
+  br
+  a(href: '#user/logout') Logout
 - else
   | yo, dude. need to 
   a.open_login(href:'#') log the fuck in!
