@@ -211,11 +211,14 @@ _r(function (app) {
     saved: function () {
       $.jGrowl('Login successful');
       app.user_self.set(this.model.toJSON());
-      app.trigger('login');
       
       if (app.current.view instanceof app.views.user.login) {
         app.go('#');
+      } else {
+        app.closeOverlay();
       }
+      
+      app.trigger('login');
     }
     
   });
