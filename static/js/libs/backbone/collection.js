@@ -64,8 +64,8 @@ _r(function (app) {
     parse: function (response) {
       if (response.data) {
         if (response.data.collection) {
-          this.per_page = response.data.per_page;
-          this.total = response.data.total;
+          this.per_page = response.data.per_page || 15;
+          this.total = response.data.total || response.data.collection.length;
           
           if (response.data.collection.length === this.total) {
             this.all_loaded = true;

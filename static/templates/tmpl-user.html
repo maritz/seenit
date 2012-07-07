@@ -45,9 +45,10 @@ if(app.user_self.may('grant', 'User') && acl)
         .control-group
           label.control-label=_t('acl.'+subject)
             br
-            a.setRead=_t('acl.read')
-            | /
-            a.setWrite=_t('acl.write')
+            - if (list.indexOf('view') !== -1 && list.indexOf('edit') !== -1)
+              a.setRead=_t('acl.read')
+              | /
+              a.setWrite=_t('acl.write')
           .controls
             each action in list
               label.checkbox
