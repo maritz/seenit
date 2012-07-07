@@ -34,29 +34,31 @@ var createDummies = module.exports.createDummies = function (json, password, cal
 };
 
 
-var getCookie = module.exports.getCookie = function (res, key) {
-  // todo req cookies alreadyd set?
+var getCookie = module.exports.getCookie = function (res, searched) {
+  var cookies = res.headers['set-cookie'];
+  var cookie;
   
-  return res.headers['set-cookie'].reduce(function (value, item) {
-    var cookie = new Cookie(item);
-    if (cookie.name === key) {
-      return cookie;
-    } else {
-      return value;
+  for (var i = 0, len = cookies.length; i < len; i++) {
+    cookie = cookies[i];
+    var key_value = cookie.split(';')[0];
+    var first_equal = key_value.indexOf('=');
+    var key = key_value.substr(0, first_equal);
+    if (searched === key) {
+      return key_value.substr(first_equal+1);
     }
-  }, false);
+  }
 };
 
 var getCsrf = module.exports.getCsrf  = function (json, callback) {
   json.get(json.base_url+'/Util/csrf', function (err, res, body) {
-    var token = getCookie(res, body.data)[body.data];
+    var token = getCookie(res, body.data);
     callback(token);
   });
 };
 
 var putPostDel = function (method, json, uri, data, callback) {
   getCsrf(json, function(token) {
-    data["_csrf"] = token;
+    data._csrf = token;
     json[method]({
         uri: json.base_url+uri,
         body: JSON.stringify(data)

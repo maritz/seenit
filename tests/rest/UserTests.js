@@ -6,7 +6,7 @@ var async = require('async');
 var redis;
 
 var json = request.defaults({json: true});
-var url = json.base_url = 'http://localhost:3002/REST';
+var url = json.base_url = 'http://localhost:'+config["static"].port+'/REST';
 var pw = 'test_pw';
 
 h.setJson(json);
@@ -15,15 +15,16 @@ Nohm.setPrefix(config.nohm.prefix);
 
 module.exports = {
   setUp: function (callback) {
-
     redis = require('redis').createClient(config.nohm.port);
-    Nohm.setClient(redis);
-    redis.select(config.nohm.db || 0, function (err) {
-      if (err) {
-        console.log('problem selecting the redis db');
-        process.exit(1);
-      }
-      Nohm.purgeDb(callback);
+    redis.on('ready', function () {
+      Nohm.setClient(redis);
+      redis.select(config.nohm.db || 0, function (err) {
+        if (err) {
+          console.log('problem selecting the redis db');
+          process.exit(1);
+        }
+        Nohm.purgeDb(callback);
+      });
     });
   },
   tearDown: function (callback) {
@@ -226,9 +227,7 @@ module.exports = {
             name: 'test_user10',
             email: '',
             acl: { 
-              User: [ 'self', 'create' ],
-              Show: [ 'view', 'list' ],
-              Episode: [ 'view', 'list' ] 
+              User: [ 'self', 'create' ]
             },
             admin: false,
             id: 10 
