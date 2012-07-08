@@ -206,13 +206,6 @@ _r(function (app) {
       if ( ! app.base.pageView.prototype.initialize.apply(this, arguments)) {
         return false;
       }
-      
-      if (_.isFunction(this.saved)) {
-        this.model.once('saved', this.saved);
-      }
-      if (_.isFunction(this.error)) {
-        this.model.bind('error', this.error);
-      }
     },
     
     /**
@@ -222,6 +215,13 @@ _r(function (app) {
       this.$el.html(html);
       this.handler = new app.formHandler(this);
       this.handler.link();
+      
+      if (_.isFunction(this.saved)) {
+        this.model.once('saved', this.saved);
+      }
+      if (_.isFunction(this.error)) {
+        this.model.bind('error', this.error);
+      }
     }
     
   });
