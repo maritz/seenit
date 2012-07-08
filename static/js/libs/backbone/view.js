@@ -21,7 +21,7 @@ _r(function (app) {
       this.el = this.$el[0];
       this.module = module || this.module;
       this.action = action || this.action;
-      this.i18n = [module, action];
+      this.i18n = [this.module, this.action];
       this.rendered = false;
       this.params = Array.isArray(params) ? params : [];
       
@@ -33,8 +33,7 @@ _r(function (app) {
       
       if (this.reload_on_login) {
         app.once('login', function () {
-          if (self.reload_on_login && self.$el.parent().length !== 0 && 
-          (app.current.view === self || self.$el.hasClass('main_content'))) {
+          if (self.reload_on_login && self.$el.parent().length !== 0) {
             self.render();
           }
         });

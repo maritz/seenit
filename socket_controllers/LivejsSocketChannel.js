@@ -11,7 +11,7 @@ exec('find static/', function(err, stdout, stderr) {
   file_list.forEach(function (name) {
     fs.stat(name, function (err, stats) {
       if (!err && stats.isFile()) {
-        fs.watchFile(name, function (curr, prev) {
+        fs.watchFile(name, {persistent: false, interval: 1500}, function (curr, prev) {
           if (curr.mtime > prev.mtime) {
             console.log('File '+name+' changed, emitting check');
             var file_name = name.replace(/^static/, '');

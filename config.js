@@ -24,7 +24,7 @@ var defaults = {
       'browser client': true,
       'browser client minification': true,
       'browser client etag': true,
-      'browser client gzip': true
+      'browser client gzip': false
     }
   },
   "nohm": {

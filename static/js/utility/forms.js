@@ -37,6 +37,10 @@ _r(function (app) {
     getCsrf();
   };
   
+  formHandler.prototype.getInputs = function () {
+    return this.view.$el.find('input[data-link]');
+  }
+  
   formHandler.prototype.autoLabels = function () {
     var $label = this.view.$el.find('[data-label]');
     var i18n = this.view.i18n;
@@ -56,7 +60,7 @@ _r(function (app) {
       return name;
     }
     var $form = this.view.$el;
-    var $el = $('input[data-link="'+name+'"]', $form);
+    var $el = $form.find('input[data-link="'+name+'"]');
     
     if ($el.length === 0) {
       $el = $('input[name="'+name+'"]', $form);
@@ -144,13 +148,13 @@ _r(function (app) {
     
     this._submitting = true;
     
-    this.$inputs.prop('readOnly', true);
+    this.getInputs().prop('readOnly', true);
     
     var attributes =  {};
     var submit_attributes = {
       '_csrf': csrf
     };
-    this.$inputs.each(function () {
+    this.getInputs().each(function () {
       var $item = $(this);
       var name = $item.attr('name');
       var value = $item.val();
@@ -163,7 +167,7 @@ _r(function (app) {
     self.model.validation(attributes, function (valid) {
       
       if ( ! valid) {
-        self.$inputs.prop('readOnly', false);
+        self.getInputs().prop('readOnly', false);
         self._submitting = false;
       } else {        
         self.model.set(submit_attributes);
@@ -178,7 +182,7 @@ _r(function (app) {
             } else {
               data = JSON.parse(response.responseText).data;
             }
-            self.$inputs.prop('readOnly', false);
+            self.getInputs().prop('readOnly', false);
             var fields = data.fields;
             _.each(fields, function (val, key) {
               if (_.isArray(val) && val.length > 0) {
@@ -191,7 +195,7 @@ _r(function (app) {
           },
           
           success: function (model) {
-            self.$inputs.prop('readOnly', false);
+            self.getInputs().prop('readOnly', false);
             self._submitting = false;
             self.model.trigger('saved', model);
           }
@@ -212,13 +216,11 @@ _r(function (app) {
       $form.data('linked', true);
     }
     
-    this.$inputs = $('input[data-link]', $form);
-    
     $form.delegate('input[data-link]', 'blur', function () {
       self.blurHandler(this);
     });
     
-    this.$inputs.each(function () {
+    this.getInputs().each(function () {
       if ($(this).attr('required')) {
         self.model.required.push($(this).attr('name'));
       }
