@@ -1,0 +1,6 @@
+/static/*
+.settings*
+*.md
+/test/*
+redis.conf
+*.rdb
