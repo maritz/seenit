@@ -4,7 +4,9 @@ _r(function (app) {
   
   app.base.collection = Backbone.Collection.extend({
     
-    pages: {},
+    initialize: function () {
+      this.pages = {};
+    },
     
     /**
      * Overwriting Backbone.Collection.parse() to use the proper root in the response json and allow pagination metadata to be parsed.

@@ -3,9 +3,13 @@ _r(function (app){
   _.extend(Backbone.Model.prototype, Backbone.Events);
   
   app.base.model = Backbone.Model.extend({
-    required: [],
+    
     validations: {},
     asyncValidations: {},
+    
+    initialize: function () {
+      this.required = [];
+    },
     
     /**
      * Overwriting Backbone.Model.parse() to use the proper root in the response json.
