@@ -93,8 +93,8 @@ _r(function (app) {
       var collection = new app.base.collection();
       collection.paginated = true;
       if (self.pagination_by_field) {
-        collection.reset(this.filter(function (episode) {
-          var num = episode.get(self.pagination_by_field);
+        collection.reset(this.filter(function (model) {
+          var num = model.get(self.pagination_by_field);
           return num > offset && num <= max;
         }));
       } else {
