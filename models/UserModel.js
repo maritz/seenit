@@ -44,12 +44,13 @@ module.exports = nohm.model('User', {
         var pwd, salt,
             valueDefined = value && typeof(value.length) !== 'undefined';
         if ( valueDefined && value.length >= password_minlength) {
-          pwd = hasher(value, this.p('salt'));
           if (pwd !== old) {
             // if the password was changed, we change the salt as well, just to be sure.
             salt = uid();
             this.p('salt', salt);
             pwd = hasher(value, salt);
+          } else {
+            pwd = hasher(value, this.p('salt'));
           }
           return pwd;
         } else {
@@ -65,7 +66,6 @@ module.exports = nohm.model('User', {
     },
     salt: {
       // DO NOT CHANGE THE SALTING METHOD, IT WILL INVALIDATE STORED PASSWORDS!
-      defaultValue: uid()
     },
     acl: {
       type: 'json',
