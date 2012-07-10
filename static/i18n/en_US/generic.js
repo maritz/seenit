@@ -22,7 +22,8 @@ module.exports = {
   },
   overlays: {
     login_needed: "Login",
-    confirm_header: "Please confirm"
+    confirm_header: "Please confirm",
+    warning: "Warning"
   },
   errors: {
     general_error: 'We encountered an error while trying to process your request:',

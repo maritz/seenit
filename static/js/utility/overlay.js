@@ -11,7 +11,12 @@ _r(function (app) {
     this.closeOverlay();
     options = options || {};
     var view = options.view || null;
-    var locals = _.extend({}, default_locals, options.locals);
+    var module = options.module || 'overlays';
+    var locals = _.extend({
+      _t: function (name, submodule, module_specific) {
+        return $.t(name, submodule || view, module_specific || module);
+      }
+    }, default_locals, options.locals);
     
     if (options.confirm) {
       $modal.one('click', 'button.confirm', function () {
@@ -39,7 +44,7 @@ _r(function (app) {
       });
     };
     if (view) {
-      app.template('overlays', view, locals, function (body) {
+      app.template(module, view, locals, function (body) {
         locals.body = body;
         renderModal();
       });
