@@ -15,6 +15,7 @@ module.exports = {
     description: 'Description',
     yes: "Yes",
     no: "No",
+    cancel: "Cancel",
     pagination: {
       previous: '<<',
       next: '>>'
@@ -23,7 +24,8 @@ module.exports = {
   overlays: {
     login_needed: "Login",
     confirm_header: "Please confirm",
-    warning: "Warning"
+    warning: "Warning",
+    error: "Error"
   },
   errors: {
     general_error: 'We encountered an error while trying to process your request:',
@@ -35,7 +37,7 @@ module.exports = {
   login_required: {
     explanation: 'To view this content you need to be logged in.',
     login_or_register: 'You can either %slog in</a> or %screate a new account</a>.',
-    login_link: '',
-    registration_link: ''
+    login_link: 'DUMMY TEXT. IF IT POPS UP SOMEWHERE, WTF?',
+    registration_link: 'DUMMY TEXT. IF IT POPS UP SOMEWHERE, WTF?'
   }
 };
