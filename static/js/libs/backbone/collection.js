@@ -51,6 +51,19 @@ _r(function (app) {
     },
     
     /**
+     * Proxy reset to remove loaded stuff if resetting to an empty array.
+     */
+    reset: function (models, options) {
+      if ( ! models || models.length === 0) {
+        this.all_loaded = false;
+        this.pages_loaded = [];
+        this.total = 0;
+        this.per_page = 0;
+      }
+      return app.base.collection.prototype.reset.call(this, models, options);
+    },
+    
+    /**
      * Proxy fetch only use  options.
      */
     fetch: function (options) {
