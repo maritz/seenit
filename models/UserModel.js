@@ -40,19 +40,13 @@ module.exports = nohm.model('User', {
     },
     password: {
       load_pure: true, // this ensures that there is no typecasting when loading from the db.
-      type: function (value, key, old) {
-        var pwd, salt,
+      type: function (value) {
+        var salt,
             valueDefined = value && typeof(value.length) !== 'undefined';
         if ( valueDefined && value.length >= password_minlength) {
-          if (pwd !== old) {
-            // if the password was changed, we change the salt as well, just to be sure.
-            salt = uid();
-            this.p('salt', salt);
-            pwd = hasher(value, salt);
-          } else {
-            pwd = hasher(value, this.p('salt'));
-          }
-          return pwd;
+          salt = uid();
+          this.p('salt', salt);
+          return hasher(value, salt);
         } else {
           return value;
         }

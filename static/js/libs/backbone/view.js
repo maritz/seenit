@@ -80,6 +80,16 @@ _r(function (app) {
       }, 250);
       
       this._expiration = +new Date() + this.max_age;
+      
+      this.bind('rendered', function () {
+        self.$el.find('[data-shorten]').each(function () {
+          var $this = $(this);
+          $this.shorten({
+            width: $this.data('shorten') || 400
+          });
+        });
+      });
+      
       return true;
     },
     
