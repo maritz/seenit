@@ -38,7 +38,7 @@ _r(function (app) {
   };
   
   formHandler.prototype.getInputs = function () {
-    return this.view.$el.find('input[data-link]');
+    return this.view.$el.find('input[data-link], select[data-link], textarea[data-link]');
   }
   
   formHandler.prototype.autoLabels = function () {
@@ -60,10 +60,10 @@ _r(function (app) {
       return name;
     }
     var $form = this.view.$el;
-    var $el = $form.find('input[data-link="'+name+'"]');
+    var $el = $form.find('input[data-link="'+name+'"], select[data-link="'+name+'"], textarea[data-link="'+name+'"]');
     
     if ($el.length === 0) {
-      $el = $('input[name="'+name+'"]', $form);
+      $el = $('input[name="'+name+'"], select[name="'+name+'"], textarea[name="'+name+'"]', $form);
     }
     return $el;
   };
@@ -216,7 +216,7 @@ _r(function (app) {
       $form.data('linked', true);
     }
     
-    $form.delegate('input[data-link]', 'blur', function () {
+    $form.delegate('input[data-link], select[data-link], textarea[data-link]', 'blur', function () {
       self.blurHandler(this);
     });
     

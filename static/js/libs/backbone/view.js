@@ -171,7 +171,7 @@ _r(function (app) {
      * Called after the rendering of this view has produced some html.
      * Used for putting the html in an element or handling errors.
      */
-    afterRender: function (html, error) {
+    afterRender: function (html) {
       this.$el.html(html);
     },
     
@@ -209,6 +209,7 @@ _r(function (app) {
     }
     
   });
+  
       
   app.base.formView = app.base.pageView.extend({
     
@@ -222,7 +223,7 @@ _r(function (app) {
      * Initialize and link the formHandler
      */
     afterRender: function (html) {
-      this.$el.html(html);
+      app.base.pageView.prototype.afterRender.call(this, html);
       this.handler = new app.formHandler(this);
       this.handler.link();
       
@@ -239,8 +240,6 @@ _r(function (app) {
   app.base.listView = app.base.pageView.extend({
     
     initialize: function () {
-      var self = this;
-      
       if (this.collection) {
         if ( ! this.collection.getByCid || typeof(this.collection.getByCid) !== 'function') {
           this.collection = new this.collection();

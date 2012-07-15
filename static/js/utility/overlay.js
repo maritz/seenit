@@ -10,11 +10,11 @@ _r(function (app) {
   app.overlay = function (options) {
     this.closeOverlay();
     options = options || {};
-    var view = options.view || null;
+    var template = options.view || options.template || null;
     var module = options.module || 'overlays';
     var locals = _.extend({
       _t: function (name, submodule, module_specific) {
-        return $.t(name, submodule || view, module_specific || module);
+        return $.t(name, submodule || template, module_specific || module);
       }
     }, default_locals, options.locals);
     
@@ -28,13 +28,17 @@ _r(function (app) {
     if (options.cancel) {
       $modal.one('hide', options.cancel);
     }
+    if ( ! options.onRender) {
+      options.onRender = function () {};
+    }
     
     var renderModal = function () {
       app.template('page', 'modal', locals, function (modal_html) {
         if (typeof(modal_html) === 'string') {
           $modal.html(modal_html).modal('show');
+          options.onRender($modal);
         } else {
-          if (view !== 'error') {
+          if (template !== 'error') {
             this.overlay = false;
             app.overlay({view: 'error', locals: {error: 'Overlay view does not exist.'}});
           }
@@ -43,8 +47,8 @@ _r(function (app) {
         }
       });
     };
-    if (view) {
-      app.template(module, view, locals, function (body) {
+    if (template) {
+      app.template(module, template, locals, function (body) {
         locals.body = body;
         renderModal();
       });

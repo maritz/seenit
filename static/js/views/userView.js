@@ -205,6 +205,13 @@ _r(function (app) {
     requires_login: false,
     reload_on_login: false,
     
+    init: function () {
+      var self = this;
+      this.bind('rendered', function () {
+        self.$el.find('input[type="text"]').focus();
+      });
+    },
+    
     /**
      * Login successful
      */
