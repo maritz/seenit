@@ -98,12 +98,13 @@ module.exports = nohm.model('Show', {
      * Proxy save to index the name for fulltext search
      */
     save: function (options, callback) {
+      var self = this;
       
       this._super_save(options, function (err) {
         if (err) {
-          callback.apply(this, arguments);
+          callback.apply(self, arguments);
         } else {
-          search.index(this.p('name'), this.id, callback);
+          search.index(self.p('name'), self.id, callback);
         }
       });
     },
@@ -113,12 +114,18 @@ module.exports = nohm.model('Show', {
      * Proxy remove to remove the index from fulltext search
      */
     remove: function (options, callback) {
-      
+      var self = this;
+      var tmp_id = this.id;
+      if (typeof(options) === 'function') {
+        callback = options;
+        options = {};
+      }
       this._super_remove(options, function (err) {
+        
         if (err) {
-          callback.apply(this, arguments);
+          callback.apply(self, arguments);
         } else {
-          search.remove(this.id, callback);
+          search.remove(tmp_id, callback);
         }
       });
     },

@@ -402,7 +402,7 @@ module.exports = nohm.model('tvdb', {
               }
             });
           } else if (err) {
-            callback(err);
+            callback(err, show);
           } else {
             show.load(ids[0], function (err) {
               callback(err, show);
