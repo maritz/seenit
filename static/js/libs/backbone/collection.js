@@ -4,7 +4,9 @@ _r(function (app) {
   
   app.base.collection = Backbone.Collection.extend({
     
-    pages: {},
+    initialize: function () {
+      this.pages = {};
+    },
     
     /**
      * Overwriting Backbone.Collection.parse() to use the proper root in the response json and allow pagination metadata to be parsed.
@@ -49,6 +51,19 @@ _r(function (app) {
     },
     
     /**
+     * Proxy reset to remove loaded stuff if resetting to an empty array.
+     */
+    reset: function (models, options) {
+      if ( ! models || models.length === 0) {
+        this.all_loaded = false;
+        this.pages_loaded = [];
+        this.total = 0;
+        this.per_page = 0;
+      }
+      return app.base.collection.prototype.reset.call(this, models, options);
+    },
+    
+    /**
      * Proxy fetch only use  options.
      */
     fetch: function (options) {
@@ -64,8 +79,8 @@ _r(function (app) {
     parse: function (response) {
       if (response.data) {
         if (response.data.collection) {
-          this.per_page = response.data.per_page;
-          this.total = response.data.total;
+          this.per_page = response.data.per_page || 15;
+          this.total = response.data.total || response.data.collection.length;
           
           if (response.data.collection.length === this.total) {
             this.all_loaded = true;
@@ -91,8 +106,8 @@ _r(function (app) {
       var collection = new app.base.collection();
       collection.paginated = true;
       if (self.pagination_by_field) {
-        collection.reset(this.filter(function (episode) {
-          var num = episode.get(self.pagination_by_field);
+        collection.reset(this.filter(function (model) {
+          var num = model.get(self.pagination_by_field);
           return num > offset && num <= max;
         }));
       } else {

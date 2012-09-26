@@ -21,7 +21,7 @@ _r(function (app) {
       this.el = this.$el[0];
       this.module = module || this.module;
       this.action = action || this.action;
-      this.i18n = [module, action];
+      this.i18n = [this.module, this.action];
       this.rendered = false;
       this.params = Array.isArray(params) ? params : [];
       
@@ -33,8 +33,7 @@ _r(function (app) {
       
       if (this.reload_on_login) {
         app.once('login', function () {
-          if (self.reload_on_login && self.$el.parent().length !== 0 && 
-          (app.current.view === self || self.$el.hasClass('main_content'))) {
+          if (self.reload_on_login && self.$el.parent().length !== 0) {
             self.render();
           }
         });
@@ -81,6 +80,16 @@ _r(function (app) {
       }, 250);
       
       this._expiration = +new Date() + this.max_age;
+      
+      this.bind('rendered', function () {
+        self.$el.find('[data-shorten]').each(function () {
+          var $this = $(this);
+          $this.shorten({
+            width: $this.data('shorten') || 400
+          });
+        });
+      });
+      
       return true;
     },
     
@@ -162,7 +171,7 @@ _r(function (app) {
      * Called after the rendering of this view has produced some html.
      * Used for putting the html in an element or handling errors.
      */
-    afterRender: function (html, error) {
+    afterRender: function (html) {
       this.$el.html(html);
     },
     
@@ -200,6 +209,7 @@ _r(function (app) {
     }
     
   });
+  
       
   app.base.formView = app.base.pageView.extend({
     
@@ -207,6 +217,15 @@ _r(function (app) {
       if ( ! app.base.pageView.prototype.initialize.apply(this, arguments)) {
         return false;
       }
+    },
+    
+    /**
+     * Initialize and link the formHandler
+     */
+    afterRender: function (html) {
+      app.base.pageView.prototype.afterRender.call(this, html);
+      this.handler = new app.formHandler(this);
+      this.handler.link();
       
       if (_.isFunction(this.saved)) {
         this.model.once('saved', this.saved);
@@ -214,15 +233,6 @@ _r(function (app) {
       if (_.isFunction(this.error)) {
         this.model.bind('error', this.error);
       }
-    },
-    
-    /**
-     * Initialize and link the formHandler
-     */
-    afterRender: function (html) {
-      this.$el.html(html);
-      this.handler = new app.formHandler(this);
-      this.handler.link();
     }
     
   });
@@ -230,8 +240,6 @@ _r(function (app) {
   app.base.listView = app.base.pageView.extend({
     
     initialize: function () {
-      var self = this;
-      
       if (this.collection) {
         if ( ! this.collection.getByCid || typeof(this.collection.getByCid) !== 'function') {
           this.collection = new this.collection();

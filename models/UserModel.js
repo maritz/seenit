@@ -40,18 +40,13 @@ module.exports = nohm.model('User', {
     },
     password: {
       load_pure: true, // this ensures that there is no typecasting when loading from the db.
-      type: function (value, key, old) {
-        var pwd, salt,
+      type: function (value) {
+        var salt,
             valueDefined = value && typeof(value.length) !== 'undefined';
         if ( valueDefined && value.length >= password_minlength) {
-          pwd = hasher(value, this.p('salt'));
-          if (pwd !== old) {
-            // if the password was changed, we change the salt as well, just to be sure.
-            salt = uid();
-            this.p('salt', salt);
-            pwd = hasher(value, salt);
-          }
-          return pwd;
+          salt = uid();
+          this.p('salt', salt);
+          return hasher(value, salt);
         } else {
           return value;
         }
@@ -65,7 +60,6 @@ module.exports = nohm.model('User', {
     },
     salt: {
       // DO NOT CHANGE THE SALTING METHOD, IT WILL INVALIDATE STORED PASSWORDS!
-      defaultValue: uid()
     },
     acl: {
       type: 'json',
@@ -221,7 +215,7 @@ module.exports = nohm.model('User', {
             return false; // make sure these aren't set via store. use the special methods or .p() directly.
           case 'password':
             if( self.id && ! data) {
-              return false;
+              return false; // creating a user without a password is not allowed
             }
         }
       });

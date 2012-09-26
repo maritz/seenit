@@ -85,9 +85,7 @@ _r(function (app) {
       var default_acl = ['view', 'list', 'create', 'edit', 'delete'];
       this.addLocals({
         acl: {
-          'User': ['self'].concat(default_acl.concat(['grant'])),
-          'Show': default_acl,
-          'Episode': default_acl
+          'User': ['self'].concat(default_acl.concat(['grant']))
         }
       });
     },
@@ -207,19 +205,27 @@ _r(function (app) {
     requires_login: false,
     reload_on_login: false,
     
+    init: function () {
+      var self = this;
+      this.bind('rendered', function () {
+        self.$el.find('input[type="text"]').focus();
+      });
+    },
+    
     /**
      * Login successful
      */
     saved: function () {
       $.jGrowl('Login successful');
       app.user_self.set(this.model.toJSON());
-      app.trigger('login');
       
       if (app.current.view instanceof app.views.user.login) {
         app.go('#');
       } else {
         app.closeOverlay();
       }
+      
+      app.trigger('login');
     }
     
   });

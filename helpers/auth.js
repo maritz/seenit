@@ -17,7 +17,7 @@ exports.isLoggedIn = function (req, res, next) {
   }
 };
 
-var fail = new Error('Checking roles failed');
+var fail = new Error('Checking roles failed.');
 var may_not = new AuthError('privileges_low');
 
 exports.isAdmin = function (req, res, next) {

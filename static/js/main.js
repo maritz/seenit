@@ -32,7 +32,6 @@ $(function () {
     });
     app.user_self.load();
     
-    var known_errors = ['login_needed', 'privileges_low'];
     $(document).ajaxError(function (event, jqXHR, ajaxSettings) {
       if (jqXHR.handled === true) {
         return;

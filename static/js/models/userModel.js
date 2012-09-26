@@ -7,7 +7,12 @@ _r(function (app) {
   app.models.User = app.base.model.extend({
     urlRoot: '/REST/User/',
     nohmName: 'User',
-    pw_repeat_set_once: false,
+    
+    initialize: function () {
+      this.pw_repeat_set_once = false;
+      app.base.model.prototype.initialize.call(this);
+    },
+    
     validations: {
       password: function (value) {
         if ( ! this.id && !value) {

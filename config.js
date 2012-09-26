@@ -24,7 +24,7 @@ var defaults = {
       'browser client': true,
       'browser client minification': true,
       'browser client etag': true,
-      'browser client gzip': true
+      'browser client gzip': false
     }
   },
   "nohm": {
@@ -56,20 +56,6 @@ var defaults = {
 
 if (env === 'production' || env === 'staging') {
   defaults["static"].port = 80;
-  defaults.nohm = {
-    host: 'carp.redistogo.com',
-    port: 9391,
-    pw: '3a8d7880bf3757d5a7af2b4029d93f17',
-    db: 0,
-    prefix: 'stack'
-  };
-  defaults.redis = {
-    host: 'carp.redistogo.com',
-    port: 9391,
-    pw: '3a8d7880bf3757d5a7af2b4029d93f17',
-    db: 0
-  };
-  defaults.socket.options["log level"] = 1;
 }
 
 if (env === 'staging') {

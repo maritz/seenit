@@ -6,3 +6,6 @@ selenium-server*
 tmp/*
 static/images/series_banners/*.*
 static/css/style.css
+.settings
+.c9revisions
+log

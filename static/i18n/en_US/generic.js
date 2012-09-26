@@ -4,7 +4,7 @@ module.exports = {
     forms: {
       errors: {
         csrf: "CSRF Check failed. You might be the victim of an attempted hack, but we foiled it for now. Please check your computer for viruses and worms.",
-        notEmpty: "Mustn't be empty.",
+        notEmpty: "This field is required.",
         email: "Invalid email format. (if this is a false-positive please free to tell us)",
         length: "Needs to be longer or shorter. Not sure which.",
         notUnique: "This must be unique. Sadly your input is already used, please change it."
@@ -18,6 +18,7 @@ module.exports = {
     description: 'Description',
     yes: "Yes",
     no: "No",
+    cancel: "Cancel",
     pagination: {
       previous: '<<',
       next: '>>'
@@ -25,7 +26,9 @@ module.exports = {
   },
   overlays: {
     login_needed: "Login",
-    confirm_header: "Please confirm"
+    confirm_header: "Please confirm",
+    warning: "Warning",
+    error: "Error"
   },
   errors: {
     general_error: 'We encountered an error while trying to process your request:',
@@ -37,7 +40,7 @@ module.exports = {
   login_required: {
     explanation: 'To view this content you need to be logged in.',
     login_or_register: 'You can either %slog in</a> or %screate a new account</a>.',
-    login_link: '',
-    registration_link: ''
+    login_link: 'DUMMY TEXT. IF IT POPS UP SOMEWHERE, WTF?',
+    registration_link: 'DUMMY TEXT. IF IT POPS UP SOMEWHERE, WTF?'
   }
 };

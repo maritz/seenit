@@ -47,8 +47,6 @@ module.exports = {
     acl: {
       legend: 'Access List',
       User: 'User Management',
-      Show: 'Show Management',
-      Episode: 'Episode Management',
       
       read: 'Toggle read rights',
       write: 'Toggle write rights',
