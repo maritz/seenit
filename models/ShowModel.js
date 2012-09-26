@@ -100,7 +100,13 @@ module.exports = nohm.model('Show', {
     save: function (options, callback) {
       var self = this;
       
+      if (typeof(options) === 'function') {
+        callback = options;
+        options = {};
+      }
+      
       this._super_save(options, function (err) {
+        console.log('save proxy', err);
         if (err) {
           callback.apply(self, arguments);
         } else {

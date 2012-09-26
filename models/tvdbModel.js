@@ -378,7 +378,7 @@ module.exports = nohm.model('tvdb', {
           if ( ! err && ids.length === 0) {
             self._tvdbRequest('/series/'+id+'/all/'+language+'.zip', 'zip', function (err, documents) {
               if (err) {
-                callback(err);
+                callback(err, show);
               } else {
                 documents.forEach(function (doc) {
                   var name = doc.root().name();

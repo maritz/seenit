@@ -149,15 +149,14 @@ app.get('/import/:id', function (req, res, next) {
       show.save(function (err) {
         cb(err, show);
       });
-    },
-  ], function (err, show) {
-      if (err) {
-        next(new ShowError('Importing the show failed.', 502, err));
-      } else {
-        res.ok(show.p('name'));
-      }
     }
-  );
+  ], function (err, show) {
+    if (err) {
+      next(new ShowError('Importing the show failed.', 502, err));
+    } else {
+      res.ok(show.p('name'));
+    }
+  });
 });
 
 
