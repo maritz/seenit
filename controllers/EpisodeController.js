@@ -138,6 +138,74 @@ app.get('/seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Ep
 });
 
 
+app.get('/today', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, res, next) {
+  
+  var start = new Date();
+  start.setHours(0,0,0,0);
+  
+  var end = new Date();
+  end.setHours(23,59,59,999);
+  
+  async.waterfall([
+    async.apply(Episode.find, {
+      first_aired: {
+        min: +start,
+        max: +end
+      }
+    }),
+    function (ids, cb) {
+      if (ids.length > 0) {
+        async.map(ids, function (id, callback) {
+          var episode = nohm.factory('Episode', id, function (err) {
+            callback(err, episode);
+          });
+        }, cb);
+      } else {
+        cb('none');
+      }
+    },
+    function (episodes, cb) {
+      async.filter(episodes, function (episode, callback) {
+        episode.getShow(function (err, show) {
+          if (err) {
+            console.log('ERROR in EpisodeController/today following filter (1):', err, show.id, episode.id);
+            callback(false);
+          } else {
+            show.getUserIsFollowing(req.user, function (err, following) {
+              if (err) {
+                console.log('ERROR in EpisodeController/today following filter (2):', err, show.id, episode.id);
+                callback(false);
+              } else {
+                callback(following);
+              }
+            });
+          }
+        });
+      }, function (filtered) {
+        cb(null, filtered);
+      });
+    }
+  ], function (err, episodes) {
+    console.log(err, episodes);
+    if (err && err !== 'none') {
+      next(err);
+    } else {
+      if (err === 'none') {
+        episodes = [];
+        err = null;
+      }
+      
+      var properties = episodes.map(function (episode) {
+        return episode.allProperties();
+      });
+      res.ok({
+        episodes: properties
+      });
+    }
+  });
+});
+
+
 app.mounted(function (){
   console.log('mounted Episode REST controller');
 });

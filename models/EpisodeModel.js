@@ -22,7 +22,8 @@ module.exports = nohm.model('Episode', {
       index: true
     },
     first_aired: {
-      type: 'timestamp'
+      type: 'timestamp',
+      index: true
     },
     plot: {
       type: 'string'
