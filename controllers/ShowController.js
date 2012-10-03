@@ -77,7 +77,7 @@ app.get('/', auth.isLoggedIn, auth.may('list', 'Show'), function (req, res, next
 });
 
 
-app.get('/view/:name', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Show', 'name', true), function (req, res, next) {
+app.get('/view/:id', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('Show'), function (req, res, next) {
   req.loaded.Show.getUserIsFollowing(req.user, function (err, is_following) {
     if (err) {
       next(new ShowError('Failed to determine if user is following show', 500, err));
@@ -154,7 +154,7 @@ app.get('/import/:id', function (req, res, next) {
     if (err) {
       next(new ShowError('Importing the show failed.', 502, err));
     } else {
-      res.ok(show.p('name'));
+      res.ok(show.id);
     }
   });
 });

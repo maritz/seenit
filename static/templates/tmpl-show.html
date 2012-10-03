@@ -89,7 +89,7 @@ else
 <script type="text/x-jade-tmpl" name="list_item">
 - var model = args[0]
 li
-  a.thumbnail.span10(href:'#show/details/'+model.get('name'))
+  a.thumbnail.span10(href:'#show/details/'+model.get('id'))
     span
       =model.get('name') 
       if model.get('following')

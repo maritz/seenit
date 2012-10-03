@@ -69,7 +69,7 @@ _r(function (app) {
       var num = $target.data('num');
       var $episode_list = $('#season_contents div.tab-pane[data-num="'+num+'"]');
       
-      var new_hash = '#show/details/'+this.model.get('name')+'/'+num;
+      var new_hash = '#show/details/'+this.model.get('id')+'/'+num;
       if ( ! window.location.hash.match(new RegExp('^'+new_hash, 'i'))) {
         app.navigate(new_hash);
       }

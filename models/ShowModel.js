@@ -9,7 +9,7 @@ module.exports = nohm.model('Show', {
   properties: {
     name: {
       type: 'string',
-      unique: true,
+      index: true,
       validations: [
         'notEmpty'
       ]
@@ -106,7 +106,7 @@ module.exports = nohm.model('Show', {
       }
       
       this._super_save(options, function (err) {
-        console.log('save proxy', err);
+
         if (err) {
           callback.apply(self, arguments);
         } else {
