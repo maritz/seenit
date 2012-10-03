@@ -6,9 +6,14 @@ var registry = require(__dirname+'/registry');
 var RedisSessionStore = require('connect-redis')(express);
 
 // load the tvdb model for global use via the registry
-nohm.factory('tvdb', 1, function (err, model) {
-  registry.tvdb = this;
-  this.getMirrors();
+var tvdb = nohm.factory('tvdb', 1, function (err, model) {
+  registry.tvdb = tvdb;
+  tvdb.getMirrors(function () {
+    tvdb.refreshData();
+    setInterval(function () {
+      tvdb.refreshData();
+    }, registry.config.thetvdb.refresh_timers.data*10000);
+  });
 });
 
 module.exports = server;

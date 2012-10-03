@@ -37,6 +37,10 @@ module.exports = nohm.model('Show', {
     },
     banner: {
       type: 'string'
+    },
+    language: {
+      type: 'string',
+      defaultValue: 'en'
     }
   },
   methods: {
@@ -171,6 +175,15 @@ module.exports = nohm.model('Show', {
       this.getAll('User', 'followingForeign', function (err, ids) {
         callback(err, ids.length);
       });
+    },
+    
+    addSeason: function (season) {
+      if (this.p('num_seasons') < +season) {
+        this.p('num_seasons', season);
+        var seasons = this.p('seasons');
+        seasons.push(season);
+        this.p('seasons', seasons)
+      }
     }
     
   }
