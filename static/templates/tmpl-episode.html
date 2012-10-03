@@ -27,11 +27,15 @@ each episode in args[0]
     span.one_line= episode.get('name')
     
     br
-    - var date = moment(episode.get('first_aired'));
-    time(datetime:date.format('YYYY-MM-DD'), title:date.format('MMM Do YYYY'))
+    - var date = moment(episode.get('first_aired') || 0);
+    if date > 0
+      time(datetime:date.format('YYYY-MM-DD'), title:date.format('MMM Do YYYY'))
+        label
+          =_t('air_date')
+        =date.fromNow()
+    else
       label
-        =_t('air_date')
-      =date.fromNow()
+        | unknown
 
     br
     .episode_seen_container
