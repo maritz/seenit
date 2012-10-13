@@ -1,3 +1,4 @@
+require(__dirname+'/helpers/pid.js');
 var config = require(__dirname+'/config.js');
 var express = require('express');
 var registry = require(__dirname+'/registry.js');
