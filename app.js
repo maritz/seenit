@@ -2,6 +2,7 @@ var config = require(__dirname+'/config.js');
 var express = require('express');
 var registry = require(__dirname+'/registry.js');
 var file_helper = require('./helpers/file.js');
+var reds = require('reds');
 
 var connector = require('./helpers/redisConnector');
 
