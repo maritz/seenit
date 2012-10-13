@@ -240,4 +240,23 @@ _r(function (app) {
     
   });
   
+  
+  /**
+   * #show/today
+   */
+  app.views.show.today = app.base.paginatedListView.extend({
+    
+    collection: app.collections.EpisodesToday,
+    auto_render: true,
+    
+    successRender: function () {
+      // HACK
+      // we want the view to re-use the episode templates but want this view to be part of show (for the subnavigation)
+      // this is the easiest way and also means the template for this is actually in tmpl-episode.html, not tmpl-show.html
+      this.module = 'episode';
+      app.base.paginatedListView.prototype.successRender.apply(this, Array.prototype.slice.apply(arguments));
+    }
+    
+  });
+  
 });

@@ -10,6 +10,7 @@ module.exports = {
     
     subnav: {
       list: "Most popular",
+      today: "Airing today",
       search: "Search"
     },
     show: 'Show',
@@ -70,5 +71,5 @@ module.exports = {
   "import": {
     confirm_header: "Importing from TheTVDB.com",
     confirm_question: "Do you want to import the show \"%s\"?"
-  }  
+  }
 };

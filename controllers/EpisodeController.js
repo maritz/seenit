@@ -176,6 +176,7 @@ app.get('/today', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, r
                 console.log('ERROR in EpisodeController/today following filter (2):', err, show.id, episode.id);
                 callback(false);
               } else {
+                episode.show = show;
                 callback(following);
               }
             });
@@ -186,7 +187,6 @@ app.get('/today', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, r
       });
     }
   ], function (err, episodes) {
-    console.log(err, episodes);
     if (err && err !== 'none') {
       next(err);
     } else {
@@ -196,10 +196,12 @@ app.get('/today', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, r
       }
       
       var properties = episodes.map(function (episode) {
-        return episode.allProperties();
+        var props = episode.allProperties();
+        props.show = episode.show.p('name');
+        return props;
       });
       res.ok({
-        episodes: properties
+        collection: properties
       });
     }
   });

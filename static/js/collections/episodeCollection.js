@@ -28,5 +28,10 @@ _r(function (app) {
       });
     }
   });
+
+  app.collections.EpisodesToday = app.base.paginatedCollection.extend({
+    model: app.models.Episode,
+    url: '/REST/Episode/today/'
+  });
   
 });

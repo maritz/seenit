@@ -36,7 +36,6 @@ module.exports = function loadModel(model_name, param_name, do_string_search) {
     if (id && !do_string_search) {
       _load(id);
     } else if (id && do_string_search) {
-      console.log('searching for ', id, req.query);
       model.find({name:id}, function (err, ids) {
         if (err || ids.length === 0) {
           next(new loadModelError('not_found', 404));

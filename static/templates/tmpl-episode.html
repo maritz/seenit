@@ -113,3 +113,44 @@ each episode in args[0]
     li
       a.get_links(href: '#')= _t('wanna_see_season')
 </script>
+
+
+<script type="text/x-jade-tmpl" name="today">
+if (data.models.length === 0)
+  =_t('none', 'today', 'show')
+else
+    
+  if data.paginated
+    .pagination.pagination-centered
+
+  ul.episode_list.pagination_content
+    each episode in data.models
+      - var episode_name = episode.get('show')+' S'+String('0'+episode.get('season')).slice(-2)+'E'+String('0'+episode.get('number')).slice(-2)
+      li.well.span3.episode_detail(data-id: episode.id)
+        h3
+          =episode_name
+          
+        label
+          =_t('name')
+        span.one_line= episode.get('name')
+        
+        br
+        - var date = moment(episode.get('first_aired') || 0);
+        if date > 0
+          time(datetime:date.format('YYYY-MM-DD'), title:date.format('MMM Do YYYY'))
+            label
+              =_t('air_date')
+            =date.format('MMM Do YYYY')
+        else
+          label
+            =_t('air_date')
+          | unknown
+    
+        br
+        .episode_seen_container
+          !=partial('episode_seen_button', episode)
+        
+        label
+          =_t('search_link')
+        a(href:'https://www.google.com/search?q=uploaded.net+'+episode_name+'+720p', target: episode_name+' Search') Goggle
+</script>

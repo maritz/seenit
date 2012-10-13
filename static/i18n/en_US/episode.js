@@ -7,11 +7,7 @@ module.exports = {
     air_date: 'Air date',
     tvdb_link: 'TheTVDB Link',
     imdb_link: 'IMDB Link',
-  },
-  
-  list:  {
-    more: "more",
-    less: "less",
+    
     has_seen: "You've seen this one",
     has_not_seen: "Not seen yet",
     not_released: "Hasn't aired yet",
@@ -25,8 +21,17 @@ module.exports = {
     set_seen_season: "I've seen every episode",
     set_seen_season_available: "I've seen every episode released so far",
     set_not_seen_season: "I haven't seen ANY episodes",
-    wanna_see_season: "I want to see all episodes",
+    wanna_see_season: "I want to see all episodes"
+  },
+  
+  list: {
+    more: "more",
+    less: "less",
     
     none_found: "There are no episodes in our database for this season."
+  },
+  
+  today: {
+    none: "No episodes of shows you're following are on today. Try again tomorrow or follow more shows."
   }
 };
