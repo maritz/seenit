@@ -6,6 +6,8 @@ var file_helper = require('./helpers/file.js');
 var connector = require('./helpers/redisConnector');
 
 connector.connect(function () {
+
+    reds.client = registry.redis;
     
     var model_files = file_helper.getFiles(__dirname, '/models/', ['validations.js']);
       
