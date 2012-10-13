@@ -24,11 +24,12 @@
       #templates
       #modal.modal.fade
 
-    //script( src: '//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js' )
+    script( src: '//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js' )
     script
       !window.jQuery && document.write(unescape('%3Cscript src="/js/libs/jquery-1.7.1.js"%3E%3C/script%3E'));
 
     script( src: '/socket.io/socket.io.js' )
+    script( src: '/js/libs/jade-0.27.6.min.js' )
 
     - if (typeof(i18n_hashes) !== 'undefined')
       script( type: 'text/javascript')
@@ -38,6 +39,6 @@
       - each file in js_files
         script( src: '/js/'+file )
     - else
-      script( src: '/js/' + cacheTimestamp.js + '/merged.js' )
+      script( src: '/js/merged.min.js' )
     
     script( src: '/nohmValidations.js' )

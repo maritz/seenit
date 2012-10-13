@@ -1,11 +1,10 @@
 var express = require('express');
 var stylus = require('stylus');
-var assetManager = require('connect-assetmanager');
-var assetHandlers = require('connect-assetmanager-handlers');
 var file_helper = require('./helpers/file.js');
-var config = require('./config.js');
 var Nohm = require('nohm').Nohm;
 var i18n = require(__dirname+'/helpers/i18n.js');
+var uglify = require('uglify-js2');
+var fs = require('fs');
 
 
 var oneDay = 86400000;
@@ -32,7 +31,7 @@ exports.init = function (server) {
   
   // reverse order of how it ends up in the merged files.
   var files = Array.prototype.concat(
-    file_helper.getFiles(basedir, 'libs/', ['modernizr-2.0.6.custom.min.js', 'jquery-1.7.1.js']),
+    file_helper.getFiles(basedir, 'libs/', ['modernizr-2.0.6.custom.min.js', 'jquery-1.7.1.js', 'jade-0.27.6.min.js']),
     file_helper.getFiles(basedir, 'libs/backbone/'),
     file_helper.getFiles(basedir, 'libs/bootstrap/'),
     file_helper.getFiles(basedir, 'utility/'),
@@ -40,29 +39,27 @@ exports.init = function (server) {
     file_helper.getFiles(basedir, 'collections/'),
     file_helper.getFiles(basedir, 'views/'),
     file_helper.getFiles(basedir, 'sockets/'),
-    file_helper.getFiles(basedir, '')
+    file_helper.getFiles(basedir, '', ['merged.min.js', 'merged.min.js.map'])
   );
   
-  var assetManagerMiddleware = assetManager({
-    'js': {
-      'route': /\/js\/[0-9]+\/merged\.js/,
-      'path': basedir,
-      'dataType': 'javascript',
-      'files': files,
-      'preManipulate': {
-        'MSIE': [],
-        '^': false && server.set('env') !== 'development' ? [
-            assetHandlers.uglifyJsOptimize
-          ] : [] // only minify if in production mode
-      },
-      /**
-       * Minification doesn't work and is completely disabled.
-       */
-      'debug': true || server.set('env') === 'development' // minification only in production mode
-    }
-  });
-  server.use(assetManagerMiddleware);
-  server.use(express.favicon());
+  if (server.set('env') !== 'development') {
+    var start = +new Date();
+    var files_full_path = files.map(function (file) {
+      return 'static/js/'+file;
+    });
+    var source_map_name = "merged.min.js.map";
+    var merged_js = uglify.minify(files_full_path, {
+      outSourceMap: source_map_name
+    });
+    fs.writeFile(basedir+'merged.min.js', merged_js.code+'\n//@ sourceMappingURL='+source_map_name, function (err) {
+      if (err) throw err;
+      
+      fs.writeFile(basedir+'merged.min.js.map', merged_js.map.replace(/static\/js\//gmi, ''), function (err) {
+        if (err) throw err;
+        console.log('uglifying js files done. ('+(+ new Date()-start)+'ms)');
+      });
+    });
+  }
   
   Nohm.setExtraValidations(__dirname+'/models/validations.js');
   
@@ -75,9 +72,8 @@ exports.init = function (server) {
       colons: true,
       locals: {
         cache: true,
-        cacheTimestamp: assetManagerMiddleware.cacheTimestamps || {js: 0},
         i18n_hashes: JSON.stringify(i18n.getHashes()),
-        js_files: server.set('env') !== 'production' ? files : false
+        js_files: server.set('env') === 'development' ? files : false
       }
     });
   });

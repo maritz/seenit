@@ -17,7 +17,8 @@
     "async": "0.1",
     "connect-redis": "1.2",
     "connect-assetmanager": "0.0",
-    "connect-assetmanager-handlers": "0.0"
+    "connect-assetmanager-handlers": "0.0",
+    "uglify-js2": "git://github.com/mishoo/UglifyJS2.git#master"
   },
   "dev-dependencies": {
     "soda": "0.2.5",
