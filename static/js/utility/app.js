@@ -225,7 +225,6 @@ var App = Backbone.Router.extend({
   
   _templates: {},
   _templates_loading: {},
-  jade: require('jade'),
   template: function (module, name, locals, callback) {
     var self = this;
     var tmpl_module;
@@ -296,7 +295,7 @@ var App = Backbone.Router.extend({
         self._templates[module] = {};
         
         tmpl_module.append(data).children('script').each(function (i, val) {
-          var tmpl = self.jade.compile(val.innerHTML, options),
+          var tmpl = jade.compile(val.innerHTML, options),
               loaded_name = val.getAttribute('name');
           self._templates[module][loaded_name] = tmpl;
           if (loaded_name === name) {

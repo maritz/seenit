@@ -97,7 +97,8 @@ app.post('/', auth.may('create', 'User'), newUser, store, updateSession, sendUse
 
 app.put('/:id([0-9]+)', auth.isLoggedIn, auth.may('edit', 'User'), loadModel('User'), store, updateSession, sendUserdata);
 
-if (process.env.NODE_ENV !== 'production') {
+if (app.set('env') === 'development') {
+  console.log('Warninig', 'Development route /REST/User/(take|give)/me/admin enabled');
   app.get('/:takeOrGive(take|give)/me/admin', auth.isLoggedIn, function (req, res, next) {
     var admin = req.param('takeOrGive') === 'give';
     req.user.p('admin', admin);
