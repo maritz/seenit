@@ -9,10 +9,7 @@ var RedisSessionStore = require('connect-redis')(express);
 var tvdb = nohm.factory('tvdb', 1, function (err, model) {
   registry.tvdb = tvdb;
   tvdb.getMirrors(function () {
-    tvdb.refreshData();
-    setInterval(function () {
-      tvdb.refreshData();
-    }, registry.config.thetvdb.refresh_timers.data*10000);
+    
   });
 });
 
