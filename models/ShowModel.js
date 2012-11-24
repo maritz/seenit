@@ -1,9 +1,10 @@
 var nohm = require('nohm').Nohm;
-var search = require('reds').createSearch('reds:show');
+var reds = require('reds');
 var async = require('async');
 var _ = require('underscore');
 
-search.client = require('../registry.js').redis;
+reds.client = require('../registry.js').redis;
+var search = reds.createSearch('reds:show');
 
 module.exports = nohm.model('Show', {
   properties: {
@@ -110,7 +111,6 @@ module.exports = nohm.model('Show', {
       }
       
       this._super_save(options, function (err) {
-
         if (err) {
           callback.apply(self, arguments);
         } else {
@@ -131,7 +131,6 @@ module.exports = nohm.model('Show', {
         options = {};
       }
       this._super_remove(options, function (err) {
-        
         if (err) {
           callback.apply(self, arguments);
         } else {
@@ -182,21 +181,9 @@ module.exports = nohm.model('Show', {
         this.p('num_seasons', season);
         var seasons = this.p('seasons');
         seasons.push(season);
-        this.p('seasons', seasons)
+        this.p('seasons', seasons);
       }
     }
     
   }
-});
-
-
-var show = nohm.factory('Show');
-show.find(function (err, ids) {
-  console.log('reindexing shows');
-  ids.forEach(function (id) {
-    nohm.factory('Show', id, function () {
-      console.log('indexing', this.p('name'));
-      search.index(this.p('name'), this.id);
-    });
-  });
 });
