@@ -13,7 +13,7 @@ exports.connect = function (cb) {
   
   registry.redis_sessions = redis.createClient(config.redis.port, config.redis.host, { no_ready_check: true });
   registry.redis_sessions.on('error', function () {
-    console.log('redis error: ', arguments);
+    console.log('redis_sessions error: ', arguments);
   });
   
   registry.redis = redis.createClient(config.redis.port, config.redis.host, { no_ready_check: true });
@@ -22,11 +22,11 @@ exports.connect = function (cb) {
   });
   registry.redis_pub = redis.createClient(config.redis.port, config.redis.host, { no_ready_check: true });
   registry.redis_pub.on('error', function () {
-    console.log('redis error: ', arguments);
+    console.log('redis_pub error: ', arguments);
   });
   registry.redis_sub = redis.createClient(config.redis.port, config.redis.host, { no_ready_check: true });
   registry.redis_sub.on('error', function () {
-    console.log('redis error: ', arguments);
+    console.log('redis_sub error: ', arguments);
   });
   
   var noop = function () {};
@@ -68,4 +68,20 @@ exports.connect = function (cb) {
     }
   );
   
+};
+
+exports.quit = function (cb) {
+  var quit = function (client) {
+    return function (done) {
+      client.quit(done);
+    };
+  };
+  async.parallel([
+    quit(registry.redis_sessions),
+    quit(registry.redis),
+    quit(registry.redis_pub),
+    quit(registry.redis_sub),
+    quit(nohm.client)
+  ],
+  cb);
 };
