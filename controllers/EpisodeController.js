@@ -140,11 +140,11 @@ app.get('/seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Ep
 
 app.get('/today', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, res, next) {
   
-  var start = new Date();
-  start.setHours(0,0,0,0);
+  var buffer_time = 16*60*60*1000;
   
-  var end = new Date();
-  end.setHours(23,59,59,999);
+  var start = +new Date()-buffer_time;
+  
+  var end = +new Date()+buffer_time;
   
   async.waterfall([
     async.apply(Episode.find, {
