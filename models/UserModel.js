@@ -74,10 +74,8 @@ module.exports = nohm.model('User', {
       defaultValue: false
     },
     searches: {
-      type: 'json',
-      defaultValue: [
-        'https://www.google.com/search?q=%name Season %season Episode %episode'
-      ]
+      type: 'string',
+      defaultValue: 'https://www.google.com/search?q=%name Season %season Episode %episode'
       // need validations
     }
   },
