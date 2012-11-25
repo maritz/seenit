@@ -442,64 +442,65 @@ module.exports = nohm.model('tvdb', {
               async.forEach(doc.find('//Episode'), function (node, done) {
                 var episode = nodeToJson(node);
                 var episode_id = parseInt(episode.id, 10);
-                if (episode_ids.indexOf(episode_id) !== -1) {
-                  var episode_model = nohm.factory('Episode');
-                  episode_model.find({
-                    tvdb_id: episode_id
-                  }, function (err, ids) {
-                    if (err) {
-                      return done(err);
-                    }
-                    var setProperties = function () {
-                      episode_model.p({
-                        tvdb_id: episode.id,
-                        imdb_id: episode.IMDB_ID,
-                        name: episode.EpisodeName,
-                        number: episode.EpisodeNumber,
-                        first_aired: episode.FirstAired,
-                        plot: episode.Overview,
-                        season: episode.SeasonNumber
-                      });
-                    }
+                
+                
+                var episode_model = nohm.factory('Episode');
+                episode_model.find({
+                  tvdb_id: episode_id
+                }, function (err, ids) {
+                  if (err) {
+                    return done(err);
+                  }
+                  var setProperties = function () {
+                    episode_model.p({
+                      tvdb_id: episode.id,
+                      imdb_id: episode.IMDB_ID,
+                      name: episode.EpisodeName,
+                      number: episode.EpisodeNumber,
+                      first_aired: episode.FirstAired,
+                      plot: episode.Overview,
+                      season: episode.SeasonNumber
+                    });
+                  }
+                  
+                  var printname = 'S'+String('0'+episode.SeasonNumber).slice(-2)+'E'+String('0'+episode.EpisodeNumber).slice(-2);
+                  
+                  if (ids.length === 0) {
+                    console.log('Adding', show.p('name'), printname);
                     
-                    var printname = 'S'+String('0'+episode.SeasonNumber).slice(-2)+'E'+String('0'+episode.EpisodeNumber).slice(-2);
+                    setProperties();
                     
-                    if (ids.length === 0) {
-                      console.log('Adding', show.p('name'), printname);
-                      
-                      setProperties();
-                      
-                      if (seasons.indexOf(episode.SeasonNumber) === -1) {
-                        seasons.push(episode.SeasonNumber);
+                    if (seasons.indexOf(episode.SeasonNumber) === -1) {
+                      seasons.push(episode.SeasonNumber);
+                    }
+                    show.link(episode_model, {
+                      error: function (err, errors, episode) {
+                        console.log('link_error', err, errors, episode.allProperties());
                       }
-                      show.link(episode_model, {
-                        error: function (err, errors, episode) {
-                          console.log('link_error', err, errors, episode.allProperties());
+                    });
+                    show.link(episode_model, {
+                      name: 'season'+episode.SeasonNumber,
+                      error: function (err, errors, episode) {
+                        console.log('season link_error', err, errors, episode.allProperties());
+                      }
+                    });
+                    done();
+                  } else if (episode_ids.indexOf(episode_id) !== -1) {
+                    console.log('Updating', show.p('name'), printname);
+                    episode_model.load(ids[0], function () {
+                      setProperties();
+                      episode_model.save(function (err) {
+                        if (err) {
+                          console.log('ERROR: Updating', show.p('name'), printname, err, episode_model.errors);
                         }
+                        done(err);
                       });
-                      show.link(episode_model, {
-                        name: 'season'+episode.SeasonNumber,
-                        error: function (err, errors, episode) {
-                          console.log('season link_error', err, errors, episode.allProperties());
-                        }
-                      });
-                      done();
-                    } else {
-                      console.log('Updating', show.p('name'), printname);
-                      episode_model.load(ids[0], function () {
-                        setProperties();
-                        episode_model.save(function (err) {
-                          if (err) {
-                            console.log('ERROR: Updating', show.p('name'), printname, err, episode_model.errors);
-                          }
-                          done(err);
-                        });
-                      });
-                    }
-                  });
-                } else {
-                  done();
-                }
+                    });
+                  } else {
+                    done();
+                  }
+                });
+              
               }, function (err) {
                 if (err) {
                   next(err);
@@ -545,8 +546,6 @@ module.exports = nohm.model('tvdb', {
           }
         }
       }
-      
-      //update_range = 'day'; // for testing TODO: REMOVE THIS!
       
       this._tvdbRequest('/updates/updates_'+update_range+'.zip', 'zip', function (err, documents) {
         if (err) {
