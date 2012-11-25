@@ -518,7 +518,6 @@ module.exports = nohm.model('tvdb', {
           });
         }
       ], function (err) {
-        console.log('updated', err);
         callback(err, show);
       });
     },
