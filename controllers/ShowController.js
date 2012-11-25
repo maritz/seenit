@@ -186,6 +186,38 @@ app.get('/del/:id', auth.isLoggedIn, auth.may('delete', 'Show'), loadModel('Show
 });
 
 
+app.get('/update/:id', auth.isLoggedIn, auth.may('edit', 'Show'), loadModel('Show'), function (req, res, next) {
+  var id = req.param('id');
+  console.log('Updating', req.loaded.Show.p('name'), 'by', req.user.p('name'), req.user.id);
+  async.waterfall([
+    // get all episodes
+    function (cb) {
+      req.loaded.Show.getAll('Episode', cb);
+    },
+    function (episode_ids, cb) {
+      async.map(episode_ids, function (id, map) {
+        nohm.factory('Episode', id, function (err, props) {
+          if (err) {
+            map(err);
+          } else {
+            map(null, props.tvdb_id);
+          }
+        });
+      }, cb);
+    },
+    function (episode_ids, cb) {
+      tvdb.updateSeries(id, episode_ids, cb);
+    }
+  ], function (err, show) {
+    if (err) {
+      next(new ShowError('Updating the show failed.', 502, err));
+    } else {
+      res.ok(show.id);
+    }
+  });
+});
+
+
 app.mounted(function (){
   console.log('mounted Show REST controller');
 });
