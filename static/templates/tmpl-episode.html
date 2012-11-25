@@ -51,7 +51,7 @@ each episode in args[0]
     - search = search.replace('%season', episode.get('season'))
     - search = search.replace('%episode_padded', String('0'+episode.get('number')).slice(-2))
     - search = search.replace('%episode', episode.get('number'))
-    a(href:search, target: 'User defined search')=search.substr(0,25)+'...'
+    a(href:search, target: 'User defined search '+search)=search.substr(0,25)+'...'
     br
     
     a.episode_opener(href: '#')
@@ -172,5 +172,5 @@ else
         - search = search.replace('%season', episode.get('season'))
         - search = search.replace('%episode_padded', String('0'+episode.get('number')).slice(-2))
         - search = search.replace('%episode', episode.get('number'))
-        a(href:search, target: 'User defined search')=search.substr(0,25)+'...'
+        a(href:search, target: 'User defined search '+search)=search.substr(0,25)+'...'
 </script>
