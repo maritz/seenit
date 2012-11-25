@@ -14,6 +14,7 @@ ul.nav.nav-pills.small
 h2!=_t('headline')
 form.form-horizontal( novalidate: true)
   - var model = parentLocals._model;
+  
   fieldset
     legend=_t('legend')
     p!=_t('forms.bold_hint')
@@ -25,7 +26,16 @@ form.form-horizontal( novalidate: true)
     !=partial('password', args[0])
     !=partial('password_repeat', args[0])
     !=partial('email', model.get('email'))
-        
+    
+  
+  fieldset
+    legend=_t('searches.legend')
+    p!=_t('searches.help')
+    
+    ul
+      li
+        !=partial('search', model.get('searches'));
+    
   != form('input', { type: 'submit', name: 'submit_user', value: _t('forms.submit') })
 </script>
 
@@ -121,6 +131,10 @@ form( novalidate: true)
 
 <script type="text/x-jade-tmpl" name="email">
 != form('input', { name: 'email', value: args[0]})
+</script>
+
+<script type="text/x-jade-tmpl" name="search">
+!= form('input', { name: 'searches', value: args[0]})
 </script>
 
 <script type="text/x-jade-tmpl" name="userbox">

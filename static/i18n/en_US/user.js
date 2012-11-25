@@ -37,6 +37,18 @@ module.exports = {
   edit_profile: {
     headline: "Edit profile",
     legend: "Your basic information",
+    searches: {
+      legend: 'Custom searches',
+      help: 'You can define your own searches for Episodes. <br/> \
+        The following strings will be replaced: <br/> \
+          - %name (name of the show)<br/> \
+          - %season (season number)<br/> \
+          - %episode (episode number)<br/> \
+          - %season_padded / %episode_padded (zero padded to 2 digits).'
+    },
+    labels: {
+      "searches[]": 'Searches'
+    },
     admin: {
       legend: "Administrator",
       label: "Administrator - BE&nbsp;CAREFUL",

@@ -20,6 +20,7 @@ _r(function (app) {
       var self = this;
       this.collection.id = this.params[0];
       this.collection.season = this.params[1];
+      this.collection.show_name = this.params[2];
       
       this.collection.bind('change:seen', function (episode) {
         self.redrawEpisodeSeenButton(episode);

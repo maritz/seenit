@@ -55,7 +55,7 @@ var defaults = {
 };
 
 if (env === 'production' || env === 'staging') {
-  defaults["static"].port = 80;
+  defaults["static"].port = 3001;
 }
 
 if (env === 'staging') {

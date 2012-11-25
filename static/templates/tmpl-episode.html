@@ -41,6 +41,18 @@ each episode in args[0]
     br
     .episode_seen_container
       !=partial('episode_seen_button', episode)
+      
+    label
+      =_t('search_link')
+    br^
+    - search = app.user_self.get('searches')
+    - search = search.replace('%name', episode.collection.show_name)
+    - search = search.replace('%season_padded', String('0'+episode.get('season')).slice(-2))
+    - search = search.replace('%season', episode.get('season'))
+    - search = search.replace('%episode_padded', String('0'+episode.get('number')).slice(-2))
+    - search = search.replace('%episode', episode.get('number'))
+    a(href:search, target: 'User defined search')=search.substr(0,25)+'...'
+    br
     
     a.episode_opener(href: '#')
       =_t('more')
@@ -153,5 +165,12 @@ else
         
         label
           =_t('search_link')
-        a(href:'https://www.google.com/search?q=uploaded.net+'+episode_name+'+720p', target: episode_name+' Search') Goggle
+        br
+        - search = app.user_self.get('searches')
+        - search = search.replace('%name', episode.get('show'))
+        - search = search.replace('%season_padded', String('0'+episode.get('season')).slice(-2))
+        - search = search.replace('%season', episode.get('season'))
+        - search = search.replace('%episode_padded', String('0'+episode.get('number')).slice(-2))
+        - search = search.replace('%episode', episode.get('number'))
+        a(href:search, target: 'User defined search')=search.substr(0,25)+'...'
 </script>

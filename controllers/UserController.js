@@ -60,7 +60,8 @@ function store (req, res, next) {
   var data = {
     name: req.param('name'),
     password: req.param('password'),
-    email: req.param('email')
+    email: req.param('email'),
+    searches: req.param('searches')
   };
   user.store(data, function (err) {
     if ( ! err) {
