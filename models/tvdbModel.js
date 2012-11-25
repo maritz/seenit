@@ -116,7 +116,8 @@ var nodeToJson = function (node) {
   return json;
 };
 
-var fillShowFromDataXml = function (show, doc) {
+
+var fillShowFromDataXml = function (show, doc, no_episodes) {
   var data = doc.get('//Series');
   if (data.get('id')) {
     var id = getText(data.get('id'));
@@ -130,7 +131,7 @@ var fillShowFromDataXml = function (show, doc) {
     });
   }
   var episodes = doc.find('//Episode');
-  if (Array.isArray(episodes) && episodes.length > 0) {
+  if ( ! no_episodes && Array.isArray(episodes) && episodes.length > 0) {
     var seasons = [];
     
     episodes.forEach(function (ep) {
@@ -307,6 +308,7 @@ module.exports = nohm.model('tvdb', {
           if (specific_url.indexOf('php') === -1) {
             url += key;
           }
+          console.log('Fetching '+type+':', url+specific_url);
           switch (type) {
             case 'xml':
               getXML(url+specific_url, callback);
@@ -418,137 +420,208 @@ module.exports = nohm.model('tvdb', {
       }
     },
     
-    refreshData: function () {
+    updateSeries: function (id, episode_ids, callback) {
       var self = this;
-      // TODO: update last_data_refresh and throw if something goes wrong.
+      var show = null;
+      
       async.waterfall([
-        async.apply(this.selectMirror, 'xml'),
-        function (mirror, next) {
-          var update_url = mirror+'Updates.php?type=all&time='+self.p('last_data_refresh')/1000;
-          getXML(update_url, next);
-        }
-      ], function (err, results) {
-        if (err) {
-          console.log('ERROR', 'Refreshing data from TheTVDB failed. Error message:', err);
-        } else {
-          
-          // Update raw Show data
-          results.find('//Series').forEach(function (node) {
-            var tvdb_id = getText(node);
-            async.auto({
-              id: function (done) {
-                nohm.factory('Show').find({
-                  tvdb_id: tvdb_id
-                }, done);
-              },
-              show: ['id', function (done, results) {
-                if (results.id.length > 0) {
-                  var show = nohm.factory('Show', results.id[0], function (err) {
-                    done(err, show);
-                  });
-                } else {
-                  done('not found');
-                }
-              }],
-              xml: ['show', function (done, results) {
-                self._tvdbRequest('/series/'+tvdb_id+'/'+results.show.p('language')+'.xml', done);
-              }],
-              update: ['show', 'xml', function (done, results) {
-                var show = results.show;
-                fillShowFromDataXml(show, results.xml);
-                show.save(done);
-              }]
-            }, function (err, results) {
-              if (err && err !== 'not found') {
-                console.log('ERROR', 'Refreshing data from TheTVDB failed (2). Error message:', err);
-              }
-            });
-          });
-          
-          // Update/Add Episodes
-          results.find('//Episode').forEach(function (node) {
-            var tvdb_id = getText(node);
-            var episode = nohm.factory('Episode');
-            var show = nohm.factory('Show');
-            async.waterfall([
-              function (done) {
-                episode.find({
-                  tvdb_id: tvdb_id
-                }, done); 
-              }, 
-              function (ids, done) {
-                if (ids.length > 0) {
-                  
-                  // Update existing episode
-                  episode.load(ids[0], function () {
-                    episode.getAll('Show', 'defaultForeign', done);
-                  });
-                  
-                } else {
-                  
-                  // Add new episode IF it's from a show we track
-                  self._tvdbRequest('/episodes/'+tvdb_id+'/en.xml', function (err, doc) {
+        function (next) {
+          show = nohm.factory('Show', id, next);
+        },
+        function (props, next) {
+          self._tvdbRequest('/series/'+props.tvdb_id+'/all/'+props.language+'.zip', 'zip', next);
+        },
+        function (documents, next) {
+          documents.forEach(function (doc) {
+            if (doc.root().name() === 'Data') {
+              
+              fillShowFromDataXml(show, doc, true);
+              
+              var seasons = show.p('seasons');
+              
+              async.forEach(doc.find('//Episode'), function (node, done) {
+                var episode = nodeToJson(node);
+                var episode_id = parseInt(episode.id, 10);
+                if (episode_ids.indexOf(episode_id) !== -1) {
+                  var episode_model = nohm.factory('Episode');
+                  episode_model.find({
+                    tvdb_id: episode_id
+                  }, function (err, ids) {
                     if (err) {
-                      done(err);
+                      return done(err);
+                    }
+                    var setProperties = function () {
+                      episode_model.p({
+                        tvdb_id: episode.id,
+                        imdb_id: episode.IMDB_ID,
+                        name: episode.EpisodeName,
+                        number: episode.EpisodeNumber,
+                        first_aired: episode.FirstAired,
+                        plot: episode.Overview,
+                        season: episode.SeasonNumber
+                      });
+                    }
+                    
+                    var printname = 'S'+String('0'+episode.SeasonNumber).slice(-2)+'E'+String('0'+episode.EpisodeNumber).slice(-2);
+                    
+                    if (ids.length === 0) {
+                      console.log('Adding', show.p('name'), printname);
+                      
+                      setProperties();
+                      
+                      if (seasons.indexOf(episode.SeasonNumber) === -1) {
+                        seasons.push(episode.SeasonNumber);
+                      }
+                      show.link(episode_model, {
+                        error: function (err, errors, episode) {
+                          console.log('link_error', err, errors, episode.allProperties());
+                        }
+                      });
+                      show.link(episode_model, {
+                        name: 'season'+episode.SeasonNumber,
+                        error: function (err, errors, episode) {
+                          console.log('season link_error', err, errors, episode.allProperties());
+                        }
+                      });
+                      done();
                     } else {
-                      var show_tvdb_id = getText(doc.get('//seriesid'));
-                      show.find({
-                        tvdb_id: show_tvdb_id
-                      }, done);
+                      console.log('Updating', show.p('name'), printname);
+                      episode_model.load(ids[0], function () {
+                        setProperties();
+                        episode_model.save(function (err) {
+                          if (err) {
+                            console.log('ERROR: Updating', show.p('name'), printname, err, episode_model.errors);
+                          }
+                          done(err);
+                        });
+                      });
                     }
                   });
-                }
-              },
-              function (ids, done) {
-                if (!ids[0]) {
-                  done('not found');
                 } else {
-                  show.load(ids[0], done);
+                  done();
                 }
-              },
-              function (props, done) {
-                self._tvdbRequest('/episodes/'+tvdb_id+'/'+show.p('language')+'.xml', done);
-              }, function (docs, done) {
-                var ep = nodeToJson(docs.get('//Episode'));
-                if (ep.EpisodeNumber) {
-                  show.addSeason(ep.seasonNumber);
-                  episode.p({
-                    tvdb_id: ep.id,
-                    imdb_id: ep.IMDB_ID,
-                    name: ep.EpisodeName,
-                    number: ep.EpisodeNumber,
-                    first_aired: ep.FirstAired,
-                    plot: ep.Overview,
-                    season: ep.SeasonNumber
+              }, function (err) {
+                if (err) {
+                  next(err);
+                } else {
+                  show.p('seasons', seasons);
+                  console.log('Updating', show.p('name'));
+                  show.save(function (err) {
+                    if (err) {
+                      console.log('ERROR: Updating', show.p('name'), err, show.errors);
+                    }
+                    next(err);
                   });
-                  if ( ! episode.inDB) {
-                    show.link(episode, {
-                      error: function (err, errors, episode) {
-                        console.log('link_error', err, errors, episode.allProperties());
-                      }
-                    });
-                    show.link(episode, {
-                      name: 'season'+ep.SeasonNumber,
-                      error: function (err, errors, episode) {
-                        console.log('season link_error', err, errors, episode.allProperties());
+                }
+              });
+            }
+          });
+        }
+      ], function (err) {
+        console.log('updated', err);
+        callback(err, show);
+      });
+    },
+    
+    refreshData: function (callback) {
+      var self = this;
+      
+      var update_range = 'day';
+      var last_refresh = self.p('last_data_refresh');
+      var day = 24*60*60*1000;
+      var week = day*7;
+      var month = day*30; // this is how thetvdb defines a month worth of updates
+      var now = + new Date();
+      
+      console.log('Last refresh was', new Date(last_refresh));
+      
+      if (last_refresh < now-day) {
+        update_range = 'week';
+        if (last_refresh < now-week) {
+          update_range = 'month';
+          if (last_refresh < now-month) {
+            console.log('Data was not updated in more than 30 days. This is not good and needs to be handled manually.');
+          } else {
+            console.log('Data was not updated in more than 7 days!');
+          }
+        }
+      }
+      
+      //update_range = 'day'; // for testing TODO: REMOVE THIS!
+      
+      this._tvdbRequest('/updates/updates_'+update_range+'.zip', 'zip', function (err, documents) {
+        if (err) {
+          callback(err);
+        } else {
+          var update_release = documents[0].root().attr('time').value()*1000;
+          if (last_refresh >= update_release) {
+            console.log('Already up-to-date.');
+            return callback();
+          } else {
+            
+            var checkTime = function (node) {
+              var time = node.get('time').text();
+              return time*1000 > last_refresh;
+            };
+            
+            async.waterfall([
+              
+              // get ids of episodes
+              function (done) {
+                var episode_updates = documents[0].find('/Data/Episode').filter(checkTime);
+                var episode_ids = episode_updates.map(function (node) {
+                  return parseInt(node.get('id').text(), 10);
+                });
+                done(null, episode_ids);
+                return true;
+                async.filter(episode_ids, function (id, cb) {
+                  nohm.factory('Episode').find({
+                    tvdb_id: id
+                  }, function (err, ids) {
+                    if (err) {
+                      throw err;
+                    }
+                    cb(ids.length !== 0);
+                  });
+                }, function (ids) {
+                  done(null, ids);
+                });
+              },
+              
+              // update series
+              function (episode_ids, done) {
+                async.forEachLimit(documents[0].find('/Data/Series'), 10, function (node, cb) {
+                  if ( ! checkTime(node)) {
+                    cb();
+                  } else {
+                    nohm.factory('Show').find({
+                      tvdb_id: ''+node.get('id').text()
+                    }, function (err, ids) {
+                      if (ids.length === 0) {
+                        cb();
+                      } else if (err) {
+                        cb(err);
+                      } else {
+                        self.updateSeries(ids[0], episode_ids, cb);
                       }
                     });
                   }
-                  episode.save(done);
-                }
+                }, done);
               },
-              function (nothing, done) {
-                show.save(done);
+              
+              // set datarefresh timestamp
+              function (done) {
+                self.p('last_data_refresh', now);
+                self.save(done);
               }
+              
             ], function (err) {
-              if (err && err !== 'not found') {
-                console.log('ERROR', 'Refreshing data from TheTVDB failed (3). Error message:', err);
-              }
+              callback(err);
             });
-          });
+            
+          }
         }
       });
-      
     }
   }
 });
