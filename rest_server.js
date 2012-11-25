@@ -4,11 +4,38 @@ var server = express.createServer();
 var nohm = require('nohm').Nohm;
 var registry = require(__dirname+'/registry');
 var RedisSessionStore = require('connect-redis')(express);
+var cp = require('child_process');
+var fs = require('fs');
 
 // load the tvdb model for global use via the registry
 var tvdb = nohm.factory('tvdb', 1, function (err, model) {
   registry.tvdb = tvdb;
   tvdb.getMirrors(function () {
+    
+    
+    var timedUpdate = function () {
+      
+      process.stdout.write('Updating... ');
+      
+      var update_log = fs.createWriteStream('update.log', {
+        flags: 'a'
+      });
+      
+      var update_process = cp.spawn('node', ['update_shows.js'], {
+        env: process.env
+      });
+      
+      update_process.stdout.pipe(update_log);
+      
+      update_process.on('exit', function () {
+        console.log('Done.')
+        setTimeout(function () {
+          timedUpdate();
+        }, registry.config.thetvdb.refresh_timers.data);
+      });
+    };
+    
+    timedUpdate();
     
   });
 });

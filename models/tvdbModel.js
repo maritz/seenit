@@ -19,7 +19,7 @@ var bitmask = {
   zipmirrors: 0x4
 };
 
-var mirror_refresh = config.refresh_timers.mirrors*1000*60;
+var mirror_refresh = config.refresh_timers.mirrors;
 
 var readXmlFiles = function (path, callback) {
   fs.readdir(path, function (err, files) {

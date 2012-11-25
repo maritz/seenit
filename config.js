@@ -48,8 +48,8 @@ var defaults = {
     tmp_path: __dirname+'/tmp/',                                  // path where zip files are temporarily stored
     banner_path: __dirname+'/static/images/series_banners/',      // path where the banner images are stored
     refresh_timers: {                                             // every x minutes
-      mirrors: 60*24*7,                                           // these should change rarely and a refresh should also be triggered if one times out
-      data: 60*24
+      mirrors: 1000*60*60*24*7,                                           // these should change rarely and a refresh should also be triggered if one times out
+      data: 1000*60*60*6
     }
   }
 };
