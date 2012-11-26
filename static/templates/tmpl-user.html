@@ -27,14 +27,14 @@ form.form-horizontal( novalidate: true)
     !=partial('password_repeat', args[0])
     !=partial('email', model.get('email'))
     
-  
-  fieldset
-    legend=_t('searches.legend')
-    p!=_t('searches.help')
-    
-    ul
-      li
-        !=partial('search', model.get('searches'));
+  - if ( ! args[0]) // edit profile
+    fieldset
+      legend=_t('searches.legend')
+      p!=_t('searches.help')
+      
+      ul
+        li
+          !=partial('search', model.get('searches'));
     
   != form('input', { type: 'submit', name: 'submit_user', value: _t('forms.submit') })
 </script>
