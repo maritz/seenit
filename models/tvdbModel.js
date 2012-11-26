@@ -6,6 +6,7 @@ var fs = require('fs');
 var child_process = require('child_process');
 var async = require('async');
 var rimraf = require('rimraf');
+var imagemagick = require('imagemagick');
 
 var key = config.key;
 var tmp_path = config.tmp_path;
@@ -173,6 +174,18 @@ var fillShowFromDataXml = function (show, doc, no_episodes) {
   return show;
 };
 
+var compressImage = function (file_name) {
+  
+  console.log('compressing '+file_name);
+  
+  imagemagick.convert([file_name, '-strip', '-interlace', 'Plane', '-quality', '85%', file_name], function(err){
+    if (err) {
+      console.log('Error compressing '+file_name, err);
+    }
+  });
+  
+};
+
 var getBannerFromDataXml = function (show, doc, id, language, tvdb) {
   var data = doc.find('//Banner');
   if (Array.isArray(data)) {
@@ -206,6 +219,9 @@ var getBannerFromDataXml = function (show, doc, id, language, tvdb) {
         var ws = fs.createWriteStream(file_name);
         console.log('TVDB: downloading banner from', url+'/banners/'+chosen.BannerPath);
         request(url+'/banners/'+chosen.BannerPath).pipe(ws);
+        ws.on('close', function () {
+          compressImage(file_name);
+        })
       }
     });
   }
