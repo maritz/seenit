@@ -164,7 +164,21 @@ module.exports = nohm.model('Show', {
         user.unlink(self, link_options);
       }
       user.save(function (err) {
-        callback(err, following);
+        if (err) {
+          callback(err);
+        } else if (following) {
+          user.computeNextUp(self, function (err, id) {
+            if (err) {
+              callback(err);
+            } else {
+              user.setNextUp(self, id, function (err) {
+                callback(err, following);
+              });
+            }
+          });
+        } else {
+          callback(null, following);
+        }
       });
     },
     
