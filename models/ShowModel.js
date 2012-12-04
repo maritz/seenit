@@ -69,6 +69,7 @@ module.exports = nohm.model('Show', {
               if (err === 'not found') {
                 cb(null);
               } else {
+                data.id = id;
                 cb(err, data);
               }
             });
@@ -176,6 +177,9 @@ module.exports = nohm.model('Show', {
       });
     },
     
+    /**
+     * Adds a season to a show
+     */
     addSeason: function (season) {
       if (this.p('num_seasons') < +season) {
         this.p('num_seasons', season);
@@ -183,6 +187,40 @@ module.exports = nohm.model('Show', {
         seasons.push(season);
         this.p('seasons', seasons);
       }
+    },
+    
+    /**
+     * Gets an episode based on season and numeric index of that season.
+     * 
+     * TODO: Make season an index so this can be solved by a simple find
+     */
+    getEpisodeByNumbering: function (season, number, callback) {
+      var self = this;
+      console.log('get episode by num', season, number);
+      async.waterfall([
+        function (cb_waterfall) {
+          self.getAll('Episode', 'season'+season, cb_waterfall);
+        },
+        function (episode_ids, cb_waterfall) {
+          console.log('episode ids', episode_ids);
+          async.map(episode_ids, function (id, cb_map) {
+            var episode = nohm.factory('Episode', id, function (err) {
+              cb_map(err, episode);
+            });
+          }, cb_waterfall);
+        },
+        function (episodes, cb_waterfall) {
+          var episode = episodes.filter(function (episode) {
+            return episode.p('number')  === number;
+          });
+          console.log('got episodes');
+          if (episode.length > 0) {
+            cb_waterfall(null, episode[0]);
+          } else {
+            cb_waterfall('not found');
+          }
+        }
+      ], callback);
     }
     
   }

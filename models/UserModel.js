@@ -1,5 +1,8 @@
-var nohm = require('nohm').Nohm,
-    crypto = require('crypto');
+var nohm = require('nohm').Nohm;
+var crypto = require('crypto');
+var redis = require('../registry').redis;
+var async = require('async');
+var _ = require('underscore');
 
 var hasher = function hasher (password, salt) {
   var hash = crypto.createHash('sha512');
@@ -73,6 +76,7 @@ module.exports = nohm.model('User', {
       type: 'bool',
       defaultValue: false
     },
+    
     searches: {
       type: 'string',
       defaultValue: 'https://www.google.com/search?q=%name Season %season Episode %episode'
@@ -240,6 +244,224 @@ module.exports = nohm.model('User', {
       delete props.password;
       delete props.salt;
       return stringify ? JSON.stringify(props) : props;
+    },
+    
+    /**
+     * Get the id of the next up episode for a given show.
+     * This is precached for every user to reduce computation time.
+     * Returns null if no nextup episode is set or all episodes have been marked as seen.
+     */
+    getNextUp: function (show, callback) {
+      var self = this;
+      var key = 'seenit:nextUp:'+self.id+':'+show.id;
+      redis.get(key, function (err, id) {
+        console.log('get', key, err, id);
+        if (id === 'done' || id === null) {
+          callback(err, null, id === 'done');
+        } else {
+          callback(null, id, null);
+        }
+      });
+    },
+    
+    /**
+     * Checks if setting an episode to seen/unseen changes the next up episode and if so changes nextup
+     */
+    checkSeenChangesNextUp: function (seen, id, callback) {
+      console.log('checking', seen, id);
+      var self = this;
+      var checkEpisode = nohm.factory('Episode');
+      var nextUpEpisode;
+      var show;
+      
+      async.waterfall([
+        function (cb_waterfall) {
+          checkEpisode.load(id, cb_waterfall);
+        },
+        function (unused_props, cb_waterfall) {
+          console.log('getting show');
+          if (checkEpisode.prop('season') === 0) {
+            cb_waterfall('nothing to be done'); // we ignore specials
+          } else {
+            checkEpisode.getShow(cb_waterfall);
+          }
+        }, 
+        function (loaded_show, cb_waterfall) {
+          // load the next up show
+          show = loaded_show;
+          self.getNextUp(show, cb_waterfall);
+        },
+        function (nextUpEpisode_id, showCompletelySeen, cb_waterfall) {
+          console.log('check ids', nextUpEpisode_id, id, showCompletelySeen);
+          // check if we can decide just by looking at the ids
+          if (nextUpEpisode_id === null) {
+            cb_waterfall('increment');
+          } else if (showCompletelySeen) {
+            cb_waterfall('nothing to be done');
+          } else if (nextUpEpisode_id === id) {
+            if (seen) {
+              cb_waterfall('increment');
+            } else {
+              cb_waterfall('nothing to be done');
+              console.log('WARNING', 'An episode was marked as unseen even though it was also the nextUp.', self.id, id, nextUpEpisode_id);
+            }
+          } else {
+            cb_waterfall(null, nextUpEpisode_id);
+          }
+        },
+        function (nextUpEpisode_id, cb_waterfall) {
+          // load the nextUpEpisode
+          nextUpEpisode = nohm.factory('Episode', nextUpEpisode_id, cb_waterfall);
+        },
+        function (unused_props, cb_waterfall) {
+          var nextUpSeason = nextUpEpisode.p('season');
+          var checkSeason = checkEpisode.p('season');
+          console.log('comparing seasons', nextUpSeason, checkSeason);
+          if (nextUpSeason > checkSeason) {
+            cb_waterfall('set to id');
+          } else if (nextUpSeason < checkSeason) {
+            cb_waterfall('nothing to be done');
+          } else {
+            // compare episodes
+            var nextUpNumber = nextUpEpisode.p('number');
+            var checkNumber = checkEpisode.p('number');
+            console.log('comparing numbers', nextUpNumber, checkNumber);
+            if (nextUpNumber < checkNumber) {
+              cb_waterfall('nothing to be done');
+            } else {
+              cb_waterfall('set to id');
+            }
+          }
+        }
+      ], function (err) {
+        console.log('check result', err, id);
+        if (err === 'increment') {
+          self.setNextUp(show, callback);
+        } else if (err === 'set to id') {
+          self.setNextUp(show, id, callback);
+        } else {
+          if (err === 'nothing to be done') {
+            err = null;
+          }
+          callback(err);
+        }
+      });
+    },
+    
+    /**
+     * Sets the nextUp episode to the given id
+     */
+    setNextUp: function (show, id, callback) {
+      console.log('setting', show.p('name'), id);
+      var self = this;
+      if (id === null || typeof id === 'function') {
+        // TODO: This should be optimized. first check the next episode by getEpisodeByNumbering and then do computeNextUp.
+        if (typeof id === 'function') {
+          callback = id;
+        }
+        this.computeNextUp(show, function (err, id) {
+          if (err) {
+            callback(err);
+          } else {
+            self.setNextUp(show, id, callback);
+          }
+        });
+      } else {
+        redis.set('seenit:nextUp:'+this.id+':'+show.id, id, callback);
+      }
+    },
+    
+    /**
+     * Setup the next up episode for a given show.
+     * This automatically computes the next one in line and chaches it in the property nextUp.
+     */
+    computeNextUp: function (show, callback) {
+      console.log('computing', show.p('name'));
+      // this can be computationally heavy and should thus be called as few times as possible.
+      var self = this;
+      var seasons = _.range(1, show.p('num_seasons'));
+      
+      async.waterfall([
+        
+        function (cb_waterfall) {
+          console.log('get episodes', seasons);
+          // get an episode of each season
+          async.map(seasons, function (season, cb_map) {
+            console.log('get episode for season', season);
+            show.getEpisodeByNumbering(season, 1, cb_map);
+          }, cb_waterfall);
+        },
+        
+        function (seasonEpisodes, cb_waterfall) {
+          console.log('get first season', seasonEpisodes.length);
+          // get the first season that isn't marked as seen
+          var error = null;
+          async.detectSeries(seasonEpisodes, function (episode, cb_detect) {
+            episode.getSeasonSeen(self, function (err, seen) {
+              if (err) {
+                error = err;
+              }
+              cb_detect(!seen);
+            });
+          }, function (season) {
+            cb_waterfall(error, season);
+          });
+        },
+        
+        function (seasonEpisode, cb_waterfall) {
+          console.log('getting all episode ids');
+          // get all episode ids of the season
+          seasonEpisode.getSeasonEpisodes(cb_waterfall);
+        },
+        
+        function (episode_ids, unused_show, cb_waterfall) {
+          console.log('sorting', episode_ids);
+          // sort ids by number in season
+          nohm.factory('Episode').sort({
+            field: 'number',
+            amount: episode_ids.length,
+          }, episode_ids, cb_waterfall);
+        },
+        
+        function (episode_ids, cb_waterfall) {
+          console.log('get first unseen');
+          var first_unseen = null;
+          // get the first episode that isn't marked as seen
+          async.forEachSeries(episode_ids, function (id, cb_forEach) {
+            var episode = nohm.factory('Episode', id, function (err) {
+              if (err) {
+                cb_forEach(err);
+              } else {
+                episode.getSeen(self, function (err, seen) {
+                  if (err) {
+                    cb_forEach(err);
+                  } else {
+                    if (!seen) {
+                      first_unseen = episode.id;
+                      cb_forEach('found one');
+                    } else {
+                      cb_forEach();
+                    }
+                  }
+                });
+              }
+            });
+          }, function (err) {
+            if (err === 'found one') {
+              err = null;
+            }
+            cb_waterfall(err, first_unseen);
+          });
+        },
+      ], function (err, id) {
+        console.log('computed', err, id);
+        if (id === null) {
+          callback('Error while computing nextUp.');
+        } else {
+          callback(err, id);
+        }
+      });
+      
     }
   }
 });
