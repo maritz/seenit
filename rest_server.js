@@ -1,6 +1,6 @@
 var file_helper = require('./helpers/file');
 var express = require('express');
-var server = express.createServer();
+var server = express();
 var nohm = require('nohm').Nohm;
 var registry = require(__dirname+'/registry');
 var RedisSessionStore = require('connect-redis')(express);
@@ -117,6 +117,6 @@ server.use(function (err, req, res, next) {
   }
 });
 
-server.mounted(function (parent){
+server.on('mount', function (parent){
   console.log('mounted REST server');
 });

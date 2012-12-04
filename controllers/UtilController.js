@@ -1,4 +1,4 @@
-var app = require('express').createServer();
+var app = require('express')();
 var crypto = require('crypto');
 
 function createKey() {
@@ -17,5 +17,8 @@ app.get('/csrf', function (req, res) {
   res.ok(key);
 });
 
+app.on('mount', function () {
+  console.log('mounted Util Controller');
+});
 
 module.exports = app;
