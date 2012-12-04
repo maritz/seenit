@@ -255,7 +255,6 @@ module.exports = nohm.model('User', {
       var self = this;
       var key = 'seenit:nextUp:'+self.id+':'+show.id;
       redis.get(key, function (err, id) {
-        console.log('get', key, err, id);
         if (id === 'done' || id === null) {
           callback(err, null, id === 'done');
         } else {
@@ -268,7 +267,6 @@ module.exports = nohm.model('User', {
      * Checks if setting an episode to seen/unseen changes the next up episode and if so changes nextup
      */
     checkSeenChangesNextUp: function (seen, id, callback) {
-      console.log('checking', seen, id);
       var self = this;
       var checkEpisode = nohm.factory('Episode');
       var nextUpEpisode;
@@ -279,7 +277,6 @@ module.exports = nohm.model('User', {
           checkEpisode.load(id, cb_waterfall);
         },
         function (unused_props, cb_waterfall) {
-          console.log('getting show');
           if (checkEpisode.prop('season') === 0) {
             cb_waterfall('nothing to be done'); // we ignore specials
           } else {
@@ -292,7 +289,6 @@ module.exports = nohm.model('User', {
           self.getNextUp(show, cb_waterfall);
         },
         function (nextUpEpisode_id, showCompletelySeen, cb_waterfall) {
-          console.log('check ids', nextUpEpisode_id, id, showCompletelySeen);
           // check if we can decide just by looking at the ids
           if (nextUpEpisode_id === null) {
             cb_waterfall('increment');
@@ -316,7 +312,6 @@ module.exports = nohm.model('User', {
         function (unused_props, cb_waterfall) {
           var nextUpSeason = nextUpEpisode.p('season');
           var checkSeason = checkEpisode.p('season');
-          console.log('comparing seasons', nextUpSeason, checkSeason);
           if (nextUpSeason > checkSeason) {
             cb_waterfall('set to id');
           } else if (nextUpSeason < checkSeason) {
@@ -325,7 +320,6 @@ module.exports = nohm.model('User', {
             // compare episodes
             var nextUpNumber = nextUpEpisode.p('number');
             var checkNumber = checkEpisode.p('number');
-            console.log('comparing numbers', nextUpNumber, checkNumber);
             if (nextUpNumber < checkNumber) {
               cb_waterfall('nothing to be done');
             } else {
@@ -334,7 +328,6 @@ module.exports = nohm.model('User', {
           }
         }
       ], function (err) {
-        console.log('check result', err, id);
         if (err === 'increment') {
           self.setNextUp(show, callback);
         } else if (err === 'set to id') {
@@ -352,7 +345,6 @@ module.exports = nohm.model('User', {
      * Sets the nextUp episode to the given id
      */
     setNextUp: function (show, id, callback) {
-      console.log('setting', show.p('name'), id);
       var self = this;
       if (id === null || typeof id === 'function') {
         // TODO: This should be optimized. first check the next episode by getEpisodeByNumbering and then do computeNextUp.
@@ -378,7 +370,6 @@ module.exports = nohm.model('User', {
      * This automatically computes the next one in line and chaches it in the property nextUp.
      */
     computeNextUp: function (show, callback) {
-      console.log('computing', show.p('name'));
       // this can be computationally heavy and should thus be called as few times as possible.
       var self = this;
       var seasons = _.range(1, show.p('num_seasons'));
@@ -389,10 +380,8 @@ module.exports = nohm.model('User', {
       async.waterfall([
         
         function (cb_waterfall) {
-          console.log('get episodes', seasons);
           // get an episode of each season
           async.map(seasons, function (season, cb_map) {
-            console.log('get episode for season', season);
             show.getEpisodeByNumbering(season, 1, function (err, episode) {
               if (err === 'not found') {
                 cb_map(null, null);
@@ -404,7 +393,6 @@ module.exports = nohm.model('User', {
         },
         
         function (seasonEpisodes, cb_waterfall) {
-          console.log('get first unseen season', seasonEpisodes.length);
           // get the first season that isn't marked as seen
           var error = null;
           async.detectSeries(seasonEpisodes, function (episode, cb_detect) {
@@ -428,13 +416,11 @@ module.exports = nohm.model('User', {
         },
         
         function (seasonEpisode, cb_waterfall) {
-          console.log('getting all episode ids');
           // get all episode ids of the season
           seasonEpisode.getSeasonEpisodes(cb_waterfall);
         },
         
         function (episode_ids, unused_show, cb_waterfall) {
-          console.log('sorting', episode_ids);
           // sort ids by number in season
           nohm.factory('Episode').sort({
             field: 'number',
@@ -443,7 +429,6 @@ module.exports = nohm.model('User', {
         },
         
         function (episode_ids, cb_waterfall) {
-          console.log('get first unseen');
           var first_unseen = null;
           // get the first episode that isn't marked as seen
           async.forEachSeries(episode_ids, function (id, cb_forEach) {
@@ -473,7 +458,6 @@ module.exports = nohm.model('User', {
           });
         },
       ], function (err, id) {
-        console.log('computed', err, id);
         if (err === 'nothing to be done') {
           err = null;
           id = null;
