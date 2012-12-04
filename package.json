@@ -7,15 +7,16 @@
   "author": "Moritz Peters",
   "description": "NOPE NOPE NOPE",
   "dependencies": {
-    "socket.io": "0.8",
+    "socket.io": "0.9",
+    "session.socket.io": "0.1",
     "nohm": "0.9",
-    "redis": "0.7",
-    "express": "2.5",
+    "redis": "0.8",
+    "express": "3",
     "stylus": "0.20",
     "nib": "0.3",
     "jade": "0.19",
     "async": "0.1",
-    "connect-redis": "1.2",
+    "connect-redis": "1.4",
     "uglify-js2": "git://github.com/mishoo/UglifyJS2.git#master"
   },
   "dev-dependencies": {

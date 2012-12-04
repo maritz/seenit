@@ -1,6 +1,6 @@
 var Registry = require(__dirname+'/../registry.js');
 var User = Registry.Models.User;
-var app = require('express').createServer();
+var app = require('express')();
 var auth = require(__dirname+'/../helpers/auth');
 var async = require('async');
 var loadModel = require(__dirname+'/../helpers/loadModel');
@@ -217,7 +217,7 @@ app.del('/:id([0-9]+)', auth.isLoggedIn, auth.may('delete', 'User'), loadModel('
 });
 
 
-app.mounted(function (){
+app.on('mount', function (){
   console.log('mounted User REST controller');
 });
 

@@ -41,7 +41,7 @@ $(function () {
         error_msg = json.data.error.msg;
       } else {
         error_msg = 'Unknown Server Error';
-        console.log('Unknown server error xhr:', jqXHR);
+        console.log('Unknown server error. URL: ', ajaxSettings.type, ajaxSettings.url, '; XHR:', jqXHR);
       }
       if (error_msg === 'need_login') {
         app.overlay({view: 'login_needed'});

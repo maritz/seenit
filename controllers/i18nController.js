@@ -1,5 +1,5 @@
 var Registry = require(__dirname+'/../registry.js');
-var app = require('express').createServer();
+var app = require('express')();
 var i18n = require(__dirname+'/../helpers/i18n.js');
 
 app.get('/hash/:language', function (req, res) {
@@ -13,7 +13,7 @@ app.get('/dict/:language', function (req, res) {
   });
 });
 
-app.mounted(function (parent){
+app.on('mount', function (parent){
   console.log('mounted i18n REST controller');
 });
 

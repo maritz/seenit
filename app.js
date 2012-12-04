@@ -15,16 +15,16 @@ connector.connect(function () {
       registry.Models[name] = require('.'+val);
     });
     
-    var server = express.createServer();
+    var server = express();
     
     require('./static_file_server.js').init(server);
     
     
     server.use('/REST', require(__dirname+'/rest_server.js'));
     
-    server.listen(config['static'].port || 3000);
+    var http_server = server.listen(config['static'].port || 3000);
     
-    require('./socket_server.js').init(server);
+    require('./socket_server.js').init(http_server);
     
     console.log('Server listening on port ' + (config['static'].port || 3000) + '.');
     

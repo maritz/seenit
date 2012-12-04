@@ -23,7 +23,7 @@ exports.init = function (server) {
   
   server.use(stylus_middleware);
   
-  server.use(express['static'](__dirname + '/static', { 
+  server.use(express['static'](__dirname + '/static', {
     maxAge: server.set('env') === 'development' ? 1 : oneDay 
   }));
   
@@ -70,11 +70,9 @@ exports.init = function (server) {
     res.render(__dirname+'/static/index.jade', {
       layout: false,
       colons: true,
-      locals: {
-        cache: true,
-        i18n_hashes: JSON.stringify(i18n.getHashes()),
-        js_files: server.set('env') === 'development' ? files : false
-      }
+      cache: true,
+      i18n_hashes: JSON.stringify(i18n.getHashes()),
+      js_files: server.set('env') === 'development' ? files : false
     });
   });
 };
