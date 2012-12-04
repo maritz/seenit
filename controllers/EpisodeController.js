@@ -1,6 +1,6 @@
 var Registry = require(__dirname+'/../registry');
 var Episode = Registry.Models.Episode;
-var app = require('express').createServer();
+var app = require('express')();
 var auth = require(__dirname+'/../helpers/auth');
 var async = require('async');
 var loadModel = require(__dirname+'/../helpers/loadModel');
@@ -208,7 +208,7 @@ app.get('/today', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, r
 });
 
 
-app.mounted(function (){
+app.on('mount', function (){
   console.log('mounted Episode REST controller');
 });
 

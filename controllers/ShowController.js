@@ -1,6 +1,6 @@
 var Registry = require(__dirname+'/../registry');
 var Show = Registry.Models.Show;
-var app = require('express').createServer();
+var app = require('express')();
 var auth = require(__dirname+'/../helpers/auth');
 var async = require('async');
 var loadModel = require(__dirname+'/../helpers/loadModel');
@@ -218,7 +218,7 @@ app.get('/update/:id', auth.isLoggedIn, auth.may('edit', 'Show'), loadModel('Sho
 });
 
 
-app.mounted(function (){
+app.on('mount', function (){
   console.log('mounted Show REST controller');
 });
 
