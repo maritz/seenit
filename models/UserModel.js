@@ -362,8 +362,10 @@ module.exports = nohm.model('User', {
         this.computeNextUp(show, function (err, id) {
           if (err) {
             callback(err);
-          } else {
+          } else if (id) {
             self.setNextUp(show, id, callback);
+          } else {
+            callback(null);
           }
         });
       } else {
@@ -380,6 +382,9 @@ module.exports = nohm.model('User', {
       // this can be computationally heavy and should thus be called as few times as possible.
       var self = this;
       var seasons = _.range(1, show.p('num_seasons'));
+      if (show.p('seasons')[0] === "1") {
+        seasons.push(show.p('num_seasons')); // no special seasons, since range is exclusive we need to add one here
+      }
       
       async.waterfall([
         
@@ -388,23 +393,37 @@ module.exports = nohm.model('User', {
           // get an episode of each season
           async.map(seasons, function (season, cb_map) {
             console.log('get episode for season', season);
-            show.getEpisodeByNumbering(season, 1, cb_map);
+            show.getEpisodeByNumbering(season, 1, function (err, episode) {
+              if (err === 'not found') {
+                cb_map(null, null);
+              } else {
+                cb_map(err, episode);
+              }
+            });
           }, cb_waterfall);
         },
         
         function (seasonEpisodes, cb_waterfall) {
-          console.log('get first season', seasonEpisodes.length);
+          console.log('get first unseen season', seasonEpisodes.length);
           // get the first season that isn't marked as seen
           var error = null;
           async.detectSeries(seasonEpisodes, function (episode, cb_detect) {
-            episode.getSeasonSeen(self, function (err, seen) {
-              if (err) {
-                error = err;
-              }
-              cb_detect(!seen);
-            });
+            if (episode === null) {
+              cb_detect(false);
+            } else {
+              episode.getSeasonSeen(self, function (err, seen) {
+                if (err) {
+                  error = err;
+                }
+                cb_detect(!seen);
+              });
+            }
           }, function (season) {
-            cb_waterfall(error, season);
+            if (!error && !season) {
+              cb_waterfall('nothing to be done');
+            } else {
+              cb_waterfall(error, season);
+            }
           });
         },
         
@@ -455,11 +474,11 @@ module.exports = nohm.model('User', {
         },
       ], function (err, id) {
         console.log('computed', err, id);
-        if (id === null) {
-          callback('Error while computing nextUp.');
-        } else {
-          callback(err, id);
+        if (err === 'nothing to be done') {
+          err = null;
+          id = null;
         }
+        callback(err, id);
       });
       
     }
