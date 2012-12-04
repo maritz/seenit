@@ -9,7 +9,7 @@
   "dependencies": {
     "socket.io": "0.9",
     "session.socket.io": "0.1",
-    "nohm": "0.9",
+    "nohm": "0.9.2hotfix",
     "redis": "0.8",
     "express": "3",
     "stylus": "0.20",
