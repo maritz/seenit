@@ -135,24 +135,24 @@ module.exports = nohm.model('Episode', {
               callback('Failed to toggle Season seen/unseen.');
             } else {
               var action = seen ? 'unlink' : 'link';
-              var episodes = [];
               ids.forEach(function (id) {
                 var episode = nohm.factory('Episode');
                 episode.id = id;
                 user[action](episode, 'seen');
-                episodes.push(episode);
               });
               user[action](show, season_rel);
               user.save(function (err) {
                 if (err) {
                   callback('Failed to set Season as '+(seen?'':'un')+'seen.');
                 } else {
-                  // sort for getting the last episode in the season
-                  episodes.sort(function (a, b) {
-                    return b.p('number') - a.p('number');
-                  });
-                  user.checkSeenChangesNextUp(!seen, episodes[episodes.length-1].id, function (err) {
-                    callback(err, !seen);
+                  user.computeNextUp(show, function (err, id) {
+                    if (err) {
+                      callback(err, !seen);
+                    } else {
+                      user.setNextUp(show, id, function (err) {
+                        callback(err, !seen);
+                      });
+                    }
                   });
                 }
               });

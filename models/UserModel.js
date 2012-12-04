@@ -346,6 +346,7 @@ module.exports = nohm.model('User', {
      */
     setNextUp: function (show, id, callback) {
       var self = this;
+      var key = 'seenit:nextUp:'+this.id+':'+show.id;
       if (id === null || typeof id === 'function') {
         // TODO: This should be optimized. first check the next episode by getEpisodeByNumbering and then do computeNextUp.
         if (typeof id === 'function') {
@@ -354,14 +355,18 @@ module.exports = nohm.model('User', {
         this.computeNextUp(show, function (err, id) {
           if (err) {
             callback(err);
-          } else if (id) {
+          } else if (id !== null) {
             self.setNextUp(show, id, callback);
           } else {
             callback(null);
           }
         });
       } else {
-        redis.set('seenit:nextUp:'+this.id+':'+show.id, id, callback);
+        if (id) {
+          redis.set(key, id, callback);
+        } else {
+          redis.del(key, callback);
+        }
       }
     },
     
@@ -408,7 +413,7 @@ module.exports = nohm.model('User', {
             }
           }, function (season) {
             if (!error && !season) {
-              cb_waterfall('nothing to be done');
+              cb_waterfall('no unseen seasons');
             } else {
               cb_waterfall(error, season);
             }
@@ -458,9 +463,10 @@ module.exports = nohm.model('User', {
           });
         },
       ], function (err, id) {
-        if (err === 'nothing to be done') {
+        console.log('computed', err, id);
+        if (err === 'no unseen seasons') {
           err = null;
-          id = null;
+          id = false;
         }
         callback(err, id);
       });

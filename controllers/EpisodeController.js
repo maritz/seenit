@@ -208,6 +208,89 @@ app.get('/today', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, r
 });
 
 
+app.get('/nextUp', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, res, next) {
+  
+  var max_future = 14*24*60*60*1000; // 14 days
+    
+  var end = +new Date()+max_future;
+  
+  async.waterfall([
+    function (cb_waterfall) {
+      // get shows user is following
+      req.user.getAll('Show', 'following', cb_waterfall);
+    },
+    function (show_ids, cb_waterfall) {
+      // load shows
+      if (show_ids.length === 0) {
+        cb_waterfall('none');
+      } else {
+        async.map(show_ids, function (id, cb_map) {
+          var show = nohm.factory('Show', id, function (err) {
+            cb_map(err, show);
+          });
+        }, cb_waterfall);
+      }
+    },
+    function (shows, cb_waterfall) {
+      // get the next episode_ids of the shows
+      async.map(shows, function (show, cb_map) {
+        req.user.getNextUp(show, function (err, id) {
+          if (id === null) {
+            cb_map(err, null);
+          } else {
+            cb_map(err, {
+              show: show,
+              episode_id: id
+            });
+          }
+        });
+      }, cb_waterfall);
+    },
+    function (results, cb_waterfall) {
+      // load episodes
+      results = results.filter(function (result) {
+        return result !== null;
+      });
+      if (results.length === 0) {
+        cb_waterfall('none');
+      } else {
+        async.map(results, function (result, cb_map) {
+          nohm.factory('Episode', result.episode_id, function (err, props) {
+            result.episode = props;
+            cb_map(err, result);
+          });
+        }, cb_waterfall);
+      }
+    },
+    function (results, cb_waterfall) {
+      // filter far future and blend it!
+      var episodes = results.map(function (result) {
+        var episode = result.episode;
+        episode.id = result.episode_id;
+        episode.show = result.show.p('name');
+        return episode;
+      });
+      episodes = episodes.filter(function (episode) {
+        return +new Date(episode.first_aired) < end;
+      });
+      cb_waterfall(null, episodes);
+    }
+  ], function (err, episodes) {
+    if (err && err !== 'none') {
+      next(err);
+    } else {
+      if (err === 'none') {
+        episodes = [];
+        err = null;
+      }
+      res.ok({
+        collection: episodes
+      });
+    }
+  });
+});
+
+
 app.on('mount', function (){
   console.log('mounted Episode REST controller');
 });
