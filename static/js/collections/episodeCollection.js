@@ -33,5 +33,10 @@ _r(function (app) {
     model: app.models.Episode,
     url: '/REST/Episode/today/'
   });
+
+  app.collections.EpisodesNextUp = app.base.paginatedCollection.extend({
+    model: app.models.Episode,
+    url: '/REST/Episode/nextUp/'
+  });
   
 });

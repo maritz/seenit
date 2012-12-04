@@ -263,7 +263,7 @@ app.get('/nextUp', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, 
       }
     },
     function (results, cb_waterfall) {
-      // filter far future and blend it!
+      // filter far future, sort by air date and blend it!
       var episodes = results.map(function (result) {
         var episode = result.episode;
         episode.id = result.episode_id;
@@ -272,6 +272,11 @@ app.get('/nextUp', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, 
       });
       episodes = episodes.filter(function (episode) {
         return +new Date(episode.first_aired) < end;
+      });
+      
+      episodes.sort(function (a, b) {
+        console.log(a.first_aired - b.first_aired, a.first_aired, b.first_aired)
+        return a.first_aired - b.first_aired;
       });
       cb_waterfall(null, episodes);
     }

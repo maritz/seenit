@@ -259,4 +259,46 @@ _r(function (app) {
     
   });
   
+  
+  /**
+   * #show/nextUp
+   */
+  app.views.show.next_up = app.base.paginatedListView.extend({
+    
+    collection: app.collections.EpisodesNextUp,
+    auto_render: true,
+    
+    events: {
+      'click .episode_seen_button a.set_seen': 'toggleEpisodeSeen'
+    },
+    
+    init: function () {
+      this.collection.bind('reset', this.render);
+    },
+    
+    successRender: function () {
+      // HACK
+      // we want the view to re-use the episode templates but want this view to be part of show (for the subnavigation)
+      // this is the easiest way and also means the template for this is actually in tmpl-episode.html, not tmpl-show.html
+      this.module = 'episode';
+      app.base.paginatedListView.prototype.successRender.apply(this, Array.prototype.slice.apply(arguments));
+    },
+    
+    toggleEpisodeSeen: function (e) {
+      var self = this;
+      e.preventDefault();
+      var $container = $(e.target).closest('li.episode_detail');
+      var id = $container.data('id');
+      var episode = this.collection.get(id);
+      
+      $container.fadeOut(function () {
+        $container.remove();
+      });
+      episode.toggleSeen(function () {
+        Backbone.Collection.prototype.fetch.call(self.collection); // paginated fetch is .add only, which doesn't work in this case.
+      });
+    }
+    
+  });
+  
 });

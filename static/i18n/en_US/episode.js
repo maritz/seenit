@@ -21,7 +21,9 @@ module.exports = {
     set_seen_season: "I've seen every episode",
     set_seen_season_available: "I've seen every episode released so far",
     set_not_seen_season: "I haven't seen ANY episodes",
-    wanna_see_season: "I want to see all episodes"
+    wanna_see_season: "I want to see all episodes",
+    
+    search_link: "Search link"
   },
   
   list: {
@@ -33,5 +35,10 @@ module.exports = {
   
   today: {
     none: "No episodes of shows you're following are on today. Try again tomorrow or follow more shows."
+  },
+  
+  nextUp: {
+    none: "Either you're not following enough shows or you've watched too many. ;-) <br/>\
+          This page also only shows episodes that have already aired or will air in the next 14 days."
   }
 };

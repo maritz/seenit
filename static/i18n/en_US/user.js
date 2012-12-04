@@ -11,7 +11,8 @@ module.exports = {
         name: "User name",
         password: "Password",
         password_repeat: "Repeat password",
-        email: "E-Mail"
+        email: "E-Mail",
+        searches: 'Searches'
       },
       login: "Log in",
       submit: "Submit changes"
@@ -45,9 +46,6 @@ module.exports = {
           - %season (season number)<br/> \
           - %episode (episode number)<br/> \
           - %season_padded / %episode_padded (zero padded to 2 digits).'
-    },
-    labels: {
-      "searches[]": 'Searches'
     },
     admin: {
       legend: "Administrator",

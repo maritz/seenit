@@ -10,6 +10,7 @@ module.exports = {
     
     subnav: {
       list: "Most popular",
+      nextUp: "Next Up",
       today: "Airing today",
       search: "Search"
     },
