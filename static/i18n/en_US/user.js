@@ -12,7 +12,8 @@ module.exports = {
         password: "Password",
         password_repeat: "Repeat password",
         email: "E-Mail",
-        searches: 'Searches'
+        searches: 'Searches',
+        remember_me: "Remember me?"
       },
       login: "Log in",
       submit: "Submit changes"

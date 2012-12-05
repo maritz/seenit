@@ -1,11 +1,11 @@
 <script type="text/x-jade-tmpl" name="input">
-- var id = 'input_'+(Math.floor(Math.random()*10))+(+new Date());
+- var id = 'input_'+(Math.floor(Math.random()*1000))+(+new Date());
 
 .control-group
   if (locals.type !== 'submit')
     
     if (locals.label !== false)
-      - var label_class = locals.required ? 'required' : false;
+      - var label_class = locals.required ? 'required' : '';
       if (locals.label && locals["data-label"])
         label.control-label(for: id, "data-label": locals["data-label"], "class": label_class)= label
       else if (locals["data-label"])

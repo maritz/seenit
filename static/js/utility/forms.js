@@ -158,6 +158,9 @@ _r(function (app) {
       var $item = $(this);
       var name = $item.attr('name');
       var value = $item.val();
+      if ($item[0].type === 'checkbox') {
+        value = $item.is(':checked');
+      }
       if ($item.data('validate')) {
         attributes[name] = value;
       }

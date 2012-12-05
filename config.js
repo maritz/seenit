@@ -40,7 +40,8 @@ var defaults = {
   },
   "sessions": {
     secret: "super secret cat",
-    db: 1
+    db: 1,
+    rememberAge: 1000*60*60*24*31 // one month
   },
   "thetvdb": {
     key: require('fs').readFileSync(__dirname+'/thetvdb.key', 'utf8').trim(),
