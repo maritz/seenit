@@ -275,7 +275,6 @@ app.get('/nextUp', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, 
       });
       
       episodes.sort(function (a, b) {
-        console.log(a.first_aired - b.first_aired, a.first_aired, b.first_aired)
         return a.first_aired - b.first_aired;
       });
       cb_waterfall(null, episodes);
