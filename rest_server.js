@@ -43,6 +43,10 @@ var tvdb = nohm.factory('tvdb', 1, function (err, model) {
 module.exports = server;
 
 if (server.set('env') === 'production' || server.set('env') === 'staging') {
+  express.logger.token('remote-addr', function(req) {
+    // x-real-ip from nginx proxy or the default from connect
+    return req.headers['x-real-ip'] || req.socket && (req.socket.remoteAddress || (req.socket.socket && req.socket.socket.remoteAddress)); 
+  });
   server.use(express.logger({ immediate: true }));
 } else {
   server.use(express.logger({ format: 'dev' }));
@@ -57,7 +61,11 @@ server.use(express.session({
   store: new RedisSessionStore({
     client: registry.redis_sessions
   }),
-  secret: registry.config.sessions.secret
+  secret: registry.config.sessions.secret,
+  cookie: { 
+    secure: (server.set('env') === 'production' || server.set('env') === 'staging')
+  },
+  proxy: (server.set('env') === 'production' || server.set('env') === 'staging')
 }));
 
 server.use(express.csrf());
