@@ -171,6 +171,11 @@ function login (req, res, next) {
   user.login(name, password, function (success) {
     if (success) {
       req.loaded.User = user;
+      if (req.param('remember')) {
+        req.session.cookie.maxAge = Registry.config.sessions.rememberAge;
+      } else {
+        req.session.cookie.expires = false;
+      }
       next();
     } else {
       setTimeout(function () { // artificial delay to make bruteforcing less practical

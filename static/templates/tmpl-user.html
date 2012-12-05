@@ -95,6 +95,10 @@ form( novalidate: true)
     span.error.general_error
     !=form('input', { name: 'name', validate: false})
     !=form('input', { type: 'password', name: 'password', validate: false})
+    
+    label.checkbox(for: "remember_me")
+      input(id: 'remember_me', type: 'checkbox', name: "remember", data-link="data-link")
+      != $.t('forms.labels.remember_me', null, 'user')
   != form('input', { type: 'submit', name: 'login', value: _t('forms.login') })
 </script>
 

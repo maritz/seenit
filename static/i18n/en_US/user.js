@@ -11,7 +11,8 @@ module.exports = {
         name: "User name",
         password: "Password",
         password_repeat: "Repeat password",
-        email: "E-Mail"
+        email: "E-Mail",
+        remember_me: "Remember me?"
       },
       login: "Log in",
       submit: "Submit changes"
