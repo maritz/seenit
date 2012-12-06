@@ -12,7 +12,6 @@ var tvdb = nohm.factory('tvdb', 1, function (err, model) {
   registry.tvdb = tvdb;
   tvdb.getMirrors(function () {
     
-    
     var timedUpdate = function () {
       
       process.stdout.write('Updating... ');
@@ -20,15 +19,19 @@ var tvdb = nohm.factory('tvdb', 1, function (err, model) {
       var update_log = fs.createWriteStream('update.log', {
         flags: 'a'
       });
+      update_log.on('error', function (err) {
+        console.log('Error in update_shows.js', err);
+      });
       
-      var update_process = cp.spawn('node', ['update_shows.js'], {
+      var update_process = cp.spawn(__dirname+'/node', [__dirname+'/update_shows.js'], {
         env: process.env
       });
       
       update_process.stdout.pipe(update_log);
+      update_process.stderr.pipe(update_log);
       
       update_process.on('exit', function () {
-        console.log('Done.')
+        console.log('Done.');
         setTimeout(function () {
           timedUpdate();
         }, registry.config.thetvdb.refresh_timers.data);
