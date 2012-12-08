@@ -10,7 +10,9 @@ _r(function (app) {
         self.set({
           seen: res.data.episode
         });
-        callback();
+        if (typeof(callback) === 'function') {
+          callback();
+        }
       });
     }
   });
