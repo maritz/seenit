@@ -7,6 +7,7 @@ module.exports = {
     air_date: 'Air date',
     tvdb_link: 'TheTVDB Link',
     imdb_link: 'IMDB Link',
+    show_details: "Go to show page",
     
     has_seen: "You've seen this one",
     has_not_seen: "Not seen yet",

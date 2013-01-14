@@ -94,9 +94,6 @@ each episode in args[0]
     
     li( "class": seen ? 'hidden' : '' )
       a.set_seen(href: '#')= _t('set_seen')
-      
-    li
-      a.get_links(href: '#')= _t('wanna_see')
 </script>
 
 
@@ -157,6 +154,9 @@ ul.episode_list.pagination_content
       h3
         =episode_name
         
+      a(href:'#show/details/'+episode.get('show_id')+'/'+episode.get('season'))
+        =_t('show_details')
+      br
       label
         =_t('name')
       span.one_line= episode.get('name')

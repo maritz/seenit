@@ -283,6 +283,7 @@ app.get('/nextUp', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, 
         var episode = result.episode;
         episode.id = result.episode_id;
         episode.show = result.show.p('name');
+        episode.show_id = result.show.id;
         return episode;
       });
       episodes = episodes.filter(function (episode) {
