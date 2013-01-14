@@ -27,6 +27,9 @@ exports.init = function (server) {
         if (err) {
           socket.emit('error', err);
         } else {
+          if ( ! socket.handshake) {
+            console.log(socket, err, session)
+          }
           socket.handshake.session = session;
           socket.emit('login_confirmed');
         }
