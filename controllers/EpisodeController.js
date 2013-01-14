@@ -295,6 +295,17 @@ app.get('/nextUp', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, 
 });
 
 
+app.del('/:id', auth.isLoggedIn, auth.may('delete', 'Episode'), loadModel('Episode'), function (req, res, next) {
+  req.loaded.Episode.remove(function (err) {
+    if (err) {
+      next(new EpisodeError('Delete failed.', 500, err));
+    } else {
+      res.ok();
+    }
+  });
+});
+
+
 app.on('mount', function (){
   console.log('mounted Episode REST controller');
 });
