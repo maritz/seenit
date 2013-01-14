@@ -16,6 +16,9 @@ else
 <script type="text/x-jade-tmpl" name="episode_details">
 each episode in args[0]
   li.well.span3.episode_detail(data-id: episode.id)
+    if app.user_self.may('edit', 'Episode')
+      a.remove(href: '')
+        i.icon-remove
     h3
       if parseInt(episode.get('season'), 10) == 0
         =episode.get('name')

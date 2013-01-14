@@ -11,6 +11,7 @@ _r(function (app) {
     
     events: {
       'click a.episode_opener': 'toggleEpisode',
+      'click a.remove': 'removeEpisode',
       'click .episode_seen_button a.set_seen, .episode_seen_button a.set_not_seen': 'toggleEpisodeSeen',
       'click .season_seen_button a.set_seen, .season_seen_button a.set_not_seen': 'toggleSeasonSeen',
       'click .season_seen_button a.get_links': 'toggleSeasonSeen'
@@ -25,6 +26,23 @@ _r(function (app) {
       this.collection.bind('change:seen', function (episode) {
         self.redrawEpisodeSeenButton(episode);
         self.redrawSeasonSeenButtons();
+      });
+    },
+    
+    removeEpisode: function (e) {
+      e.preventDefault();
+      var self = this;
+      var $target = $(e.target);
+      var id = $target.closest('li.episode_detail').data('id');
+      var episode = this.collection.get(id);
+      
+      // because we have a different urlRoot in the collection we need to manually delete here
+      var real_episode = new app.models.Episode({id: id});
+      real_episode.destroy({
+        success: function () {
+          self.collection.remove(episode);
+          self.render();
+        }
       });
     },
     
