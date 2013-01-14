@@ -307,7 +307,14 @@ module.exports = nohm.model('User', {
         },
         function (nextUpEpisode_id, cb_waterfall) {
           // load the nextUpEpisode
-          nextUpEpisode = nohm.factory('Episode', nextUpEpisode_id, cb_waterfall);
+          nextUpEpisode = nohm.factory('Episode', nextUpEpisode_id, function (err, props) {
+            if (err === 'not found') {
+              // the episode was probably deleted
+              cb_waterfall('increment');
+            } else {
+              cb_waterfall(err, props);
+            }
+          });
         },
         function (unused_props, cb_waterfall) {
           var nextUpSeason = nextUpEpisode.p('season');
@@ -363,7 +370,9 @@ module.exports = nohm.model('User', {
         });
       } else {
         if (id) {
-          redis.set(key, id, callback);
+          redis.set(key, id, function (err) {
+            callback(err, id);
+          });
         } else {
           redis.del(key, callback);
         }
@@ -463,7 +472,6 @@ module.exports = nohm.model('User', {
           });
         },
       ], function (err, id) {
-        console.log('computed', err, id);
         if (err === 'no unseen seasons') {
           err = null;
           id = false;

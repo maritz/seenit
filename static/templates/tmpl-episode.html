@@ -17,7 +17,7 @@ else
 each episode in args[0]
   li.well.span3.episode_detail(data-id: episode.id)
     if app.user_self.may('edit', 'Episode')
-      a.remove(href: '')
+      a.remove(href: '', title: 'Remove')
         i.icon-remove
     h3
       if parseInt(episode.get('season'), 10) == 0
@@ -47,7 +47,7 @@ each episode in args[0]
       
     label
       =_t('search_link')
-    br^
+    br
     - search = app.user_self.get('searches')
     - search = search.replace('%name', episode.collection.show_name)
     - search = search.replace('%season_padded', String('0'+episode.get('season')).slice(-2))

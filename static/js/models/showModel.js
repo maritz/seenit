@@ -28,6 +28,23 @@ _r(function (app) {
     
     unsetFollow: function () {
       this._followRequest(false);
+    },
+    
+    update: function (options) {
+      var self = this;
+      app.getCsrf(function (csrf) {
+        $.ajax(self.urlRoot+'update/'+self.id, {
+          type: 'GET',
+          dataType: 'json',
+          data: {
+            _csrf: csrf
+          }
+        }).success(function () {
+          if (typeof options.success === 'function') {
+            options.success();
+          }
+        });
+      });
     }
   });
   

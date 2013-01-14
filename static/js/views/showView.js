@@ -26,6 +26,7 @@ _r(function (app) {
     
     events: {
       'show a[data-toggle="tab"]': 'loadSeason',
+      'click .update': 'update',
       'click .following a.set_follow': 'setFollow',
       'click .following a.unset_follow': 'unsetFollow',
       'click .following a.explain': 'openExplain'
@@ -36,14 +37,15 @@ _r(function (app) {
       
       this.seasons = {};
       
-      if (this.params[1]) {
-        this.once('rendered', function () {
-          var $season_opener = self.$el.find('a.season_opener[data-num="'+self.params[1]+'"]');
+      this.season_selected = this.params[1] || null;
+      this.bind('rendered', function () {
+        if (this.season_selected) {
+          var $season_opener = self.$el.find('a.season_opener[data-num="'+this.season_selected+'"]');
           if ($season_opener) {
             $season_opener.click();
           }
-        });
-      }
+        }
+      });
       this.model.bind('change:following', function () {
         self.redrawFollowButton();
       });
@@ -66,7 +68,7 @@ _r(function (app) {
       e.preventDefault();
       var self = this;
       var $target = $(e.target);
-      var num = $target.data('num');
+      var num = this.season_selected = $target.data('num');
       var $episode_list = $('#season_contents div.tab-pane[data-num="'+num+'"]');
       
       var new_hash = '#show/details/'+this.model.get('id')+'/'+num;
@@ -83,6 +85,19 @@ _r(function (app) {
       } else {
         this.seasons[num].render();
       }
+    },
+    
+    update: function (e) {
+      e.preventDefault();
+      var self = this;
+      $update = this.$el.find('a.update');
+      $update.addClass('animate');
+      this.model.update({
+        success: function () {
+          self.seasons = {};
+          self.render();
+        }
+      });
     },
     
     redrawFollowButton: function () {

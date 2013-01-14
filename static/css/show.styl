@@ -14,6 +14,24 @@ ul.show_index
   img
     margin 5px 10px
 
+@keyframes rotate
+  0%
+    transform rotate(0deg)
+
+  100%
+    transform rotate(360deg)
+
+.show.details
+  a.update
+    position absolute
+    top 2px
+    right 2px
+    
+    &.animate
+      animation rotate 2s
+      animation-iteration-count infinite
+      animation-timing-function linear
+
 ul.show_details, ul.episode_list
   label
     font-weight bold

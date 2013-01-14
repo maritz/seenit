@@ -7,7 +7,6 @@ _r(function (app) {
     season: 1,
     
     url: function (bla, blub) {
-      console.log(bla, blub);
       return this.urlRoot+this.id+'/'+this.season;
     },
     

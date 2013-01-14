@@ -112,8 +112,8 @@ app.get('/season_seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadMo
 
 app.get('/seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Episode'), function (req, res, next) {
   var episode = req.loaded.Episode;
-  
   var resultHandler = function (err, seen) {
+    console.log(err, seen);
     if (err) {
       if ( ! err instanceof Error) {
         err = new EpisodeError(err);
@@ -256,8 +256,23 @@ app.get('/nextUp', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, 
       } else {
         async.map(results, function (result, cb_map) {
           nohm.factory('Episode', result.episode_id, function (err, props) {
-            result.episode = props;
-            cb_map(err, result);
+            if (err === 'not found') {
+              // nextUp is broken, try to repair it
+              req.user.setNextUp(result.show, function (err, id) {
+                nohm.factory('Episode', id, function (err, props) {
+                  if (err === 'not found') {
+                    console.log('Repairing broken nextUp failed.', id);
+                    cb_map(err);
+                  } else {
+                    result.episode = props;
+                    cb_map(err, result);
+                  }
+                });
+              });
+            } else {
+              result.episode = props;
+              cb_map(err, result);
+            }
           });
         }, cb_waterfall);
       }

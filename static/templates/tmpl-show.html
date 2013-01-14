@@ -106,6 +106,10 @@ li
 
 <script type="text/x-jade-tmpl" name="details">
 
+if (app.user_self.may('edit', 'Show'))
+  a.update(href: '', title: 'Update')
+    i.icon-refresh
+
 if (data.get('banner'))
   img.thumbnail(src:'/images/series_banners/'+data.get('banner'))
 
