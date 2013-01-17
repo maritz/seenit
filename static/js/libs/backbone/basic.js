@@ -69,7 +69,7 @@
     
     if (options.noCsrf !== true && method !== 'read') {
       app.getCsrf(function (token) {
-        params.url += '?_csrf='+token;
+        params.url += '?_csrf='+encodeURIComponent(token);
         // Make the request.
         return $.ajax(params);
       });
