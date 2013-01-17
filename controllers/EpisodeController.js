@@ -198,6 +198,7 @@ app.get('/today', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, r
       var properties = episodes.map(function (episode) {
         var props = episode.allProperties();
         props.show = episode.show.p('name');
+        props.show_id = episode.show.id;
         return props;
       });
       res.ok({
