@@ -7,6 +7,8 @@ ul.nav.nav-pills.small
   li
     a(href: '#show/today')=_t('subnav.today')
   li
+    a(href: '#show/following')=_t('subnav.following')
+  li
     a(href: '#show/search')=_t('subnav.search')
 </script>
 
@@ -74,6 +76,20 @@ else
         - if( model.get('description') )
           |  - 
           = model.get('description')
+</script>
+
+
+<script type="text/x-jade-tmpl" name="following">
+- if (data && data.models.length)
+
+  if data.paginated
+    .pagination.pagination-centered
+    
+  ul.thumbnails.show_index
+    each model in data.models
+      !=partial('list_item', model)
+- else
+  != _t('not_following')
 </script>
 
 

@@ -5,9 +5,16 @@ _r(function (app) {
     url: '/REST/Show/'
   });
   
-  app.collections.ShowSearch = app.base.collection.extend({
-    model: app.models.Show,
-    url: '/REST/Show/search' // not used
+  
+  app.collections.ShowFollowing = app.collections.Show.extend({
+    url: '/REST/Show/following',
+    comparator: function(show) {
+      return show.get("name");
+    }
+  });
+  
+  
+  app.collections.ShowSearch = app.collections.Show.extend({
   });
   
 });

@@ -12,6 +12,7 @@ module.exports = {
       list: "Most popular",
       nextUp: "Next Up",
       today: "Airing today",
+      following: "Followed",
       search: "Search"
     },
     show: 'Show',
@@ -30,6 +31,10 @@ module.exports = {
   },
   
   index: {
+  },
+  
+  following: {
+    not_following: "You aren't following any shows. Go to the <a href=\"#show/\">list</a> and follow some shows you like."
   },
   
   details: {

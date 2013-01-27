@@ -90,7 +90,7 @@ _r(function (app) {
     update: function (e) {
       e.preventDefault();
       var self = this;
-      $update = this.$el.find('a.update');
+      var $update = this.$el.find('a.update');
       $update.addClass('animate');
       this.model.update({
         success: function () {
@@ -313,6 +313,17 @@ _r(function (app) {
         Backbone.Collection.prototype.fetch.call(self.collection); // paginated fetch is .add only, which doesn't work in this case.
       });
     }
+    
+  });
+  
+  
+  /**
+   * #show/following
+   */
+  app.views.show.following = app.base.paginatedListView.extend({
+    
+    collection: app.collections.ShowFollowing,
+    auto_render: true
     
   });
   

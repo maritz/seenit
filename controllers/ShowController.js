@@ -112,6 +112,32 @@ app.put('/unfollow/:id', auth.isLoggedIn, auth.may('view', 'Show'), loadModel('S
 });
 
 
+app.get('/following', auth.isLoggedIn, auth.may('view', 'Show'), function (req, res, next) {
+  async.waterfall([
+    function (done_waterfall) {
+      req.user.getAll('Show', 'following', done_waterfall);
+    },
+    function (following, done_waterfall) {
+      async.map(following, function (show_id, done_map) {
+        new Show(show_id, function (err) {
+          done_map(err, this.allProperties());
+        });
+      }, done_waterfall);
+    }
+  ], function (err, following) {
+    if (err) {
+      next(new ShowError('Failed get shows you\'re following.', 500, err));
+    } else {
+      res.ok({
+        total: following.length,
+        per_page: 10,
+        collection: following
+      });
+    }
+  });
+});
+
+
 app.get('/search/:name', function (req, res, next) {
   var name = req.param('name');
   var show = new Show();
