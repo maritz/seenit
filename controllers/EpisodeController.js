@@ -138,6 +138,21 @@ app.get('/seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Ep
 });
 
 
+app.get('/seen_up_to/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Episode'), function (req, res, next) {
+  
+  req.loaded.Episode.setSeenUpTo(req.user, function (err, seen) {
+    if (err) {
+      if ( ! err instanceof Error) {
+        err = new EpisodeError(err);
+      }
+      next(err);
+    } else {
+      res.ok({seen: seen});
+    }
+  });
+});
+
+
 app.get('/today', auth.isLoggedIn, auth.may('view', 'Episode'), function (req, res, next) {
   
   var buffer_time = 16*60*60*1000;

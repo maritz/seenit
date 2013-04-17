@@ -1,5 +1,6 @@
 var nohm = require('nohm').Nohm;
 var async = require('async');
+var _ = require("underscore");
 
 module.exports = nohm.model('Episode', {
   properties: {
@@ -40,11 +41,11 @@ module.exports = nohm.model('Episode', {
         if (err) {
           callback(err);
         } else {
-          nohm.factory('Show', ids[0], function (err) {
+          var show = nohm.factory('Show', ids[0], function (err) {
             if (err) {
               callback(err);
             } else {
-              callback(null, this);
+              callback(null, show);
             }
           });
         }
@@ -162,6 +163,7 @@ module.exports = nohm.model('Episode', {
       });
     },
     
+    
     getSeasonSeen: function (user, callback) {
       var season_rel = 'seen_season_'+this.p('season');
       async.waterfall([
@@ -174,6 +176,77 @@ module.exports = nohm.model('Episode', {
           callback('Failed to get Season seen/unseen.');
         } else {
           callback(null, seen);
+        }
+      });
+    },
+    
+    
+    setSeenUpTo: function (user, callback) {
+      var self = this;
+      
+      async.auto({
+        "show": self.getShow,
+        
+        "previous_seasons_episode_ids": ["show", function (cb_auto, auto) {
+          // set previous seasons
+          var seasons = auto.show.p("seasons");
+          seasons = seasons.filter(function (season) {
+            return season !== "0" && season < self.p("season");
+          });
+          
+          async.concat(seasons, function (season, cb_forEach) {
+            auto.show.getAll("Episode", "season"+season, cb_forEach);
+          }, cb_auto);
+        }],
+        
+        "previous_seasons_episodes": ["show", "previous_seasons_episode_ids", function (cb_auto, auto) {
+          // set previous seasons
+          async.map(auto.previous_seasons_episode_ids, function (episode_id, cb_map) {
+            var episode = nohm.factory("Episode", episode_id, function (err) {
+              cb_map(err, episode);
+            });
+          }, cb_auto);
+        }],
+        
+        "this_seasons_episode_ids": ["show", function (cb_auto, auto) {
+          auto.show.getAll("Episode", "season"+self.p("season"), cb_auto);
+        }],
+        
+        "this_seasons_episodes": ["this_seasons_episode_ids", function (cb_auto, auto) {
+          async.map(auto.this_seasons_episode_ids, function (episode_id, cb_map) {
+            var episode = nohm.factory("Episode", episode_id, function (err) {
+              cb_map(err, episode);
+            });
+          }, cb_auto);
+        }],
+        
+        "previous_episodes_this_season": ["this_seasons_episodes", function (cb_auto, auto) {
+          cb_auto(null, auto.this_seasons_episodes.filter(function (episode) {
+            return episode.p("number") <= self.p("number");
+          }));
+        }],
+        
+        "link": ["previous_seasons_episodes", "previous_episodes_this_season", function (cb_auto, auto) {
+          
+          var all_episodes = auto.previous_episodes_this_season.concat(auto.previous_seasons_episodes);
+          
+          all_episodes.forEach(function (episode) {
+            user.link(episode, {
+              name: "seen",
+              error: function (err, err_type, obj) {
+                console.log("EpisodeModel.setSeenUpTo() link error", err, err_type, obj);
+              }
+            });
+          });
+          cb_auto(null, all_episodes);
+        }]
+      }, function (err, results) {
+        if (err) {
+          callback(err);
+        } else {
+          user.save(function (err) {
+            callback(err, _.pluck(results.link, "id"));
+          });
         }
       });
     }
