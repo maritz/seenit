@@ -187,20 +187,24 @@ module.exports = nohm.model('Episode', {
       async.auto({
         "show": self.getShow,
         
-        "previous_seasons_episode_ids": ["show", function (cb_auto, auto) {
-          // set previous seasons
+        "previous_seasons": ["show", function (cb_auto, auto) {
+          // get previous seasons
           var seasons = auto.show.p("seasons");
           seasons = seasons.filter(function (season) {
             return season !== "0" && season < self.p("season");
           });
-          
-          async.concat(seasons, function (season, cb_forEach) {
+          cb_auto(null, seasons);
+        }],
+        
+        "previous_seasons_episode_ids": ["previous_seasons", function (cb_auto, auto) {
+          // get ids of previous seasons' episodes
+          async.concat(auto.previous_seasons, function (season, cb_forEach) {
             auto.show.getAll("Episode", "season"+season, cb_forEach);
           }, cb_auto);
         }],
         
         "previous_seasons_episodes": ["show", "previous_seasons_episode_ids", function (cb_auto, auto) {
-          // set previous seasons
+          // load episodes from previous seasons
           async.map(auto.previous_seasons_episode_ids, function (episode_id, cb_map) {
             var episode = nohm.factory("Episode", episode_id, function (err) {
               cb_map(err, episode);
@@ -209,10 +213,12 @@ module.exports = nohm.model('Episode', {
         }],
         
         "this_seasons_episode_ids": ["show", function (cb_auto, auto) {
+          // get episodes ids of this season
           auto.show.getAll("Episode", "season"+self.p("season"), cb_auto);
         }],
         
         "this_seasons_episodes": ["this_seasons_episode_ids", function (cb_auto, auto) {
+          // load episodes of this season
           async.map(auto.this_seasons_episode_ids, function (episode_id, cb_map) {
             var episode = nohm.factory("Episode", episode_id, function (err) {
               cb_map(err, episode);
@@ -221,32 +227,53 @@ module.exports = nohm.model('Episode', {
         }],
         
         "previous_episodes_this_season": ["this_seasons_episodes", function (cb_auto, auto) {
+          // filter episodes of this seasons to the ones before `this`
           cb_auto(null, auto.this_seasons_episodes.filter(function (episode) {
             return episode.p("number") <= self.p("number");
           }));
         }],
         
         "link": ["previous_seasons_episodes", "previous_episodes_this_season", function (cb_auto, auto) {
-          
+          // create links for seasons and episodes
           var all_episodes = auto.previous_episodes_this_season.concat(auto.previous_seasons_episodes);
           
           all_episodes.forEach(function (episode) {
             user.link(episode, {
               name: "seen",
               error: function (err, err_type, obj) {
-                console.log("EpisodeModel.setSeenUpTo() link error", err, err_type, obj);
+                console.log("EpisodeModel.setSeenUpTo() link episode error", err, err_type, obj);
+              }
+            });
+          });
+          auto.previous_seasons.forEach(function (season) {
+            user.link(auto.show, {
+              name: "seen_season_"+season,
+              error: function (err, err_type, obj) {
+                console.log("EpisodeModel.setSeenUpTo() link season error", err, err_type, obj);
               }
             });
           });
           cb_auto(null, all_episodes);
-        }]
+        }],
+        
+        "save": ["link", function (cb_auto) {
+          user.save(cb_auto);
+        }],
+        
+        "nextUp": ["save", function (cb_auto, auto) {
+          user.computeNextUp(auto.show, function (err, id) {
+            if (err) {
+              cb_auto(err);
+            } else {
+              user.setNextUp(auto.show, id, cb_auto);
+            }
+          });
+        }],
       }, function (err, results) {
         if (err) {
           callback(err);
         } else {
-          user.save(function (err) {
-            callback(err, _.pluck(results.link, "id"));
-          });
+          callback(null, _.pluck(results.link, "id"));
         }
       });
     }

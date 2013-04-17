@@ -69,7 +69,8 @@ _r(function (app) {
     redrawEpisodeSeenButton: function (episode) {
       var $el = this.$el.find('ul.episode_list > li[data-id="'+episode.id+'"] div.episode_seen_container');
       var locals = _.extend({}, this.locals, {
-        episode: episode
+        episode: episode,
+        seen_up_to: true
       });
       app.template('episode', 'episode_seen_button', locals, function (html) {
         $el.html(html);
