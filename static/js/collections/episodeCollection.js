@@ -19,11 +19,14 @@ _r(function (app) {
     toggleSeen: function () {
       var self = this;
       $.getJSON('/REST/Episode/season_seen/'+this.first().id, function (res) {
-        var seen = res.data.seen;
-        self.each(function (episode) {
-          episode.set({
-            seen: seen
-          });
+        self.setSeenClient(res.data.seen);
+      });
+    },
+    
+    setSeenClient: function (seen) {
+      this.each(function (episode) {
+        episode.set({
+          seen: seen
         });
       });
     }

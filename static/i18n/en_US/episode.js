@@ -15,6 +15,7 @@ module.exports = {
     set_seen: "I've seen it",
     set_not_seen: "I've NOT seen it",
     wanna_see: "I want to see it",
+    set_seen_up_to: "I've seen all up to this",
     
     has_seen_season: "You've seen this entire season",
     has_not_seen_season: "Not seen all episodes",

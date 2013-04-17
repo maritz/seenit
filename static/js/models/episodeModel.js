@@ -14,6 +14,23 @@ _r(function (app) {
           callback();
         }
       });
+    },
+    
+    setSeenUpTo: function (callback) {
+      var self = this;
+      app.getCsrf(function (csrf) {
+        $.ajax(self.urlRoot+'seen_up_to/'+self.id, {
+          type: 'PUT',
+          dataType: 'json',
+          data: {
+            _csrf: csrf
+          }
+        }).success(function () {
+          callback();
+        }).error(function () {
+          callback("error");
+        });
+      });
     }
   });
   

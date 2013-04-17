@@ -81,7 +81,7 @@ _r(function (app) {
           'episode',
           'list',
           $episode_list,
-          [self.model.get('id'), num, self.model.get('name')]);
+          [self.model.get('id'), num, self.model.get('name'), self]);
       } else {
         this.seasons[num].render();
       }

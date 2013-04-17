@@ -138,7 +138,7 @@ app.get('/seen/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Ep
 });
 
 
-app.get('/seen_up_to/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Episode'), function (req, res, next) {
+app.put('/seen_up_to/:id', auth.isLoggedIn, auth.may('view', 'Episode'), loadModel('Episode'), function (req, res, next) {
   
   req.loaded.Episode.setSeenUpTo(req.user, function (err, seen) {
     if (err) {

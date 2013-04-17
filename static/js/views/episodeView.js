@@ -14,7 +14,8 @@ _r(function (app) {
       'click a.remove': 'removeEpisode',
       'click .episode_seen_button a.set_seen, .episode_seen_button a.set_not_seen': 'toggleEpisodeSeen',
       'click .season_seen_button a.set_seen, .season_seen_button a.set_not_seen': 'toggleSeasonSeen',
-      'click .season_seen_button a.get_links': 'toggleSeasonSeen'
+      'click .season_seen_button a.get_links': 'toggleSeasonSeen',
+      'click .episode_seen_button a.set_seen_up_to': 'setSeenUpTo'
     },
     
     init: function() {
@@ -22,6 +23,7 @@ _r(function (app) {
       this.collection.id = this.params[0];
       this.collection.season = this.params[1];
       this.collection.show_name = this.params[2];
+      this.show_view = this.params[3];
       
       this.collection.bind('change:seen', function (episode) {
         self.redrawEpisodeSeenButton(episode);
@@ -82,8 +84,32 @@ _r(function (app) {
     },
     
     toggleSeasonSeen: function (e) {
-      e.preventDefault();      
+      e.preventDefault();
       this.collection.toggleSeen();
+    },
+    
+    setSeenUpTo: function (e) {
+      e.preventDefault();
+      var self = this;
+      var $target = $(e.target);
+      var id = $target.closest('li.episode_detail').data('id');
+      var selected_episode = this.collection.get(id);
+      var episode_num = selected_episode.get("number");
+      
+      selected_episode.setSeenUpTo(function (err) {
+        if ( ! err) {
+          self.collection.each(function (episode) {
+            if (episode.get("number") <= episode_num) {
+              episode.set({"seen": true});
+            }
+          });
+          _.each(self.show_view.seasons, function (season) {
+            if (season.collection.season < self.collection.season) {
+              season.collection.setSeenClient(true);
+            }
+          });
+        }
+      });
     }
     
   });

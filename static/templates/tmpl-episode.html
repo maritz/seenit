@@ -43,7 +43,7 @@ each episode in args[0]
 
     br
     .episode_seen_container
-      !=partial('episode_seen_button', episode)
+      !=partial('episode_seen_button', episode, true)
       
     label
       =_t('search_link')
@@ -79,6 +79,7 @@ each episode in args[0]
 - var seen = episode.get('seen');
 - var in_future = moment().add('d', 1) > moment(episode.get('first_aired'));
 - var class_name = seen ? 'btn-success' : 'btn-info';
+- var show_seen_up_to = !!args[1];
 .btn-group.dropdown.episode_seen_button
   a.btn.dropdown-toggle("class":class_name, data-toggle: "dropdown")
     if seen
@@ -94,6 +95,10 @@ each episode in args[0]
     
     li( "class": seen ? 'hidden' : '' )
       a.set_seen(href: '#')= _t('set_seen')
+    
+    if !seen && show_seen_up_to
+      li
+        a.set_seen_up_to(href: '#')= _t('set_seen_up_to')
 </script>
 
 
